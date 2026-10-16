@@ -165,21 +165,18 @@ export function RouteCard({
     <>
       <Card
         p="md"
-        radius="md"
+        radius="lg"
         onClick={onSelect}
         style={{
-          background: isSelected
-            ? "rgba(45, 212, 191, 0.15)"
-            : "var(--bg-card)",
-          backdropFilter: "blur(12px)",
+          background: isSelected ? "var(--bg-card-hover)" : "var(--bg-card)",
           border: isSelected
-            ? "1.5px solid #2dd4bf"
+            ? "2px solid var(--text-main)"
             : "1px solid var(--border-subtle)",
           cursor: "pointer",
-          transition: "all 0.2s ease",
+          transition: "all 0.15s ease",
           boxShadow: isSelected
-            ? "0 0 20px rgba(45, 212, 191, 0.25)"
-            : "var(--shadow-card)",
+            ? "0 4px 16px rgba(0, 0, 0, 0.1)"
+            : "0 2px 8px rgba(0, 0, 0, 0.04)",
         }}
       >
         <Stack gap="xs">
@@ -188,8 +185,16 @@ export function RouteCard({
             <Group gap={6}>
               <Badge
                 size="sm"
-                variant="gradient"
-                gradient={getProfileGradient()}
+                variant="filled"
+                color="dark"
+                radius="sm"
+                styles={{
+                  root: {
+                    background: "var(--text-main)",
+                    color: "var(--bg-page)",
+                    fontWeight: 700,
+                  },
+                }}
               >
                 {rankingProfile.toUpperCase()}
               </Badge>
@@ -199,6 +204,7 @@ export function RouteCard({
                   size="sm"
                   color="red"
                   variant="filled"
+                  radius="sm"
                   leftSection={<IconAlertTriangle size={12} />}
                 >
                   Active Disruption
@@ -216,7 +222,7 @@ export function RouteCard({
                 <ActionIcon
                   size="sm"
                   variant={speaking ? "filled" : "subtle"}
-                  color="teal"
+                  color="gray"
                   onClick={handleSpeakBriefing}
                 >
                   {speaking ? (
@@ -244,12 +250,13 @@ export function RouteCard({
                   size="xs"
                   color={
                     budgetCategorization === "WITHIN_BUDGET"
-                      ? "teal"
+                      ? "dark"
                       : budgetCategorization === "MAY_EXCEED_BUDGET"
                         ? "yellow"
                         : "red"
                   }
                   variant="light"
+                  radius="sm"
                 >
                   {budgetCategorization === "WITHIN_BUDGET"
                     ? "Within Budget"
@@ -265,32 +272,47 @@ export function RouteCard({
           <Group justify="space-between" align="baseline">
             <Group gap="md">
               <Group gap={4} align="center">
-                <IconClock size={18} color="#38bdf8" />
-                <Text fw={700} size="lg" style={{ color: "var(--text-main)" }}>
+                <IconClock size={16} />
+                <Text
+                  fw={700}
+                  size="xl"
+                  style={{
+                    color: "var(--text-main)",
+                    letterSpacing: "-0.02em",
+                  }}
+                >
                   {totalDurationMin} min
                 </Text>
               </Group>
 
               <Group gap={4} align="center">
-                <IconArrowsExchange size={18} color="#94a3b8" />
+                <IconArrowsExchange size={16} color="var(--text-muted)" />
                 <Text size="sm" c="dimmed">
                   {transfers === 0
-                    ? "Direct Route"
-                    : `${transfers} ${transfers === 1 ? "Transfer" : "Transfers"}`}
+                    ? "Direct"
+                    : `${transfers} ${transfers === 1 ? "transfer" : "transfers"}`}
                 </Text>
               </Group>
             </Group>
 
             <Group gap={6} align="baseline">
-              <IconCoins size={18} color="#2dd4bf" />
-              <Text fw={700} size="xl" style={{ color: "#2dd4bf" }}>
+              <Text
+                fw={800}
+                size="xl"
+                style={{
+                  color: "var(--text-main)",
+                  fontSize: "1.4rem",
+                  letterSpacing: "-0.03em",
+                }}
+              >
                 {displayFare} ৳
               </Text>
               {isStudent && savings > 0 && (
                 <Badge
                   size="xs"
-                  color="teal"
+                  color="dark"
                   variant="light"
+                  radius="sm"
                   leftSection={<IconDiscountCheck size={12} />}
                 >
                   Save {savings} ৳

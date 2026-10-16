@@ -11,11 +11,13 @@ import {
   Tooltip,
 } from "@mantine/core";
 import {
-  IconCompass,
-  IconAlertTriangle,
-  IconShieldLock,
+  IconCar,
   IconRoute,
   IconBus,
+  IconAlertTriangle,
+  IconShieldLock,
+  IconShare,
+  IconUser,
 } from "@tabler/icons-react";
 
 import { ThemeToggle } from "./ThemeToggle";
@@ -34,126 +36,171 @@ export function Navbar({
   return (
     <Box
       component="header"
-      px="md"
-      py="xs"
+      px={{ base: "md", md: "xl" }}
+      py={14}
       style={{
         borderBottom: "1px solid var(--nav-border)",
         background: "var(--nav-bg)",
-        backdropFilter: "blur(12px)",
         position: "sticky",
         top: 0,
-        zIndex: 100,
+        zIndex: 1000,
         transition: "background-color 0.2s ease, border-color 0.2s ease",
       }}
     >
-      <Group justify="space-between">
-        <Group
-          gap="xs"
-          style={{ cursor: "pointer" }}
-          onClick={() => setActiveTab("planner")}
-        >
-          <Box
-            style={{
-              width: 34,
-              height: 34,
-              borderRadius: 8,
-              background: "linear-gradient(135deg, #38bdf8 0%, #2dd4bf 100%)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxShadow: "0 0 16px rgba(45, 212, 191, 0.35)",
-            }}
-          >
-            <IconCompass size={20} color="#0a0f18" stroke={2.5} />
-          </Box>
-          <Box>
-            <Group gap={6} align="center">
-              <Title
-                order={3}
-                style={{
-                  fontSize: "1.25rem",
-                  letterSpacing: "-0.02em",
-                  color: "var(--text-main)",
-                }}
-              >
-                DhakaPath
-              </Title>
-              <Badge
-                size="xs"
-                variant="gradient"
-                gradient={{ from: "teal", to: "cyan" }}
-              >
-                Pilot
-              </Badge>
-            </Group>
-          </Box>
-        </Group>
-
-        {/* Navigation Tabs */}
-        <Group gap="xs" visibleFrom="sm">
-          <Button
-            size="xs"
-            variant={activeTab === "planner" ? "filled" : "subtle"}
-            color="teal"
-            leftSection={<IconRoute size={15} />}
+      <Group justify="space-between" align="center">
+        {/* Brand Logo & Product Mode Switcher */}
+        <Group gap="xl" align="center">
+          <Group
+            gap={6}
+            style={{ cursor: "pointer" }}
             onClick={() => setActiveTab("planner")}
           >
-            Trip Planner
-          </Button>
+            <Title
+              order={1}
+              style={{
+                fontSize: "1.65rem",
+                fontWeight: 800,
+                letterSpacing: "-0.04em",
+                color: "var(--text-main)",
+                fontFamily: "system-ui, -apple-system, sans-serif",
+              }}
+            >
+              DhakaPath
+            </Title>
+          </Group>
+
+          {/* Uber-like top tab bar: Ride / Network / Alerts */}
+          <Group gap={8} visibleFrom="sm">
+            <Button
+              size="sm"
+              variant={activeTab === "planner" ? "filled" : "subtle"}
+              color="dark"
+              leftSection={<IconCar size={18} stroke={2.2} />}
+              onClick={() => setActiveTab("planner")}
+              radius="xl"
+              styles={{
+                root: {
+                  fontWeight: 600,
+                  fontSize: 14,
+                  background:
+                    activeTab === "planner"
+                      ? "var(--text-main)"
+                      : "transparent",
+                  color:
+                    activeTab === "planner"
+                      ? "var(--bg-page)"
+                      : "var(--text-sub)",
+                  height: 38,
+                  padding: "0 18px",
+                },
+              }}
+            >
+              Ride
+            </Button>
+
+            <Button
+              size="sm"
+              variant={activeTab === "network" ? "filled" : "subtle"}
+              color="dark"
+              leftSection={<IconBus size={18} stroke={2} />}
+              onClick={() => setActiveTab("network")}
+              radius="xl"
+              styles={{
+                root: {
+                  fontWeight: 600,
+                  fontSize: 14,
+                  background:
+                    activeTab === "network"
+                      ? "var(--text-main)"
+                      : "transparent",
+                  color:
+                    activeTab === "network"
+                      ? "var(--bg-page)"
+                      : "var(--text-sub)",
+                  height: 38,
+                  padding: "0 18px",
+                },
+              }}
+            >
+              Transit Lines
+            </Button>
+
+            <Button
+              size="sm"
+              variant={activeTab === "alerts" ? "filled" : "subtle"}
+              color="dark"
+              leftSection={<IconAlertTriangle size={18} stroke={2} />}
+              rightSection={
+                activeAlertsCount > 0 ? (
+                  <Badge size="xs" color="red" variant="filled">
+                    {activeAlertsCount}
+                  </Badge>
+                ) : null
+              }
+              onClick={() => setActiveTab("alerts")}
+              radius="xl"
+              styles={{
+                root: {
+                  fontWeight: 600,
+                  fontSize: 14,
+                  background:
+                    activeTab === "alerts" ? "var(--text-main)" : "transparent",
+                  color:
+                    activeTab === "alerts"
+                      ? "var(--bg-page)"
+                      : "var(--text-sub)",
+                  height: 38,
+                  padding: "0 18px",
+                },
+              }}
+            >
+              Live Alerts
+            </Button>
+          </Group>
+        </Group>
+
+        {/* Right Actions: Share, Admin, Theme */}
+        <Group gap="sm" align="center">
+          <ThemeToggle />
 
           <Button
             size="xs"
-            variant={activeTab === "network" ? "filled" : "subtle"}
-            color="cyan"
-            leftSection={<IconBus size={15} />}
-            onClick={() => setActiveTab("network")}
-          >
-            Transit Network
-          </Button>
-
-          <Button
-            size="xs"
-            variant={activeTab === "alerts" ? "filled" : "subtle"}
-            color="orange"
-            leftSection={<IconAlertTriangle size={15} />}
-            rightSection={
-              activeAlertsCount > 0 ? (
-                <Badge size="xs" color="red" variant="filled">
-                  {activeAlertsCount}
-                </Badge>
-              ) : null
-            }
-            onClick={() => setActiveTab("alerts")}
-          >
-            Street Alerts
-          </Button>
-
-          <Button
-            size="xs"
-            variant={activeTab === "admin" ? "filled" : "subtle"}
+            variant="subtle"
             color="gray"
             leftSection={<IconShieldLock size={15} />}
             onClick={() => setActiveTab("admin")}
+            radius="xl"
+            visibleFrom="sm"
+            styles={{
+              root: {
+                fontWeight: 600,
+                color: "var(--text-main)",
+              },
+            }}
           >
             Admin CMS
           </Button>
-        </Group>
 
-        {/* Action Controls */}
-        <Group gap="xs">
-          <ThemeToggle />
-
-          <Box hiddenFrom="sm">
-            <Tooltip label="Street Alerts">
-              <ActionIcon
-                variant={activeTab === "alerts" ? "filled" : "subtle"}
-                color="orange"
-                onClick={() => setActiveTab("alerts")}
-              >
-                <IconAlertTriangle size={18} />
-              </ActionIcon>
-            </Tooltip>
-          </Box>
+          <Button
+            size="xs"
+            radius="xl"
+            variant="filled"
+            color="dark"
+            onClick={() => {
+              window.location.href = "/login";
+            }}
+            styles={{
+              root: {
+                background: "var(--text-main)",
+                color: "var(--bg-page)",
+                fontWeight: 600,
+                height: 34,
+                padding: "0 16px",
+              },
+            }}
+          >
+            Login
+          </Button>
         </Group>
       </Group>
     </Box>

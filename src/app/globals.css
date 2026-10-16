@@ -1,46 +1,46 @@
 :root,
 [data-mantine-color-scheme="light"] {
-  --bg-page: #f8fafc;
-  --bg-card: rgba(255, 255, 255, 0.95);
-  --bg-card-hover: #ffffff;
-  --bg-card-inner: #f1f5f9;
-  --border-subtle: rgba(0, 0, 0, 0.09);
-  --border-glow: rgba(45, 212, 191, 0.35);
-  --text-main: #0f172a;
-  --text-sub: #334155;
-  --text-muted: #64748b;
-  --nav-bg: rgba(255, 255, 255, 0.92);
-  --nav-border: rgba(0, 0, 0, 0.08);
-  --input-bg: #ffffff;
-  --input-border: #cbd5e1;
-  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.06);
+  --bg-page: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f6f6f6;
+  --bg-card-inner: #f3f3f3;
+  --border-subtle: #e2e2e2;
+  --border-glow: rgba(0, 0, 0, 0.1);
+  --text-main: #000000;
+  --text-sub: #333333;
+  --text-muted: #6b6b6b;
+  --nav-bg: #ffffff;
+  --nav-border: #e8e8e8;
+  --input-bg: #f3f3f3;
+  --input-border: #e2e2e2;
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.08);
 
-  --accent-cyan: #0284c7;
-  --accent-teal: #0d9488;
-  --accent-amber: #d97706;
-  --accent-rose: #e11d48;
+  --accent-cyan: #000000;
+  --accent-teal: #000000;
+  --accent-amber: #e11900;
+  --accent-rose: #e11900;
 }
 
 [data-mantine-color-scheme="dark"] {
-  --bg-page: #0a0e17;
-  --bg-card: rgba(18, 25, 38, 0.88);
-  --bg-card-hover: rgba(26, 36, 54, 0.95);
-  --bg-card-inner: rgba(10, 15, 24, 0.6);
-  --border-subtle: rgba(255, 255, 255, 0.09);
-  --border-glow: rgba(45, 212, 191, 0.35);
-  --text-main: #f8fafc;
-  --text-sub: #cbd5e1;
-  --text-muted: #94a3b8;
-  --nav-bg: rgba(10, 15, 24, 0.85);
-  --nav-border: rgba(255, 255, 255, 0.08);
-  --input-bg: rgba(10, 15, 24, 0.65);
-  --input-border: rgba(255, 255, 255, 0.12);
-  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --bg-page: #000000;
+  --bg-card: #141414;
+  --bg-card-hover: #1f1f1f;
+  --bg-card-inner: #1a1a1a;
+  --border-subtle: #292929;
+  --border-glow: rgba(255, 255, 255, 0.1);
+  --text-main: #ffffff;
+  --text-sub: #e2e2e2;
+  --text-muted: #a6a6a6;
+  --nav-bg: #000000;
+  --nav-border: #242424;
+  --input-bg: #1f1f1f;
+  --input-border: #333333;
+  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.6);
 
-  --accent-cyan: #38bdf8;
-  --accent-teal: #2dd4bf;
-  --accent-amber: #f59e0b;
-  --accent-rose: #f43f5e;
+  --accent-cyan: #ffffff;
+  --accent-teal: #ffffff;
+  --accent-amber: #ff6b4a;
+  --accent-rose: #ff4d4d;
 }
 
 html,

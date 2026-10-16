@@ -34,8 +34,8 @@ export function FloatingChatButton({
           visibleFrom="sm"
           size="md"
           radius="xl"
-          variant="gradient"
-          gradient={{ from: "teal", to: "cyan" }}
+          variant="filled"
+          color="dark"
           leftSection={
             <Box
               style={{
@@ -54,37 +54,38 @@ export function FloatingChatButton({
                   height: 7,
                   borderRadius: "50%",
                   backgroundColor: "#10b981",
-                  border: "1.5px solid #ffffff",
+                  border: "1.5px solid #000000",
                 }}
               />
             </Box>
           }
           onClick={onClick}
           style={{
-            boxShadow:
-              "0 8px 28px rgba(13, 148, 136, 0.4), 0 2px 10px rgba(2, 132, 199, 0.3)",
-            border: "1px solid rgba(255, 255, 255, 0.25)",
-            transition: "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
+            background: "var(--text-main)",
+            color: "var(--bg-page)",
+            boxShadow: "0 8px 24px rgba(0, 0, 0, 0.25)",
+            border: "1px solid var(--border-subtle)",
+            transition: "all 0.2s ease",
             paddingLeft: 16,
             paddingRight: 18,
-            height: 44,
+            height: 46,
           }}
           className="floating-ai-button"
         >
-          <Group gap={6} align="center">
-            <Text fw={600} size="sm" style={{ letterSpacing: "-0.01em" }}>
+          <Group gap={8} align="center">
+            <Text fw={700} size="sm" style={{ letterSpacing: "-0.01em" }}>
               Ask Transit AI
             </Text>
             <Badge
               size="xs"
               variant="filled"
-              color="dark"
+              color="gray"
               style={{
-                background: "rgba(0, 0, 0, 0.25)",
-                color: "#ffffff",
-                padding: "0 5px",
-                height: 16,
-                fontSize: 9,
+                background: "rgba(255, 255, 255, 0.2)",
+                color: "var(--bg-page)",
+                padding: "0 6px",
+                height: 18,
+                fontSize: 10,
                 fontWeight: 700,
               }}
             >
@@ -99,15 +100,17 @@ export function FloatingChatButton({
         <Button
           hiddenFrom="sm"
           radius="xl"
-          variant="gradient"
-          gradient={{ from: "teal", to: "cyan" }}
+          variant="filled"
+          color="dark"
           onClick={onClick}
           p={0}
           style={{
-            width: 50,
-            height: 50,
-            boxShadow: "0 8px 24px rgba(13, 148, 136, 0.45)",
-            border: "1.5px solid rgba(255, 255, 255, 0.3)",
+            width: 52,
+            height: 52,
+            background: "var(--text-main)",
+            color: "var(--bg-page)",
+            boxShadow: "0 8px 24px rgba(0, 0, 0, 0.3)",
+            border: "1px solid var(--border-subtle)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -132,7 +135,7 @@ export function FloatingChatButton({
                 height: 8,
                 borderRadius: "50%",
                 backgroundColor: "#10b981",
-                border: "1.5px solid #ffffff",
+                border: "1.5px solid #000000",
               }}
             />
           </Box>

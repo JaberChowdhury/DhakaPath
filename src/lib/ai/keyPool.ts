@@ -29,8 +29,12 @@ const RAW_KEYS =
   ENV_POOL_KEYS.length >= 2
     ? ENV_POOL_KEYS
     : ENV_POOL_KEYS.length === 1
-      ? [ENV_POOL_KEYS[0], `${ENV_POOL_KEYS[0]}_fallback_1`, `${ENV_POOL_KEYS[0]}_fallback_2`]
-      : ['dummy_key_primary', 'dummy_key_fallback_1', 'dummy_key_fallback_2'];
+      ? [
+          ENV_POOL_KEYS[0],
+          `${ENV_POOL_KEYS[0]}_fallback_1`,
+          `${ENV_POOL_KEYS[0]}_fallback_2`,
+        ]
+      : ["dummy_key_primary", "dummy_key_fallback_1", "dummy_key_fallback_2"];
 
 function maskKey(key: string): string {
   if (key.length <= 16) return key;

@@ -123,126 +123,197 @@ export function TripPlannerForm({
 
   return (
     <Paper
-      p="md"
-      radius="md"
+      p="lg"
+      radius="lg"
       style={{
         background: "var(--bg-card)",
-        backdropFilter: "blur(16px)",
         border: "1px solid var(--border-subtle)",
-        boxShadow: "var(--shadow-card)",
+        boxShadow: "0 10px 30px rgba(0, 0, 0, 0.08)",
         transition: "all 0.2s ease",
       }}
     >
-      <Stack gap="sm">
-        {/* Origin & Destination with Swap and Geolocation Trigger */}
-        <Group align="flex-end" gap="xs" wrap="nowrap">
-          <Box style={{ flex: 1 }}>
-            <Group justify="space-between" mb={3} gap={4}>
-              <Text size="xs" fw={600} c="dimmed">
-                Origin (কোথা থেকে)
-              </Text>
-              {onRequestLocation && (
-                <Tooltip label="Ask for browser GPS permission to detect nearest station">
-                  <Button
-                    size="compact-xs"
-                    variant="subtle"
-                    color="teal"
-                    leftSection={
-                      locationLoading ? (
-                        <Loader size={12} color="teal" />
-                      ) : (
-                        <IconCurrentLocation size={13} />
-                      )
-                    }
-                    onClick={onRequestLocation}
-                    disabled={locationLoading}
-                    styles={{
-                      root: { padding: "2px 6px", height: 20, fontSize: 11 },
-                    }}
-                  >
-                    {locationLoading ? "Locating..." : "Locate Me"}
-                  </Button>
-                </Tooltip>
-              )}
-            </Group>
-            <Select
-              placeholder="Select starting hub..."
-              data={hubOptions}
-              value={originHubId || null}
-              onChange={(val) => setOriginHubId(val || "")}
-              searchable
-              clearable
-              comboboxProps={{
-                withinPortal: true,
-                zIndex: 2000,
-                transitionProps: { duration: 150, transition: "fade" },
-              }}
+      <Stack gap="md">
+        {/* Uber Header */}
+        <Group justify="space-between" align="center">
+          <Text
+            fw={800}
+            size="xl"
+            style={{
+              letterSpacing: "-0.03em",
+              color: "var(--text-main)",
+              fontFamily: "system-ui, -apple-system, sans-serif",
+            }}
+          >
+            Get a ride
+          </Text>
+          {onRequestLocation && (
+            <Button
+              size="compact-xs"
+              variant="subtle"
+              color="dark"
+              leftSection={
+                locationLoading ? (
+                  <Loader size={12} color="gray" />
+                ) : (
+                  <IconCurrentLocation size={14} />
+                )
+              }
+              onClick={onRequestLocation}
+              disabled={locationLoading}
+              radius="xl"
               styles={{
-                input: {
-                  background: "var(--input-bg)",
-                  borderColor: "var(--input-border)",
-                  color: "var(--text-main)",
+                root: {
+                  fontWeight: 600,
+                  fontSize: 12,
+                  color: "var(--text-sub)",
                 },
               }}
-            />
-          </Box>
-
-          <Tooltip label="Swap endpoints">
-            <ActionIcon
-              size="lg"
-              variant="light"
-              color="teal"
-              mb={2}
-              onClick={handleSwap}
-              disabled={!originHubId && !destinationHubId}
             >
-              <IconArrowsExchange size={18} />
-            </ActionIcon>
-          </Tooltip>
-
-          <Box style={{ flex: 1 }}>
-            <Text size="xs" fw={600} c="dimmed" mb={3}>
-              Destination (কোথায় যাবেন)
-            </Text>
-            <Select
-              placeholder="Select destination hub..."
-              data={hubOptions}
-              value={destinationHubId || null}
-              onChange={(val) => setDestinationHubId(val || "")}
-              searchable
-              clearable
-              comboboxProps={{
-                withinPortal: true,
-                zIndex: 2000,
-                transitionProps: { duration: 150, transition: "fade" },
-              }}
-              styles={{
-                input: {
-                  background: "var(--input-bg)",
-                  borderColor: "var(--input-border)",
-                  color: "var(--text-main)",
-                },
-              }}
-            />
-          </Box>
+              {locationLoading ? "Locating..." : "Locate Me"}
+            </Button>
+          )}
         </Group>
 
-        {/* Dynamic Quick Corridor Suggestions */}
-        <Group gap={6} align="center">
-          <Text
-            size="xs"
-            c="dimmed"
-            style={{ display: "flex", alignItems: "center", gap: 4 }}
+        {/* Uber Pick-up & Destination Stacked Inputs with Connecting Line */}
+        <Box style={{ position: "relative" }}>
+          {/* Visual Connecting Line between Dot and Square */}
+          <Box
+            style={{
+              position: "absolute",
+              left: 20,
+              top: 26,
+              bottom: 26,
+              width: 2,
+              background: "var(--border-subtle)",
+              zIndex: 1,
+            }}
+          />
+
+          <Stack gap="xs">
+            {/* Origin Input (Black Circle) */}
+            <Box style={{ position: "relative" }}>
+              <Box
+                style={{
+                  position: "absolute",
+                  left: 17,
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  width: 8,
+                  height: 8,
+                  borderRadius: "50%",
+                  background: "var(--text-main)",
+                  zIndex: 2,
+                }}
+              />
+              <Select
+                placeholder="Pickup location..."
+                data={hubOptions}
+                value={originHubId || null}
+                onChange={(val) => setOriginHubId(val || "")}
+                searchable
+                clearable
+                comboboxProps={{
+                  withinPortal: true,
+                  zIndex: 2000,
+                  transitionProps: { duration: 150, transition: "fade" },
+                }}
+                styles={{
+                  input: {
+                    background: "var(--input-bg)",
+                    borderColor: "var(--input-border)",
+                    color: "var(--text-main)",
+                    paddingLeft: 38,
+                    height: 48,
+                    borderRadius: 8,
+                    fontWeight: 500,
+                    fontSize: 14,
+                  },
+                }}
+              />
+            </Box>
+
+            {/* Destination Input (Black Square) */}
+            <Box style={{ position: "relative" }}>
+              <Box
+                style={{
+                  position: "absolute",
+                  left: 17,
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  width: 8,
+                  height: 8,
+                  background: "var(--text-main)",
+                  zIndex: 2,
+                }}
+              />
+              <Select
+                placeholder="Where to?"
+                data={hubOptions}
+                value={destinationHubId || null}
+                onChange={(val) => setDestinationHubId(val || "")}
+                searchable
+                clearable
+                comboboxProps={{
+                  withinPortal: true,
+                  zIndex: 2000,
+                  transitionProps: { duration: 150, transition: "fade" },
+                }}
+                styles={{
+                  input: {
+                    background: "var(--input-bg)",
+                    borderColor: "var(--input-border)",
+                    color: "var(--text-main)",
+                    paddingLeft: 38,
+                    height: 48,
+                    borderRadius: 8,
+                    fontWeight: 500,
+                    fontSize: 14,
+                  },
+                }}
+              />
+            </Box>
+          </Stack>
+
+          {/* Swap Button on Right */}
+          <ActionIcon
+            size="md"
+            variant="default"
+            radius="xl"
+            onClick={handleSwap}
+            disabled={!originHubId && !destinationHubId}
+            style={{
+              position: "absolute",
+              right: 12,
+              top: "50%",
+              transform: "translateY(-50%)",
+              zIndex: 3,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+              borderColor: "var(--border-subtle)",
+              background: "var(--bg-card)",
+              color: "var(--text-main)",
+            }}
           >
-            <IconSparkles size={12} color="#0d9488" /> Quick:
-          </Text>
+            <IconArrowsExchange size={16} />
+          </ActionIcon>
+        </Box>
+
+        {/* Quick Popular Corridors Chips */}
+        <Group gap={6} align="center">
           {popularCorridors.map((c, i) => (
             <Badge
               key={i}
-              size="xs"
+              size="sm"
               variant="light"
-              color="teal"
-              style={{ cursor: "pointer", textTransform: "none" }}
+              color="gray"
+              radius="sm"
+              style={{
+                cursor: "pointer",
+                textTransform: "none",
+                fontWeight: 500,
+                background: "var(--bg-card-inner)",
+                color: "var(--text-sub)",
+                border: "1px solid var(--border-subtle)",
+              }}
               onClick={() => {
                 setOriginHubId(c.origin);
                 setDestinationHubId(c.dest);
@@ -253,27 +324,26 @@ export function TripPlannerForm({
           ))}
         </Group>
 
-        {/* Student Concession & Budget Pills */}
+        {/* Student Concession & Budget Options */}
         <Group justify="space-between" align="center" wrap="wrap">
           <Switch
             checked={student}
             onChange={(e) => setStudent(e.currentTarget.checked)}
-            color="teal"
+            color="dark"
             size="sm"
             label={
               <Group gap={4}>
-                <IconSchool size={16} color="#0d9488" />
-                <Text size="sm" fw={500}>
-                  Student Concession
+                <IconSchool size={16} />
+                <Text size="sm" fw={600} style={{ color: "var(--text-main)" }}>
+                  Student Pass
                 </Text>
-                <Badge size="xs" color="teal" variant="light">
-                  50% Bus Off
+                <Badge size="xs" color="gray" variant="filled">
+                  50% Off Bus
                 </Badge>
               </Group>
             }
           />
 
-          {/* Quick Budget Pills */}
           <Group gap={6} align="center">
             <Text size="xs" c="dimmed">
               Budget:
@@ -283,8 +353,15 @@ export function TripPlannerForm({
                 key={amt}
                 size="sm"
                 variant={budgetBdt === amt ? "filled" : "outline"}
-                color="cyan"
-                style={{ cursor: "pointer" }}
+                color="dark"
+                radius="sm"
+                style={{
+                  cursor: "pointer",
+                  background:
+                    budgetBdt === amt ? "var(--text-main)" : undefined,
+                  color:
+                    budgetBdt === amt ? "var(--bg-page)" : "var(--text-sub)",
+                }}
                 onClick={() => setBudgetBdt(budgetBdt === amt ? null : amt)}
               >
                 ≤ {amt} ৳
@@ -293,7 +370,7 @@ export function TripPlannerForm({
             {budgetBdt !== null && (
               <Badge
                 size="sm"
-                variant="light"
+                variant="subtle"
                 color="gray"
                 style={{ cursor: "pointer" }}
                 onClick={() => setBudgetBdt(null)}
@@ -307,41 +384,86 @@ export function TripPlannerForm({
         {/* Mode Selector Chips */}
         <Group justify="space-between" align="center">
           <Group gap={6}>
-            <Text size="xs" c="dimmed">
-              Modes:
-            </Text>
             <Button
               size="compact-xs"
-              variant={allowedModes.includes("metro") ? "filled" : "subtle"}
-              color="teal"
+              variant={allowedModes.includes("metro") ? "filled" : "default"}
+              color="dark"
+              radius="xl"
               leftSection={<IconTrain size={13} />}
               onClick={() => toggleMode("metro")}
+              styles={{
+                root: {
+                  background: allowedModes.includes("metro")
+                    ? "var(--text-main)"
+                    : "var(--bg-card-inner)",
+                  color: allowedModes.includes("metro")
+                    ? "var(--bg-page)"
+                    : "var(--text-main)",
+                  border: "1px solid var(--border-subtle)",
+                },
+              }}
             >
               Metro
             </Button>
             <Button
               size="compact-xs"
-              variant={allowedModes.includes("bus") ? "filled" : "subtle"}
-              color="blue"
+              variant={allowedModes.includes("bus") ? "filled" : "default"}
+              color="dark"
+              radius="xl"
               leftSection={<IconBus size={13} />}
               onClick={() => toggleMode("bus")}
+              styles={{
+                root: {
+                  background: allowedModes.includes("bus")
+                    ? "var(--text-main)"
+                    : "var(--bg-card-inner)",
+                  color: allowedModes.includes("bus")
+                    ? "var(--bg-page)"
+                    : "var(--text-main)",
+                  border: "1px solid var(--border-subtle)",
+                },
+              }}
             >
               Bus
             </Button>
             <Button
               size="compact-xs"
-              variant={allowedModes.includes("leguna") ? "filled" : "subtle"}
-              color="orange"
+              variant={allowedModes.includes("leguna") ? "filled" : "default"}
+              color="dark"
+              radius="xl"
               leftSection={<IconCar size={13} />}
               onClick={() => toggleMode("leguna")}
+              styles={{
+                root: {
+                  background: allowedModes.includes("leguna")
+                    ? "var(--text-main)"
+                    : "var(--bg-card-inner)",
+                  color: allowedModes.includes("leguna")
+                    ? "var(--bg-page)"
+                    : "var(--text-main)",
+                  border: "1px solid var(--border-subtle)",
+                },
+              }}
             >
               Leguna
             </Button>
             <Button
               size="compact-xs"
-              variant={allowedModes.includes("rickshaw") ? "filled" : "subtle"}
-              color="grape"
+              variant={allowedModes.includes("rickshaw") ? "filled" : "default"}
+              color="dark"
+              radius="xl"
               onClick={() => toggleMode("rickshaw")}
+              styles={{
+                root: {
+                  background: allowedModes.includes("rickshaw")
+                    ? "var(--text-main)"
+                    : "var(--bg-card-inner)",
+                  color: allowedModes.includes("rickshaw")
+                    ? "var(--bg-page)"
+                    : "var(--text-main)",
+                  border: "1px solid var(--border-subtle)",
+                },
+              }}
             >
               Rickshaw
             </Button>
@@ -353,8 +475,9 @@ export function TripPlannerForm({
             color="gray"
             leftSection={<IconAdjustmentsHorizontal size={14} />}
             onClick={() => setShowFilters(!showFilters)}
+            radius="xl"
           >
-            {showFilters ? "Hide Advanced" : "Disruptions"}
+            {showFilters ? "Hide" : "Disruptions"}
           </Button>
         </Group>
 
@@ -427,23 +550,34 @@ export function TripPlannerForm({
           </Stack>
         </Collapse>
 
-        {/* Search CTA */}
+        {/* Uber Primary Solid Black Search CTA */}
         <Button
           fullWidth
-          size="md"
-          variant="gradient"
-          gradient={{ from: "teal", to: "cyan" }}
-          rightSection={<IconArrowRight size={18} />}
+          size="lg"
+          variant="filled"
+          color="dark"
           onClick={onSearch}
           loading={loading}
           disabled={!originHubId || !destinationHubId}
-          style={{
-            boxShadow: "0 4px 20px rgba(45, 212, 191, 0.25)",
+          radius="md"
+          styles={{
+            root: {
+              background: "var(--text-main)",
+              color: "var(--bg-page)",
+              fontWeight: 700,
+              fontSize: 16,
+              height: 52,
+              letterSpacing: "-0.01em",
+              transition: "transform 0.1s ease, background-color 0.2s ease",
+              "&:hover": {
+                opacity: 0.9,
+              },
+            },
           }}
         >
           {originHubId && destinationHubId
-            ? "Find Optimal Routes"
-            : "Select Origin & Destination"}
+            ? "Search"
+            : "Enter pickup & destination"}
         </Button>
       </Stack>
     </Paper>

@@ -195,18 +195,14 @@ export function ChatDrawer({
                 >
                   <Group gap={6} mb={4} align="center">
                     {msg.sender === "user" ? (
-                      <IconUser size={14} color="#bae6fd" />
+                      <IconUser size={14} />
                     ) : (
-                      <IconSparkles size={14} color="#2dd4bf" />
+                      <IconSparkles size={14} />
                     )}
-                    <Text
-                      size="xs"
-                      fw={600}
-                      c={msg.sender === "user" ? "blue.1" : "teal.2"}
-                    >
-                      {msg.sender === "user" ? "You" : "DhakaPath AI"}
+                    <Text size="xs" fw={700} style={{ color: "inherit" }}>
+                      {msg.sender === "user" ? "You" : "DhakaPath Assistant"}
                     </Text>
-                    <Text size="xs" c="dimmed">
+                    <Text size="xs" style={{ opacity: 0.7 }}>
                       {msg.timestamp}
                     </Text>
                   </Group>
@@ -234,11 +230,12 @@ export function ChatDrawer({
                       />
                       <Button
                         fullWidth
-                        size="xs"
+                        size="sm"
                         mt={8}
-                        variant="gradient"
-                        gradient={{ from: "teal", to: "cyan" }}
-                        leftSection={<IconNavigation size={14} />}
+                        variant="filled"
+                        color="dark"
+                        radius="md"
+                        leftSection={<IconNavigation size={15} />}
                         onClick={() => {
                           if (onSelectRouteFromChat && msg.routeResult) {
                             onSelectRouteFromChat(
@@ -248,8 +245,15 @@ export function ChatDrawer({
                             onClose();
                           }
                         }}
+                        styles={{
+                          root: {
+                            background: "var(--text-main)",
+                            color: "var(--bg-page)",
+                            fontWeight: 700,
+                          },
+                        }}
                       >
-                        🗺️ View Road Directions on Map
+                        View Directions on Map
                       </Button>
                     </Box>
                   )}
@@ -264,8 +268,8 @@ export function ChatDrawer({
           <Group gap={6} mb="xs">
             <Button
               size="compact-xs"
-              variant="outline"
-              color="teal"
+              variant="default"
+              radius="sm"
               onClick={() =>
                 handleSend(
                   "Banasree theke Motijheel jabo, budget 40, ami student",
@@ -276,8 +280,8 @@ export function ChatDrawer({
             </Button>
             <Button
               size="compact-xs"
-              variant="outline"
-              color="cyan"
+              variant="default"
+              radius="sm"
               onClick={() =>
                 handleSend("Mirpur 10 theke Shahbagh under 20 taka")
               }
@@ -286,8 +290,8 @@ export function ChatDrawer({
             </Button>
             <Button
               size="compact-xs"
-              variant="outline"
-              color="orange"
+              variant="default"
+              radius="sm"
               onClick={() =>
                 handleSend("Farmgate to Gulshan 1, avoid Malibagh")
               }
@@ -296,8 +300,8 @@ export function ChatDrawer({
             </Button>
             <Button
               size="compact-xs"
-              variant="outline"
-              color="grape"
+              variant="default"
+              radius="sm"
               onClick={() =>
                 handleSend("Gulshan 1 theke Mohakhali CNG share korbo")
               }
@@ -319,16 +323,27 @@ export function ChatDrawer({
                   background: "var(--input-bg)",
                   borderColor: "var(--input-border)",
                   color: "var(--text-main)",
+                  borderRadius: 8,
+                  height: 44,
                 },
               }}
             />
             <ActionIcon
-              size="lg"
-              variant="gradient"
-              gradient={{ from: "teal", to: "cyan" }}
+              size="xl"
+              variant="filled"
+              color="dark"
+              radius="md"
               onClick={() => handleSend()}
               loading={loading}
               disabled={!input.trim()}
+              styles={{
+                root: {
+                  background: "var(--text-main)",
+                  color: "var(--bg-page)",
+                  height: 44,
+                  width: 44,
+                },
+              }}
             >
               <IconSend size={18} />
             </ActionIcon>

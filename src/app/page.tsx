@@ -468,32 +468,41 @@ export default function HomePage() {
               >
                 <Stack gap="md">
                   <Paper
-                    p="xs"
-                    radius="md"
+                    p="sm"
+                    radius="lg"
                     style={{
-                      background: "rgba(45, 212, 191, 0.08)",
-                      border: "1px solid rgba(45, 212, 191, 0.25)",
+                      background: "var(--bg-card)",
+                      border: "1px solid var(--border-subtle)",
+                      boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
                     }}
                   >
                     <Group justify="space-between" align="center">
-                      <Group gap={8}>
-                        <IconCar size={16} color="#2dd4bf" />
-                        <Text
-                          size="xs"
-                          fw={600}
-                          style={{ color: "var(--text-main)" }}
-                        >
-                          Shared Rickshaw & CNG Splitter
-                        </Text>
-                        <Badge size="xs" color="teal" variant="light">
-                          Bonus
-                        </Badge>
+                      <Group gap={10}>
+                        <IconCar size={18} />
+                        <Box>
+                          <Text
+                            size="sm"
+                            fw={700}
+                            style={{ color: "var(--text-main)" }}
+                          >
+                            Shared Rickshaw & CNG Splitter
+                          </Text>
+                          <Text size="11px" c="dimmed">
+                            Split rides & lower your commute fares
+                          </Text>
+                        </Box>
                       </Group>
                       <Button
-                        size="compact-xs"
-                        variant="gradient"
-                        gradient={{ from: "teal", to: "cyan" }}
+                        size="xs"
+                        variant="default"
+                        radius="xl"
                         onClick={() => setRideShareOpen(true)}
+                        styles={{
+                          root: {
+                            fontWeight: 600,
+                            border: "1px solid var(--border-subtle)",
+                          },
+                        }}
                       >
                         Open Board
                       </Button>
