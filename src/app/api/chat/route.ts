@@ -1,19 +1,19 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 import {
   extractTransitIntent,
   formatRouteExplanation,
   handleSpecializedQuery,
-} from '@/lib/ai/provider';
-import { planTrip } from '@/lib/routing/planner';
+} from "@/lib/ai/provider";
+import { planTrip } from "@/lib/routing/planner";
 
 export async function POST(request: Request) {
   try {
     const { message, currentContext } = await request.json();
 
-    if (!message || typeof message !== 'string') {
+    if (!message || typeof message !== "string") {
       return NextResponse.json(
-        { success: false, error: 'A message string is required.' },
-        { status: 400 }
+        { success: false, error: "A message string is required." },
+        { status: 400 },
       );
     }
 
@@ -21,9 +21,10 @@ export async function POST(request: Request) {
 
     // 1. Handle specialized knowledge queries (Fares, Disruption alerts, Reliability)
     if (
-      intent.intentType === 'explain_fare' ||
-      intent.intentType === 'explain_alert_reliability' ||
-      intent.intentType === 'check_road_status'
+      intent.intentType === "explain_fare" ||
+      intent.intentType === "explain_alert_reliability" ||
+      intent.intentType === "check_road_status" ||
+      intent.intentType === "explain_rideshare_split"
     ) {
       const explanation = handleSpecializedQuery(intent);
       return NextResponse.json({
@@ -36,7 +37,7 @@ export async function POST(request: Request) {
 
     // 2. Handle Trip Planning & Contextual Updates
     let planResponse = null;
-    let explanation = '';
+    let explanation = "";
 
     if (intent.originHubId && intent.destinationHubId) {
       planResponse = planTrip({
@@ -47,8 +48,13 @@ export async function POST(request: Request) {
         avoidHubIds: intent.avoidHubIds,
       });
 
-      const topRoute = planResponse.routes.length > 0 ? planResponse.routes[0] : null;
-      explanation = formatRouteExplanation(intent, topRoute, planResponse.message);
+      const topRoute =
+        planResponse.routes.length > 0 ? planResponse.routes[0] : null;
+      explanation = formatRouteExplanation(
+        intent,
+        topRoute,
+        planResponse.message,
+      );
     } else {
       explanation = `I understand your request. Please specify your origin and destination from our supported hubs (e.g. "Banasree theke Motijheel jabo", "Mirpur 10 to Shahbagh", "Farmgate to Airport").`;
     }
@@ -60,6 +66,9 @@ export async function POST(request: Request) {
       explanation,
     });
   } catch (err: any) {
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: err.message },
+      { status: 500 },
+    );
   }
 }

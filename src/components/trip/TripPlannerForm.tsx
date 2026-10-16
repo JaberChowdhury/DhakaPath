@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React from 'react';
+import React from "react";
 import {
   Paper,
   Select,
@@ -16,7 +16,7 @@ import {
   Collapse,
   Loader,
   Box,
-} from '@mantine/core';
+} from "@mantine/core";
 import {
   IconArrowRight,
   IconArrowsExchange,
@@ -28,8 +28,8 @@ import {
   IconCar,
   IconCurrentLocation,
   IconSparkles,
-} from '@tabler/icons-react';
-import { Hub, TransitMode } from '@/types/network';
+} from "@tabler/icons-react";
+import { Hub, TransitMode } from "@/types/network";
 
 interface TripPlannerFormProps {
   hubs: Hub[];
@@ -99,10 +99,26 @@ export function TripPlannerForm({
 
   // Popular dynamic corridors
   const popularCorridors = [
-    { label: 'Mirpur 10 ➔ Motijheel', origin: 'hub_mirpur_10', dest: 'hub_motijheel' },
-    { label: 'Uttara ➔ Shahbagh', origin: 'hub_uttara_north', dest: 'hub_shahbagh' },
-    { label: 'Banasree ➔ Gulshan 1', origin: 'hub_banasree', dest: 'hub_gulshan_1' },
-    { label: 'Farmgate ➔ Kawran Bazar', origin: 'hub_farmgate', dest: 'hub_kawran_bazar' },
+    {
+      label: "Mirpur 10 ➔ Motijheel",
+      origin: "hub_mirpur_10",
+      dest: "hub_motijheel",
+    },
+    {
+      label: "Uttara ➔ Shahbagh",
+      origin: "hub_uttara_north",
+      dest: "hub_shahbagh",
+    },
+    {
+      label: "Banasree ➔ Gulshan 1",
+      origin: "hub_banasree",
+      dest: "hub_gulshan_1",
+    },
+    {
+      label: "Farmgate ➔ Kawran Bazar",
+      origin: "hub_farmgate",
+      dest: "hub_kawran_bazar",
+    },
   ];
 
   return (
@@ -110,11 +126,11 @@ export function TripPlannerForm({
       p="md"
       radius="md"
       style={{
-        background: 'var(--bg-card)',
-        backdropFilter: 'blur(16px)',
-        border: '1px solid var(--border-subtle)',
-        boxShadow: 'var(--shadow-card)',
-        transition: 'all 0.2s ease',
+        background: "var(--bg-card)",
+        backdropFilter: "blur(16px)",
+        border: "1px solid var(--border-subtle)",
+        boxShadow: "var(--shadow-card)",
+        transition: "all 0.2s ease",
       }}
     >
       <Stack gap="sm">
@@ -131,14 +147,20 @@ export function TripPlannerForm({
                     size="compact-xs"
                     variant="subtle"
                     color="teal"
-                    leftSection={locationLoading ? <Loader size={12} color="teal" /> : <IconCurrentLocation size={13} />}
+                    leftSection={
+                      locationLoading ? (
+                        <Loader size={12} color="teal" />
+                      ) : (
+                        <IconCurrentLocation size={13} />
+                      )
+                    }
                     onClick={onRequestLocation}
                     disabled={locationLoading}
                     styles={{
-                      root: { padding: '2px 6px', height: 20, fontSize: 11 },
+                      root: { padding: "2px 6px", height: 20, fontSize: 11 },
                     }}
                   >
-                    {locationLoading ? 'Locating...' : 'Locate Me'}
+                    {locationLoading ? "Locating..." : "Locate Me"}
                   </Button>
                 </Tooltip>
               )}
@@ -147,16 +169,20 @@ export function TripPlannerForm({
               placeholder="Select starting hub..."
               data={hubOptions}
               value={originHubId || null}
-              onChange={(val) => setOriginHubId(val || '')}
+              onChange={(val) => setOriginHubId(val || "")}
               searchable
               clearable
               comboboxProps={{
                 withinPortal: true,
                 zIndex: 2000,
-                transitionProps: { duration: 150, transition: 'fade' },
+                transitionProps: { duration: 150, transition: "fade" },
               }}
               styles={{
-                input: { background: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-main)' },
+                input: {
+                  background: "var(--input-bg)",
+                  borderColor: "var(--input-border)",
+                  color: "var(--text-main)",
+                },
               }}
             />
           </Box>
@@ -182,16 +208,20 @@ export function TripPlannerForm({
               placeholder="Select destination hub..."
               data={hubOptions}
               value={destinationHubId || null}
-              onChange={(val) => setDestinationHubId(val || '')}
+              onChange={(val) => setDestinationHubId(val || "")}
               searchable
               clearable
               comboboxProps={{
                 withinPortal: true,
                 zIndex: 2000,
-                transitionProps: { duration: 150, transition: 'fade' },
+                transitionProps: { duration: 150, transition: "fade" },
               }}
               styles={{
-                input: { background: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-main)' },
+                input: {
+                  background: "var(--input-bg)",
+                  borderColor: "var(--input-border)",
+                  color: "var(--text-main)",
+                },
               }}
             />
           </Box>
@@ -199,7 +229,11 @@ export function TripPlannerForm({
 
         {/* Dynamic Quick Corridor Suggestions */}
         <Group gap={6} align="center">
-          <Text size="xs" c="dimmed" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <Text
+            size="xs"
+            c="dimmed"
+            style={{ display: "flex", alignItems: "center", gap: 4 }}
+          >
             <IconSparkles size={12} color="#0d9488" /> Quick:
           </Text>
           {popularCorridors.map((c, i) => (
@@ -208,7 +242,7 @@ export function TripPlannerForm({
               size="xs"
               variant="light"
               color="teal"
-              style={{ cursor: 'pointer', textTransform: 'none' }}
+              style={{ cursor: "pointer", textTransform: "none" }}
               onClick={() => {
                 setOriginHubId(c.origin);
                 setDestinationHubId(c.dest);
@@ -248,9 +282,9 @@ export function TripPlannerForm({
               <Badge
                 key={amt}
                 size="sm"
-                variant={budgetBdt === amt ? 'filled' : 'outline'}
+                variant={budgetBdt === amt ? "filled" : "outline"}
                 color="cyan"
-                style={{ cursor: 'pointer' }}
+                style={{ cursor: "pointer" }}
                 onClick={() => setBudgetBdt(budgetBdt === amt ? null : amt)}
               >
                 ≤ {amt} ৳
@@ -261,7 +295,7 @@ export function TripPlannerForm({
                 size="sm"
                 variant="light"
                 color="gray"
-                style={{ cursor: 'pointer' }}
+                style={{ cursor: "pointer" }}
                 onClick={() => setBudgetBdt(null)}
               >
                 Clear
@@ -278,36 +312,36 @@ export function TripPlannerForm({
             </Text>
             <Button
               size="compact-xs"
-              variant={allowedModes.includes('metro') ? 'filled' : 'subtle'}
+              variant={allowedModes.includes("metro") ? "filled" : "subtle"}
               color="teal"
               leftSection={<IconTrain size={13} />}
-              onClick={() => toggleMode('metro')}
+              onClick={() => toggleMode("metro")}
             >
               Metro
             </Button>
             <Button
               size="compact-xs"
-              variant={allowedModes.includes('bus') ? 'filled' : 'subtle'}
+              variant={allowedModes.includes("bus") ? "filled" : "subtle"}
               color="blue"
               leftSection={<IconBus size={13} />}
-              onClick={() => toggleMode('bus')}
+              onClick={() => toggleMode("bus")}
             >
               Bus
             </Button>
             <Button
               size="compact-xs"
-              variant={allowedModes.includes('leguna') ? 'filled' : 'subtle'}
+              variant={allowedModes.includes("leguna") ? "filled" : "subtle"}
               color="orange"
               leftSection={<IconCar size={13} />}
-              onClick={() => toggleMode('leguna')}
+              onClick={() => toggleMode("leguna")}
             >
               Leguna
             </Button>
             <Button
               size="compact-xs"
-              variant={allowedModes.includes('rickshaw') ? 'filled' : 'subtle'}
+              variant={allowedModes.includes("rickshaw") ? "filled" : "subtle"}
               color="grape"
-              onClick={() => toggleMode('rickshaw')}
+              onClick={() => toggleMode("rickshaw")}
             >
               Rickshaw
             </Button>
@@ -320,13 +354,17 @@ export function TripPlannerForm({
             leftSection={<IconAdjustmentsHorizontal size={14} />}
             onClick={() => setShowFilters(!showFilters)}
           >
-            {showFilters ? 'Hide Advanced' : 'Disruptions'}
+            {showFilters ? "Hide Advanced" : "Disruptions"}
           </Button>
         </Group>
 
         {/* Advanced Simulation Collapsible */}
         <Collapse expanded={showFilters}>
-          <Stack gap="xs" pt="xs" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+          <Stack
+            gap="xs"
+            pt="xs"
+            style={{ borderTop: "1px solid var(--border-subtle)" }}
+          >
             <MultiSelect
               label="Avoid Corridors / Hubs"
               placeholder="Select hubs to route around..."
@@ -339,7 +377,11 @@ export function TripPlannerForm({
                 zIndex: 2000,
               }}
               styles={{
-                input: { background: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-main)' },
+                input: {
+                  background: "var(--input-bg)",
+                  borderColor: "var(--input-border)",
+                  color: "var(--text-main)",
+                },
               }}
             />
 
@@ -347,20 +389,39 @@ export function TripPlannerForm({
               label="Inject Synthetic Disruption Scenario"
               placeholder="Live Conditions (No Simulation)"
               data={[
-                { value: '', label: '🟢 Live Conditions (No Injected Simulation)' },
-                { value: 'disrupt_malibagh_waterlogging', label: '🌊 Malibagh Waterlogging (Closed to buses/rickshaws)' },
-                { value: 'disrupt_farmgate_vip_movement', label: '🚔 Farmgate VIP Movement (+20m bus delay)' },
-                { value: 'disrupt_mrt_shewrapara_delay', label: '🚇 MRT-6 Signaling Calibration (+10m metro delay)' },
-                { value: 'disrupt_rampura_blockade', label: '🚫 Rampura Canal Blockade (Simulates No Valid Route)' },
+                {
+                  value: "",
+                  label: "🟢 Live Conditions (No Injected Simulation)",
+                },
+                {
+                  value: "disrupt_malibagh_waterlogging",
+                  label: "🌊 Malibagh Waterlogging (Closed to buses/rickshaws)",
+                },
+                {
+                  value: "disrupt_farmgate_vip_movement",
+                  label: "🚔 Farmgate VIP Movement (+20m bus delay)",
+                },
+                {
+                  value: "disrupt_mrt_shewrapara_delay",
+                  label: "🚇 MRT-6 Signaling Calibration (+10m metro delay)",
+                },
+                {
+                  value: "disrupt_rampura_blockade",
+                  label: "🚫 Rampura Canal Blockade (Simulates No Valid Route)",
+                },
               ]}
-              value={scenarioId || ''}
+              value={scenarioId || ""}
               onChange={(val) => setScenarioId(val || null)}
               comboboxProps={{
                 withinPortal: true,
                 zIndex: 2000,
               }}
               styles={{
-                input: { background: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-main)' },
+                input: {
+                  background: "var(--input-bg)",
+                  borderColor: "var(--input-border)",
+                  color: "var(--text-main)",
+                },
               }}
             />
           </Stack>
@@ -371,16 +432,18 @@ export function TripPlannerForm({
           fullWidth
           size="md"
           variant="gradient"
-          gradient={{ from: 'teal', to: 'cyan' }}
+          gradient={{ from: "teal", to: "cyan" }}
           rightSection={<IconArrowRight size={18} />}
           onClick={onSearch}
           loading={loading}
           disabled={!originHubId || !destinationHubId}
           style={{
-            boxShadow: '0 4px 20px rgba(45, 212, 191, 0.25)',
+            boxShadow: "0 4px 20px rgba(45, 212, 191, 0.25)",
           }}
         >
-          {originHubId && destinationHubId ? 'Find Optimal Routes' : 'Select Origin & Destination'}
+          {originHubId && destinationHubId
+            ? "Find Optimal Routes"
+            : "Select Origin & Destination"}
         </Button>
       </Stack>
     </Paper>

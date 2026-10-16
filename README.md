@@ -96,7 +96,7 @@ DhakaPath is designed for Supabase PostgreSQL.
 
 ---
 
-## 🧪 Acceptance Test Verification (12 / 12 Passing)
+## 🧪 Acceptance Test Verification (18 / 18 Passing — 100%)
 
 | # | Test Scenario | Verified System Invariant |
 |---|---|---|
@@ -112,17 +112,42 @@ DhakaPath is designed for Supabase PostgreSQL.
 | **10** | Maximum Delay Deduplication | Overlapping incidents on the same segment take $\max(\text{delay})$ rather than compounding. |
 | **11** | Banglish Intent Extraction | Deterministic regex correctly extracts origin, destination, budget, and avoid corridors. |
 | **12** | Benchmark Journeys | All 4 demonstration scenarios execute deterministically. |
+| **13** | Network Snapshot Integrity | Authoritative verification of 14 hubs, 25 directional stops, 4 transit modes, and fare rules. |
+| **14** | Report Moderation Lifecycle | Community submission, crowd confirmation, and admin transition (`pending` ➔ `approved` ➔ `resolved`). |
+| **15** | Simulation Comparative Delta | Exact before-and-after computation of travel time delays and fare surge deltas. |
+| **16** | Admin Authentication Guard | Cryptographic session tokens, Next.js 16 proxy protection, and secure login verification. |
+| **17** | AI Multi-Key Pool & Failover | Circuit-breaker auto-switching across 5 Google AI Studio API keys on HTTP 429 rate-limits. |
+| **18** | Chat Road Directions on Map | Natural language chat intent extraction generates real-world road direction polylines on Leaflet. |
 
 ---
 
-## 🎬 5-Minute Live Demonstration Flow
+## 🎬 4–5 Minute Hackathon Live Demonstration Flow
 
-1. **[0:00–0:40] Public Mobile Experience:** Open [http://localhost:3000](http://localhost:3000) on a mobile device or responsive viewport. Inspect pilot hubs, boarding landmarks, and the Leaflet/Schematic map toggle.
-2. **[0:40–1:35] Journey Planning & Student Fare:** Search *Mirpur 10 ➔ Shahbagh*. Toggle **Student Concession** to show the 50% discount savings (25 ৳ $\to$ 13 ৳). Set a 20 ৳ budget to show `Within Budget` verification.
-3. **[1:35–2:25] Disruption Simulation & Rerouting:** In the Disruption Simulation dropdown, inject *Malibagh Waterlogging*. Re-plan *Banasree ➔ Kawran Bazar* to show the automatic detour via Leguna to Gulshan 1 and bus to Kawran Bazar (+18m delay notice).
-4. **[2:25–3:25] Incident Reporting & Admin Moderation:** Click **Report Incident** in Street Alerts. Submit a new road issue. Open `/admin` to demonstrate administrative review, approval, and live status propagation.
-5. **[3:25–4:20] Conversational AI Assistant:** Click **AI Assistant** and enter: `"Banasree theke Motijheel jabo, budget 40 taka, ami student"`. Watch intent extraction resolve hub IDs and render the grounded route card inside chat.
-6. **[4:20–5:00] Architectural Q&A:** Explain shared routing engine architecture, deterministic tariff calculations, and RLS security boundaries.
+1. **[0:00–0:40] Public Transit Browser & Live GPS:**
+   - Open [http://localhost:3000](http://localhost:3000) on a mobile device or responsive desktop split-screen.
+   - Show 14 pilot hubs, 25 boarding points with specific landmarks (e.g. BSMMU Gate, Concourse Level), and click **"📍 Detect Nearest Station"** for browser geolocation.
+2. **[0:40–1:30] Multimodal Planning & Student Fare Engine:**
+   - Search *Mirpur 10 ➔ Motijheel*.
+   - Toggle **Student Concession** to demonstrate statutory 50% discount savings on bus (25 ৳ $\to$ 13 ৳) while preserving MRT-6 flat distance tariff.
+   - Show ranking options: **Fastest** (Metro, 25m), **Cheapest** (Bus, 13 ৳), and **Balanced** (Metro + Bus transfer).
+3. **[1:30–2:30] Interactive Disruption Simulation & Automatic Rerouting:**
+   - In Disruption Simulation, activate *Malibagh Waterlogging* (+25 min delay).
+   - Watch the routing engine automatically compute a detour via Leguna to Gulshan 1 and bus to Kawran Bazar.
+   - Show the **Simulation Comparison Banner** highlighting the exact travel time increase and cost difference.
+   - Activate *Rampura Feeder Blockade* to prove the **Honest No-Route Guarantee** (`NO_VALID_ROUTE`).
+4. **[2:30–3:15] Street Alerts & Admin Authentication:**
+   - Browse the **Street Alerts** tab with real-time crowd verification ("Confirm" & "Resolved" voting).
+   - Navigate to `/admin`. Demonstrate that unauthenticated users are redirected to `/login`.
+   - Log in as admin (`admin` / `dhakapath2026`). Show the Admin Moderation panel, live alerts review, and the **AI Key Pool & Quota Monitor** tracking all 5 API keys.
+5. **[3:15–4:20] Conversational AI Assistant & Map Direction Sync:**
+   - Click the floating AI button in the bottom right corner.
+   - Type in Banglish: `"Banasree theke Motijheel jabo, budget 40, ami student"`.
+   - Show multi-turn context memory: follow up with `"Malibagh avoid koro"`.
+   - Click **"🗺️ View Road Directions on Map"** on the chat route card: show how it smoothly animates and plots the color-coded road polyline on the Leaflet map with origin and destination pins.
+6. **[4:20–5:00] Architectural Highlights & Q&A:**
+   - Explain zero paid APIs (Leaflet + OpenStreetMap + Free-tier Gemini).
+   - Deterministic tariff calculation prevents AI hallucination.
+   - 18 / 18 automated tests passing (100%).
 
 ---
 

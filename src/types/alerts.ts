@@ -1,9 +1,9 @@
-import { TransitMode } from './network';
+import { TransitMode } from "./network";
 
-export type AlertSeverity = 'low' | 'medium' | 'high' | 'critical';
-export type ModerationStatus = 'pending' | 'approved' | 'rejected';
-export type LifecycleStage = 'active' | 'disputed' | 'resolved' | 'expired';
-export type ReporterType = 'guest' | 'user' | 'admin' | 'simulation';
+export type AlertSeverity = "low" | "medium" | "high" | "critical";
+export type ModerationStatus = "pending" | "approved" | "rejected";
+export type LifecycleStage = "active" | "disputed" | "resolved" | "expired";
+export type ReporterType = "guest" | "user" | "admin" | "simulation";
 
 export interface DisruptionAlert {
   id: string;
@@ -40,6 +40,6 @@ export interface AlertVote {
   id?: number;
   alert_id: string;
   voter_fingerprint: string;
-  vote_type: 'confirm' | 'dispute' | 'resolved';
+  vote_type: "confirm" | "dispute" | "resolved";
   created_at: string;
 }

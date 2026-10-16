@@ -1,6 +1,6 @@
-import { DisruptionAlert } from '@/types/alerts';
-import { Segment, TransitMode } from '@/types/network';
-import { getActiveAlerts, getDemoDisruptions } from '@/lib/db/repository';
+import { DisruptionAlert } from "@/types/alerts";
+import { Segment, TransitMode } from "@/types/network";
+import { getActiveAlerts, getDemoDisruptions } from "@/lib/db/repository";
 
 export interface DisruptionOverlay {
   effectiveDurationMin: number;
@@ -12,11 +12,17 @@ export interface DisruptionOverlay {
  * Checks if an alert has aged past its TTL or expiration timestamp.
  * Expired means "no longer fresh enough to influence routing", not "road is clear".
  */
-export function isAlertActive(alert: DisruptionAlert, asOfTime: Date = new Date()): boolean {
-  if (alert.lifecycle_stage === 'resolved' || alert.lifecycle_stage === 'expired') {
+export function isAlertActive(
+  alert: DisruptionAlert,
+  asOfTime: Date = new Date(),
+): boolean {
+  if (
+    alert.lifecycle_stage === "resolved" ||
+    alert.lifecycle_stage === "expired"
+  ) {
     return false;
   }
-  if (alert.reported_by_type === 'simulation') {
+  if (alert.reported_by_type === "simulation") {
     return true;
   }
   const expiry = new Date(alert.expires_at);
@@ -29,7 +35,7 @@ export function isAlertActive(alert: DisruptionAlert, asOfTime: Date = new Date(
  */
 export function evaluateSegmentDisruptions(
   segment: Segment,
-  alerts: DisruptionAlert[]
+  alerts: DisruptionAlert[],
 ): DisruptionOverlay {
   const impactingAlerts = alerts.filter((alert) => {
     if (!isAlertActive(alert)) return false;
@@ -57,10 +63,15 @@ export function evaluateSegmentDisruptions(
   const isClosed = impactingAlerts.some((a) => a.is_closed);
 
   // Maximum delay deduplication (avoiding multiplicative compounding)
-  const maxDelay = Math.max(...impactingAlerts.map((a) => a.delay_minutes || 0), 0);
+  const maxDelay = Math.max(
+    ...impactingAlerts.map((a) => a.delay_minutes || 0),
+    0,
+  );
 
   return {
-    effectiveDurationMin: isClosed ? Infinity : segment.baseline_duration_min + maxDelay,
+    effectiveDurationMin: isClosed
+      ? Infinity
+      : segment.baseline_duration_min + maxDelay,
     isClosed,
     activeAlerts: impactingAlerts,
   };
@@ -69,7 +80,9 @@ export function evaluateSegmentDisruptions(
 /**
  * Prepares active alerts for a planning session, including optional scenario simulation.
  */
-export function prepareSessionAlerts(scenarioId?: string | null): DisruptionAlert[] {
+export function prepareSessionAlerts(
+  scenarioId?: string | null,
+): DisruptionAlert[] {
   const baseAlerts = getActiveAlerts();
   if (!scenarioId) return baseAlerts;
 
@@ -78,7 +91,10 @@ export function prepareSessionAlerts(scenarioId?: string | null): DisruptionAler
 
   if (scenarioAlert) {
     // Avoid duplicates
-    return [...baseAlerts.filter((a) => a.id !== scenarioAlert.id), scenarioAlert];
+    return [
+      ...baseAlerts.filter((a) => a.id !== scenarioAlert.id),
+      scenarioAlert,
+    ];
   }
 
   return baseAlerts;

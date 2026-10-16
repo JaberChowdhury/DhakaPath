@@ -1,6 +1,6 @@
-import { TransitMode } from './network';
-import { BudgetStatus } from './fares';
-import { DisruptionAlert } from './alerts';
+import { TransitMode } from "./network";
+import { BudgetStatus } from "./fares";
+import { DisruptionAlert } from "./alerts";
 
 export interface PlanRequest {
   originHubId: string;
@@ -35,7 +35,7 @@ export interface RouteLeg {
 
 export interface PlannedRoute {
   id: string;
-  rankingProfile: 'cheapest' | 'fastest' | 'balanced';
+  rankingProfile: "cheapest" | "fastest" | "balanced";
   totalDurationMin: number;
   transfers: number;
   fareRegularBdt: number;
@@ -49,7 +49,7 @@ export interface PlannedRoute {
 
 export interface PlanResponse {
   success: boolean;
-  status?: 'OK' | 'NO_VALID_ROUTE' | 'OUTSIDE_COVERAGE' | 'INVALID_REQUEST';
+  status?: "OK" | "NO_VALID_ROUTE" | "OUTSIDE_COVERAGE" | "INVALID_REQUEST";
   message?: string;
   networkRevision: string;
   calculatedAt: string;

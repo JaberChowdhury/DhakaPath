@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Paper,
   Stack,
@@ -20,8 +20,8 @@ import {
   ActionIcon,
   Tooltip,
   Box,
-} from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+} from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import {
   IconAlertTriangle,
   IconPlus,
@@ -32,9 +32,9 @@ import {
   IconTrain,
   IconBus,
   IconCar,
-} from '@tabler/icons-react';
-import { DisruptionAlert } from '@/types/alerts';
-import { Hub } from '@/types/network';
+} from "@tabler/icons-react";
+import { DisruptionAlert } from "@/types/alerts";
+import { Hub } from "@/types/network";
 
 interface AlertFeedProps {
   alerts: DisruptionAlert[];
@@ -47,39 +47,42 @@ export function AlertFeed({ alerts, hubs, onRefreshAlerts }: AlertFeedProps) {
   const [submitting, setSubmitting] = useState(false);
 
   // Form State
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [selectedHubId, setSelectedHubId] = useState<string | null>(null);
-  const [affectedModes, setAffectedModes] = useState<string[]>(['bus']);
+  const [affectedModes, setAffectedModes] = useState<string[]>(["bus"]);
   const [delayMinutes, setDelayMinutes] = useState<number>(20);
   const [isClosed, setIsClosed] = useState(false);
-  const [severity, setSeverity] = useState<string>('medium');
+  const [severity, setSeverity] = useState<string>("medium");
 
   const hubOptions = hubs.map((h) => ({
     value: h.id,
     label: `${h.name_en} (${h.name_bn})`,
   }));
 
-  const handleVote = async (alertId: string, voteType: 'confirm' | 'dispute' | 'resolved') => {
+  const handleVote = async (
+    alertId: string,
+    voteType: "confirm" | "dispute" | "resolved",
+  ) => {
     try {
       const res = await fetch(`/api/reports/${alertId}/feedback`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ voteType }),
       });
       if (res.ok) {
         notifications.show({
-          title: 'Feedback Recorded',
+          title: "Feedback Recorded",
           message: `Your ${voteType} observation was registered.`,
-          color: 'teal',
+          color: "teal",
         });
         onRefreshAlerts();
       }
     } catch {
       notifications.show({
-        title: 'Error',
-        message: 'Could not record feedback.',
-        color: 'red',
+        title: "Error",
+        message: "Could not record feedback.",
+        color: "red",
       });
     }
   };
@@ -87,18 +90,19 @@ export function AlertFeed({ alerts, hubs, onRefreshAlerts }: AlertFeedProps) {
   const handleReportSubmit = async () => {
     if (!title || affectedModes.length === 0) {
       notifications.show({
-        title: 'Validation Error',
-        message: 'Please provide an incident title and at least one affected mode.',
-        color: 'red',
+        title: "Validation Error",
+        message:
+          "Please provide an incident title and at least one affected mode.",
+        color: "red",
       });
       return;
     }
 
     setSubmitting(true);
     try {
-      const res = await fetch('/api/reports', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/reports", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title,
           description,
@@ -112,20 +116,21 @@ export function AlertFeed({ alerts, hubs, onRefreshAlerts }: AlertFeedProps) {
 
       if (res.ok) {
         notifications.show({
-          title: 'Report Submitted',
-          message: 'Your incident was queued for moderation and community validation.',
-          color: 'teal',
+          title: "Report Submitted",
+          message:
+            "Your incident was queued for moderation and community validation.",
+          color: "teal",
         });
         setReportModalOpen(false);
-        setTitle('');
-        setDescription('');
+        setTitle("");
+        setDescription("");
         onRefreshAlerts();
       }
     } catch {
       notifications.show({
-        title: 'Submission Failed',
-        message: 'Unable to submit incident report.',
-        color: 'red',
+        title: "Submission Failed",
+        message: "Unable to submit incident report.",
+        color: "red",
       });
     } finally {
       setSubmitting(false);
@@ -134,14 +139,14 @@ export function AlertFeed({ alerts, hubs, onRefreshAlerts }: AlertFeedProps) {
 
   const getSeverityBadgeColor = (sev: string) => {
     switch (sev) {
-      case 'critical':
-        return 'red';
-      case 'high':
-        return 'orange';
-      case 'medium':
-        return 'yellow';
+      case "critical":
+        return "red";
+      case "high":
+        return "orange";
+      case "medium":
+        return "yellow";
       default:
-        return 'blue';
+        return "blue";
     }
   };
 
@@ -152,17 +157,17 @@ export function AlertFeed({ alerts, hubs, onRefreshAlerts }: AlertFeedProps) {
         p="md"
         radius="md"
         style={{
-          background: 'var(--bg-card)',
-          backdropFilter: 'blur(12px)',
-          border: '1px solid var(--border-subtle)',
-          boxShadow: 'var(--shadow-card)',
+          background: "var(--bg-card)",
+          backdropFilter: "blur(12px)",
+          border: "1px solid var(--border-subtle)",
+          boxShadow: "var(--shadow-card)",
         }}
       >
         <Group justify="space-between" align="center">
           <Box>
             <Group gap="xs">
               <IconAlertTriangle size={24} color="#f59e0b" />
-              <Title order={3} style={{ color: 'var(--text-main)' }}>
+              <Title order={3} style={{ color: "var(--text-main)" }}>
                 Live Street Alerts
               </Title>
               <Badge color="orange" variant="light">
@@ -170,14 +175,15 @@ export function AlertFeed({ alerts, hubs, onRefreshAlerts }: AlertFeedProps) {
               </Badge>
             </Group>
             <Text size="xs" c="dimmed" mt={4}>
-              Real-time crowd and verified alerts impacting Dhaka transit corridors.
+              Real-time crowd and verified alerts impacting Dhaka transit
+              corridors.
             </Text>
           </Box>
 
           <Button
             size="sm"
             variant="gradient"
-            gradient={{ from: 'orange', to: 'red' }}
+            gradient={{ from: "orange", to: "red" }}
             leftSection={<IconPlus size={16} />}
             onClick={() => setReportModalOpen(true)}
           >
@@ -188,8 +194,19 @@ export function AlertFeed({ alerts, hubs, onRefreshAlerts }: AlertFeedProps) {
 
       {/* Alert Feed Cards */}
       {alerts.length === 0 ? (
-        <Paper p="xl" radius="md" style={{ textAlign: 'center', background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
-          <Text c="dimmed">No active street disruptions currently reported on the pilot corridor.</Text>
+        <Paper
+          p="xl"
+          radius="md"
+          style={{
+            textAlign: "center",
+            background: "var(--bg-card)",
+            border: "1px solid var(--border-subtle)",
+          }}
+        >
+          <Text c="dimmed">
+            No active street disruptions currently reported on the pilot
+            corridor.
+          </Text>
         </Paper>
       ) : (
         alerts.map((alert) => (
@@ -198,15 +215,22 @@ export function AlertFeed({ alerts, hubs, onRefreshAlerts }: AlertFeedProps) {
             p="md"
             radius="md"
             style={{
-              background: 'var(--bg-card)',
-              border: alert.severity === 'critical' ? '1px solid #ef4444' : '1px solid var(--border-subtle)',
-              boxShadow: 'var(--shadow-card)',
+              background: "var(--bg-card)",
+              border:
+                alert.severity === "critical"
+                  ? "1px solid #ef4444"
+                  : "1px solid var(--border-subtle)",
+              boxShadow: "var(--shadow-card)",
             }}
           >
             <Stack gap="xs">
               <Group justify="space-between">
                 <Group gap="xs">
-                  <Badge color={getSeverityBadgeColor(alert.severity)} variant="filled" size="sm">
+                  <Badge
+                    color={getSeverityBadgeColor(alert.severity)}
+                    variant="filled"
+                    size="sm"
+                  >
                     {alert.severity.toUpperCase()}
                   </Badge>
                   {alert.is_closed && (
@@ -214,7 +238,7 @@ export function AlertFeed({ alerts, hubs, onRefreshAlerts }: AlertFeedProps) {
                       Road Closed
                     </Badge>
                   )}
-                  {alert.reported_by_type === 'simulation' && (
+                  {alert.reported_by_type === "simulation" && (
                     <Badge color="grape" variant="light" size="xs">
                       Simulation Fixture
                     </Badge>
@@ -224,12 +248,15 @@ export function AlertFeed({ alerts, hubs, onRefreshAlerts }: AlertFeedProps) {
                 <Group gap={4} align="center">
                   <IconClock size={14} color="#94a3b8" />
                   <Text size="xs" c="dimmed">
-                    {new Date(alert.observed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {new Date(alert.observed_at).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
                   </Text>
                 </Group>
               </Group>
 
-              <Text fw={700} size="md" style={{ color: 'var(--text-main)' }}>
+              <Text fw={700} size="md" style={{ color: "var(--text-main)" }}>
                 {alert.title}
               </Text>
 
@@ -269,7 +296,7 @@ export function AlertFeed({ alerts, hubs, onRefreshAlerts }: AlertFeedProps) {
                       variant="light"
                       color="teal"
                       leftSection={<IconThumbUp size={12} />}
-                      onClick={() => handleVote(alert.id, 'confirm')}
+                      onClick={() => handleVote(alert.id, "confirm")}
                     >
                       {alert.upvotes || 0}
                     </Button>
@@ -281,7 +308,7 @@ export function AlertFeed({ alerts, hubs, onRefreshAlerts }: AlertFeedProps) {
                       variant="subtle"
                       color="red"
                       leftSection={<IconThumbDown size={12} />}
-                      onClick={() => handleVote(alert.id, 'dispute')}
+                      onClick={() => handleVote(alert.id, "dispute")}
                     >
                       {alert.downvotes || 0}
                     </Button>
@@ -292,7 +319,7 @@ export function AlertFeed({ alerts, hubs, onRefreshAlerts }: AlertFeedProps) {
                       size="sm"
                       variant="subtle"
                       color="green"
-                      onClick={() => handleVote(alert.id, 'resolved')}
+                      onClick={() => handleVote(alert.id, "resolved")}
                     >
                       <IconCheck size={14} />
                     </ActionIcon>
@@ -311,8 +338,12 @@ export function AlertFeed({ alerts, hubs, onRefreshAlerts }: AlertFeedProps) {
         title="Submit Street Disruption Report"
         centered
         styles={{
-          content: { background: 'var(--bg-card)', color: 'var(--text-main)', border: '1px solid var(--border-subtle)' },
-          header: { background: 'var(--bg-card)', color: 'var(--text-main)' },
+          content: {
+            background: "var(--bg-card)",
+            color: "var(--text-main)",
+            border: "1px solid var(--border-subtle)",
+          },
+          header: { background: "var(--bg-card)", color: "var(--text-main)" },
         }}
       >
         <Stack gap="sm">
@@ -345,7 +376,7 @@ export function AlertFeed({ alerts, hubs, onRefreshAlerts }: AlertFeedProps) {
 
           <MultiSelect
             label="Affected Transport Modes"
-            data={['bus', 'leguna', 'rickshaw', 'metro', 'walk']}
+            data={["bus", "leguna", "rickshaw", "metro", "walk"]}
             value={affectedModes}
             onChange={setAffectedModes}
             comboboxProps={{ withinPortal: true, zIndex: 3000 }}
@@ -354,9 +385,9 @@ export function AlertFeed({ alerts, hubs, onRefreshAlerts }: AlertFeedProps) {
           <Group grow>
             <Select
               label="Severity"
-              data={['low', 'medium', 'high', 'critical']}
+              data={["low", "medium", "high", "critical"]}
               value={severity}
-              onChange={(val) => setSeverity(val || 'medium')}
+              onChange={(val) => setSeverity(val || "medium")}
               comboboxProps={{ withinPortal: true, zIndex: 3000 }}
             />
             <NumberInput

@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import { getNetworkSnapshot } from '@/lib/db/repository';
+import { NextResponse } from "next/server";
+import { getNetworkSnapshot } from "@/lib/db/repository";
 
 export async function GET() {
   try {
@@ -9,6 +9,9 @@ export async function GET() {
       ...snapshot,
     });
   } catch (err: any) {
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: err.message },
+      { status: 500 },
+    );
   }
 }

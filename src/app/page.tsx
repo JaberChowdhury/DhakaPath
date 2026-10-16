@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useRef } from 'react';
-import dynamic from 'next/dynamic';
+import React, { useState, useEffect, useRef } from "react";
+import dynamic from "next/dynamic";
 import {
   Container,
   Grid,
@@ -18,8 +18,8 @@ import {
   Loader,
   ThemeIcon,
   SimpleGrid,
-} from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+} from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import {
   IconAlertCircle,
   IconSparkles,
@@ -31,33 +31,36 @@ import {
   IconSchool,
   IconClock,
   IconArrowRight,
-} from '@tabler/icons-react';
+  IconUsers,
+} from "@tabler/icons-react";
 
-import { Navbar } from '@/components/layout/Navbar';
-import { TripPlannerForm } from '@/components/trip/TripPlannerForm';
-import { RouteCard } from '@/components/trip/RouteCard';
-import { AlertFeed } from '@/components/alerts/AlertFeed';
-import { TransitNetworkBrowser } from '@/components/network/TransitNetworkBrowser';
-import { SimulationComparisonBanner } from '@/components/trip/SimulationComparisonBanner';
-import { ChatDrawer } from '@/components/chat/ChatDrawer';
-import { Hub, Stop, TransitMode } from '@/types/network';
-import { PlannedRoute, PlanResponse } from '@/types/api';
-import { DisruptionAlert } from '@/types/alerts';
+import { Navbar } from "@/components/layout/Navbar";
+import { TripPlannerForm } from "@/components/trip/TripPlannerForm";
+import { RouteCard } from "@/components/trip/RouteCard";
+import { AlertFeed } from "@/components/alerts/AlertFeed";
+import { TransitNetworkBrowser } from "@/components/network/TransitNetworkBrowser";
+import { SimulationComparisonBanner } from "@/components/trip/SimulationComparisonBanner";
+import { ChatDrawer } from "@/components/chat/ChatDrawer";
+import { FloatingChatButton } from "@/components/chat/FloatingChatButton";
+import { RideShareModal } from "@/components/rideshare/RideShareModal";
+import { Hub, Stop, TransitMode } from "@/types/network";
+import { PlannedRoute, PlanResponse } from "@/types/api";
+import { DisruptionAlert } from "@/types/alerts";
 
 // Dynamic import for Leaflet client component
-const LeafletMapView = dynamic(() => import('@/components/map/LeafletMap'), {
+const LeafletMapView = dynamic(() => import("@/components/map/LeafletMap"), {
   ssr: false,
   loading: () => (
     <Box
       style={{
-        height: '100%',
+        height: "100%",
         minHeight: 520,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'var(--bg-card)',
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "var(--bg-card)",
         borderRadius: 12,
-        border: '1px solid var(--border-subtle)',
+        border: "1px solid var(--border-subtle)",
       }}
     >
       <Stack align="center" gap="xs">
@@ -71,7 +74,12 @@ const LeafletMapView = dynamic(() => import('@/components/map/LeafletMap'), {
 });
 
 // Haversine distance calculator in km
-function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+function calculateDistanceKm(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number,
+): number {
   const R = 6371;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLon = ((lon2 - lon1) * Math.PI) / 180;
@@ -86,9 +94,12 @@ function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: num
 }
 
 export default function HomePage() {
-  const [activeTab, setActiveTab] = useState<'planner' | 'alerts' | 'network' | 'admin'>('planner');
+  const [activeTab, setActiveTab] = useState<
+    "planner" | "alerts" | "network" | "admin"
+  >("planner");
   const [chatOpened, setChatOpened] = useState(false);
-  const [mobileView, setMobileView] = useState<'list' | 'map'>('list');
+  const [rideShareOpen, setRideShareOpen] = useState(false);
+  const [mobileView, setMobileView] = useState<"list" | "map">("list");
 
   // Network State
   const [hubs, setHubs] = useState<Hub[]>([]);
@@ -96,17 +107,17 @@ export default function HomePage() {
   const [alerts, setAlerts] = useState<DisruptionAlert[]>([]);
 
   // Trip Search State (default empty destination as requested)
-  const [originHubId, setOriginHubId] = useState<string>('');
-  const [destinationHubId, setDestinationHubId] = useState<string>('');
+  const [originHubId, setOriginHubId] = useState<string>("");
+  const [destinationHubId, setDestinationHubId] = useState<string>("");
   const [student, setStudent] = useState<boolean>(true);
   const [budgetBdt, setBudgetBdt] = useState<number | null>(null);
   const [avoidHubIds, setAvoidHubIds] = useState<string[]>([]);
   const [allowedModes, setAllowedModes] = useState<TransitMode[]>([
-    'metro',
-    'bus',
-    'leguna',
-    'rickshaw',
-    'walk',
+    "metro",
+    "bus",
+    "leguna",
+    "rickshaw",
+    "walk",
   ]);
   const [scenarioId, setScenarioId] = useState<string | null>(null);
 
@@ -117,7 +128,11 @@ export default function HomePage() {
   const [searching, setSearching] = useState<boolean>(false);
 
   // Geolocation & Live Tracking State
-  const [userLocation, setUserLocation] = useState<{ lat: number; lon: number; accuracy: number } | null>(null);
+  const [userLocation, setUserLocation] = useState<{
+    lat: number;
+    lon: number;
+    accuracy: number;
+  } | null>(null);
   const [isLiveTracking, setIsLiveTracking] = useState<boolean>(false);
   const [locationLoading, setLocationLoading] = useState<boolean>(false);
   const watchIdRef = useRef<number | null>(null);
@@ -126,8 +141,8 @@ export default function HomePage() {
   const fetchNetworkData = async () => {
     try {
       const [stopsRes, alertsRes] = await Promise.all([
-        fetch('/api/stops'),
-        fetch(`/api/alerts${scenarioId ? `?scenarioId=${scenarioId}` : ''}`),
+        fetch("/api/stops"),
+        fetch(`/api/alerts${scenarioId ? `?scenarioId=${scenarioId}` : ""}`),
       ]);
       const stopsData = await stopsRes.json();
       const alertsData = await alertsRes.json();
@@ -146,11 +161,11 @@ export default function HomePage() {
 
   // Request browser geolocation permission & identify closest station
   const handleRequestLocation = () => {
-    if (typeof window === 'undefined' || !('geolocation' in navigator)) {
+    if (typeof window === "undefined" || !("geolocation" in navigator)) {
       notifications.show({
-        title: 'Geolocation Not Available',
-        message: 'Your browser does not support geolocation.',
-        color: 'red',
+        title: "Geolocation Not Available",
+        message: "Your browser does not support geolocation.",
+        color: "red",
       });
       return;
     }
@@ -170,7 +185,12 @@ export default function HomePage() {
           let minDistance = Infinity;
 
           hubs.forEach((hub) => {
-            const dist = calculateDistanceKm(lat, lon, hub.center_lat, hub.center_lon);
+            const dist = calculateDistanceKm(
+              lat,
+              lon,
+              hub.center_lat,
+              hub.center_lon,
+            );
             if (dist < minDistance) {
               minDistance = dist;
               closestHub = hub;
@@ -184,43 +204,49 @@ export default function HomePage() {
               : `${minDistance.toFixed(1)} km`;
 
           notifications.show({
-            title: '📍 Location Detected',
+            title: "📍 Location Detected",
             message: `Closest station is ${closestHub.name_en} (~${distLabel} away). Origin updated!`,
-            color: 'teal',
+            color: "teal",
           });
         }
       },
       (err) => {
         setLocationLoading(false);
         notifications.show({
-          title: 'Location Permission',
-          message: err.message || 'Please enable location permissions in your browser.',
-          color: 'orange',
+          title: "Location Permission",
+          message:
+            err.message ||
+            "Please enable location permissions in your browser.",
+          color: "orange",
         });
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 },
     );
   };
 
   // Toggle Continuous Live GPS Tracking
   const handleToggleLiveTracking = () => {
     if (isLiveTracking) {
-      if (watchIdRef.current !== null && typeof window !== 'undefined' && 'geolocation' in navigator) {
+      if (
+        watchIdRef.current !== null &&
+        typeof window !== "undefined" &&
+        "geolocation" in navigator
+      ) {
         navigator.geolocation.clearWatch(watchIdRef.current);
         watchIdRef.current = null;
       }
       setIsLiveTracking(false);
       notifications.show({
-        title: 'Live Tracking Paused',
-        message: 'Continuous GPS tracking paused.',
-        color: 'gray',
+        title: "Live Tracking Paused",
+        message: "Continuous GPS tracking paused.",
+        color: "gray",
       });
     } else {
-      if (typeof window === 'undefined' || !('geolocation' in navigator)) {
+      if (typeof window === "undefined" || !("geolocation" in navigator)) {
         notifications.show({
-          title: 'Geolocation Not Available',
-          message: 'Your browser does not support GPS tracking.',
-          color: 'red',
+          title: "Geolocation Not Available",
+          message: "Your browser does not support GPS tracking.",
+          color: "red",
         });
         return;
       }
@@ -236,20 +262,20 @@ export default function HomePage() {
         (err) => {
           setIsLiveTracking(false);
           notifications.show({
-            title: 'GPS Tracking Error',
-            message: err.message || 'Could not watch current GPS coordinates.',
-            color: 'red',
+            title: "GPS Tracking Error",
+            message: err.message || "Could not watch current GPS coordinates.",
+            color: "red",
           });
         },
-        { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 }
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 },
       );
 
       watchIdRef.current = id;
       setIsLiveTracking(true);
       notifications.show({
-        title: '📡 Live GPS Tracking Active',
-        message: 'Your live position is updating in real time on the road map.',
-        color: 'teal',
+        title: "📡 Live GPS Tracking Active",
+        message: "Your live position is updating in real time on the road map.",
+        color: "teal",
       });
     }
   };
@@ -257,7 +283,11 @@ export default function HomePage() {
   // Clean up geolocation watch on unmount
   useEffect(() => {
     return () => {
-      if (watchIdRef.current !== null && typeof window !== 'undefined' && 'geolocation' in navigator) {
+      if (
+        watchIdRef.current !== null &&
+        typeof window !== "undefined" &&
+        "geolocation" in navigator
+      ) {
         navigator.geolocation.clearWatch(watchIdRef.current);
       }
     };
@@ -266,9 +296,19 @@ export default function HomePage() {
   const handleSearch = async () => {
     if (!originHubId || !destinationHubId) {
       notifications.show({
-        title: 'Selection Required',
-        message: 'Please choose both starting hub and destination.',
-        color: 'red',
+        title: "Selection Required",
+        message: "Please choose both starting hub and destination.",
+        color: "red",
+      });
+      return;
+    }
+
+    if (originHubId === destinationHubId) {
+      notifications.show({
+        title: "Identical Endpoints",
+        message:
+          "Origin and destination are the same location. Please choose different starting and ending hubs.",
+        color: "yellow",
       });
       return;
     }
@@ -278,9 +318,9 @@ export default function HomePage() {
       if (scenarioId) {
         // Fetch both unperturbed baseline and disrupted route to compute comparison delta
         const [baselineRes, disruptedRes] = await Promise.all([
-          fetch('/api/plan', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+          fetch("/api/plan", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               originHubId,
               destinationHubId,
@@ -291,9 +331,9 @@ export default function HomePage() {
               scenarioId: null,
             }),
           }),
-          fetch('/api/plan', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+          fetch("/api/plan", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               originHubId,
               destinationHubId,
@@ -313,9 +353,9 @@ export default function HomePage() {
         setPlanResult(disruptedData);
         setSelectedRoute(disruptedData.routes?.[0] || null);
       } else {
-        const res = await fetch('/api/plan', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        const res = await fetch("/api/plan", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             originHubId,
             destinationHubId,
@@ -334,9 +374,9 @@ export default function HomePage() {
       }
     } catch {
       notifications.show({
-        title: 'Planning Error',
-        message: 'Failed to communicate with the routing engine.',
-        color: 'red',
+        title: "Planning Error",
+        message: "Failed to communicate with the routing engine.",
+        color: "red",
       });
     } finally {
       setSearching(false);
@@ -351,31 +391,45 @@ export default function HomePage() {
   }, [scenarioId]);
 
   return (
-    <Box style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-page)' }}>
+    <Box
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        background: "var(--bg-page)",
+      }}
+    >
       <Navbar
         activeTab={activeTab}
         setActiveTab={(tab) => {
-          if (tab === 'admin') {
-            window.location.href = '/admin';
+          if (tab === "admin") {
+            window.location.href = "/admin";
           } else {
             setActiveTab(tab);
           }
         }}
         activeAlertsCount={alerts.length}
-        onOpenChat={() => setChatOpened(true)}
       />
 
-      <Container size="xl" py="md" style={{ flex: 1, width: '100%', maxWidth: 1440 }}>
-        {activeTab === 'alerts' ? (
-          <AlertFeed alerts={alerts} hubs={hubs} onRefreshAlerts={fetchNetworkData} />
-        ) : activeTab === 'network' ? (
+      <Container
+        size="xl"
+        py="md"
+        style={{ flex: 1, width: "100%", maxWidth: 1440 }}
+      >
+        {activeTab === "alerts" ? (
+          <AlertFeed
+            alerts={alerts}
+            hubs={hubs}
+            onRefreshAlerts={fetchNetworkData}
+          />
+        ) : activeTab === "network" ? (
           <TransitNetworkBrowser
             hubs={hubs}
             stops={stops}
             alerts={alerts}
             onSelectHubForPlan={(hubId) => {
               setOriginHubId(hubId);
-              setActiveTab('planner');
+              setActiveTab("planner");
             }}
           />
         ) : (
@@ -388,11 +442,15 @@ export default function HomePage() {
                 value={mobileView}
                 onChange={(val: any) => setMobileView(val)}
                 data={[
-                  { label: '📋 Trip Options', value: 'list' },
-                  { label: '🗺️ Road Map', value: 'map' },
+                  { label: "📋 Trip Options", value: "list" },
+                  { label: "🗺️ Road Map", value: "map" },
                 ]}
                 styles={{
-                  root: { background: 'var(--bg-card)', backdropFilter: 'blur(8px)', border: '1px solid var(--border-subtle)' },
+                  root: {
+                    background: "var(--bg-card)",
+                    backdropFilter: "blur(8px)",
+                    border: "1px solid var(--border-subtle)",
+                  },
                 }}
               />
             </Box>
@@ -402,9 +460,46 @@ export default function HomePage() {
               {/* Left Column: Form, Suggestions, Results */}
               <Grid.Col
                 span={{ base: 12, md: 5, lg: 5 }}
-                className={mobileView === 'map' ? 'mobile-hide-list desktop-scroll-pane' : 'desktop-scroll-pane'}
+                className={
+                  mobileView === "map"
+                    ? "mobile-hide-list desktop-scroll-pane"
+                    : "desktop-scroll-pane"
+                }
               >
                 <Stack gap="md">
+                  <Paper
+                    p="xs"
+                    radius="md"
+                    style={{
+                      background: "rgba(45, 212, 191, 0.08)",
+                      border: "1px solid rgba(45, 212, 191, 0.25)",
+                    }}
+                  >
+                    <Group justify="space-between" align="center">
+                      <Group gap={8}>
+                        <IconCar size={16} color="#2dd4bf" />
+                        <Text
+                          size="xs"
+                          fw={600}
+                          style={{ color: "var(--text-main)" }}
+                        >
+                          Shared Rickshaw & CNG Splitter
+                        </Text>
+                        <Badge size="xs" color="teal" variant="light">
+                          Bonus
+                        </Badge>
+                      </Group>
+                      <Button
+                        size="compact-xs"
+                        variant="gradient"
+                        gradient={{ from: "teal", to: "cyan" }}
+                        onClick={() => setRideShareOpen(true)}
+                      >
+                        Open Board
+                      </Button>
+                    </Group>
+                  </Paper>
+
                   <TripPlannerForm
                     hubs={hubs}
                     originHubId={originHubId}
@@ -439,44 +534,49 @@ export default function HomePage() {
                   )}
 
                   {/* No Route Outcome Warning */}
-                  {planResult && !planResult.success && planResult.status === 'NO_VALID_ROUTE' && (
-                    <Alert
-                      color="red"
-                      variant="filled"
-                      title="No Valid Route Found (Honest Routing Guarantee)"
-                      icon={<IconAlertCircle size={20} />}
-                    >
-                      <Text size="sm">{planResult.message}</Text>
-                      <Text size="xs" mt="xs" opacity={0.9}>
-                        DhakaPath guarantees honest route reporting without inventing impassable detours or phantom connections.
-                      </Text>
-                    </Alert>
-                  )}
+                  {planResult &&
+                    !planResult.success &&
+                    planResult.status === "NO_VALID_ROUTE" && (
+                      <Alert
+                        color="red"
+                        variant="filled"
+                        title="No Valid Route Found (Honest Routing Guarantee)"
+                        icon={<IconAlertCircle size={20} />}
+                      >
+                        <Text size="sm">{planResult.message}</Text>
+                        <Text size="xs" mt="xs" opacity={0.9}>
+                          DhakaPath guarantees honest route reporting without
+                          inventing impassable detours or phantom connections.
+                        </Text>
+                      </Alert>
+                    )}
 
                   {/* Candidate Route Results */}
-                  {planResult && planResult.routes && planResult.routes.length > 0 && (
-                    <Stack gap="xs">
-                      <Group justify="space-between">
-                        <Text fw={600} size="sm" c="dimmed">
-                          {planResult.routes.length} Multimodal Options Found:
-                        </Text>
-                        <Badge size="xs" color="teal">
-                          {planResult.networkRevision}
-                        </Badge>
-                      </Group>
+                  {planResult &&
+                    planResult.routes &&
+                    planResult.routes.length > 0 && (
+                      <Stack gap="xs">
+                        <Group justify="space-between">
+                          <Text fw={600} size="sm" c="dimmed">
+                            {planResult.routes.length} Multimodal Options Found:
+                          </Text>
+                          <Badge size="xs" color="teal">
+                            {planResult.networkRevision}
+                          </Badge>
+                        </Group>
 
-                      {planResult.routes.map((route) => (
-                        <RouteCard
-                          key={route.id}
-                          route={route}
-                          isStudent={student}
-                          budgetBdt={budgetBdt}
-                          isSelected={selectedRoute?.id === route.id}
-                          onSelect={() => setSelectedRoute(route)}
-                        />
-                      ))}
-                    </Stack>
-                  )}
+                        {planResult.routes.map((route) => (
+                          <RouteCard
+                            key={route.id}
+                            route={route}
+                            isStudent={student}
+                            budgetBdt={budgetBdt}
+                            isSelected={selectedRoute?.id === route.id}
+                            onSelect={() => setSelectedRoute(route)}
+                          />
+                        ))}
+                      </Stack>
+                    )}
 
                   {/* Welcome Exploration Card (When no search has been performed yet) */}
                   {!planResult && !searching && (
@@ -484,62 +584,121 @@ export default function HomePage() {
                       p="lg"
                       radius="md"
                       style={{
-                        background: 'var(--bg-card)',
-                        border: '1px solid var(--border-subtle)',
-                        boxShadow: 'var(--shadow-card)',
+                        background: "var(--bg-card)",
+                        border: "1px solid var(--border-subtle)",
+                        boxShadow: "var(--shadow-card)",
                       }}
                     >
                       <Stack gap="sm">
                         <Group gap="xs">
-                          <ThemeIcon size="md" color="teal" variant="light" radius="md">
+                          <ThemeIcon
+                            size="md"
+                            color="teal"
+                            variant="light"
+                            radius="md"
+                          >
                             <IconSparkles size={18} />
                           </ThemeIcon>
-                          <Title order={5} style={{ color: 'var(--text-main)' }}>
+                          <Title
+                            order={5}
+                            style={{ color: "var(--text-main)" }}
+                          >
                             Dhaka Multimodal Transit Engine
                           </Title>
                         </Group>
 
                         <Text size="xs" c="dimmed" lh={1.6}>
-                          Plan realistic trips across MRT Line 6, licensed city buses, and local legunas with real-world road alignments, student concession calculations, and live disruption intelligence.
+                          Plan realistic trips across MRT Line 6, licensed city
+                          buses, and local legunas with real-world road
+                          alignments, student concession calculations, and live
+                          disruption intelligence.
                         </Text>
 
-                        <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="xs" mt="xs">
-                          <Paper p="xs" radius="sm" style={{ background: 'var(--bg-card-inner)', border: '1px solid var(--border-subtle)' }}>
+                        <SimpleGrid
+                          cols={{ base: 1, sm: 2 }}
+                          spacing="xs"
+                          mt="xs"
+                        >
+                          <Paper
+                            p="xs"
+                            radius="sm"
+                            style={{
+                              background: "var(--bg-card-inner)",
+                              border: "1px solid var(--border-subtle)",
+                            }}
+                          >
                             <Group gap={8}>
                               <IconTrain size={16} color="#0d9488" />
                               <Box>
-                                <Text size="xs" fw={600}>Metro Rail (MRT-6)</Text>
-                                <Text size="11px" c="dimmed">Uttara to Motijheel spine</Text>
+                                <Text size="xs" fw={600}>
+                                  Metro Rail (MRT-6)
+                                </Text>
+                                <Text size="11px" c="dimmed">
+                                  Uttara to Motijheel spine
+                                </Text>
                               </Box>
                             </Group>
                           </Paper>
 
-                          <Paper p="xs" radius="sm" style={{ background: 'var(--bg-card-inner)', border: '1px solid var(--border-subtle)' }}>
+                          <Paper
+                            p="xs"
+                            radius="sm"
+                            style={{
+                              background: "var(--bg-card-inner)",
+                              border: "1px solid var(--border-subtle)",
+                            }}
+                          >
                             <Group gap={8}>
                               <IconBus size={16} color="#0284c7" />
                               <Box>
-                                <Text size="xs" fw={600}>Bikolpo & Prochesta</Text>
-                                <Text size="11px" c="dimmed">Major road corridors</Text>
+                                <Text size="xs" fw={600}>
+                                  Bikolpo & Prochesta
+                                </Text>
+                                <Text size="11px" c="dimmed">
+                                  Major road corridors
+                                </Text>
                               </Box>
                             </Group>
                           </Paper>
 
-                          <Paper p="xs" radius="sm" style={{ background: 'var(--bg-card-inner)', border: '1px solid var(--border-subtle)' }}>
+                          <Paper
+                            p="xs"
+                            radius="sm"
+                            style={{
+                              background: "var(--bg-card-inner)",
+                              border: "1px solid var(--border-subtle)",
+                            }}
+                          >
                             <Group gap={8}>
                               <IconCar size={16} color="#d97706" />
                               <Box>
-                                <Text size="xs" fw={600}>Hatirjheel Leguna</Text>
-                                <Text size="11px" c="dimmed">Banasree to Gulshan feeder</Text>
+                                <Text size="xs" fw={600}>
+                                  Hatirjheel Leguna
+                                </Text>
+                                <Text size="11px" c="dimmed">
+                                  Banasree to Gulshan feeder
+                                </Text>
                               </Box>
                             </Group>
                           </Paper>
 
-                          <Paper p="xs" radius="sm" style={{ background: 'var(--bg-card-inner)', border: '1px solid var(--border-subtle)' }}>
+                          <Paper
+                            p="xs"
+                            radius="sm"
+                            style={{
+                              background: "var(--bg-card-inner)",
+                              border: "1px solid var(--border-subtle)",
+                            }}
+                          >
                             <Group gap={8}>
                               <IconCurrentLocation size={16} color="#0284c7" />
                               <Box>
-                                <Text size="xs" fw={600}>Live GPS Proximity</Text>
-                                <Text size="11px" c="dimmed">Auto-detect nearest stop</Text>
+                                <Text size="xs" fw={600}>
+                                  Live GPS Proximity
+                                </Text>
+                                <Text size="11px" c="dimmed">
+                                  Auto-detect nearest stop
+                                </Text>
                               </Box>
                             </Group>
                           </Paper>
@@ -553,7 +712,11 @@ export default function HomePage() {
               {/* Right Column: Sticky Full-Height Road Map */}
               <Grid.Col
                 span={{ base: 12, md: 7, lg: 7 }}
-                className={mobileView === 'list' ? 'mobile-hide-map desktop-sticky-map' : 'desktop-sticky-map'}
+                className={
+                  mobileView === "list"
+                    ? "mobile-hide-map desktop-sticky-map"
+                    : "desktop-sticky-map"
+                }
               >
                 <LeafletMapView
                   hubs={hubs}
@@ -564,6 +727,8 @@ export default function HomePage() {
                   isLiveTracking={isLiveTracking}
                   onToggleLiveTracking={handleToggleLiveTracking}
                   onRequestLocation={handleRequestLocation}
+                  onSelectOrigin={(id) => setOriginHubId(id)}
+                  onSelectDestination={(id) => setDestinationHubId(id)}
                 />
               </Grid.Col>
             </Grid>
@@ -575,16 +740,55 @@ export default function HomePage() {
       <ChatDrawer
         opened={chatOpened}
         onClose={() => setChatOpened(false)}
-        onSelectRouteFromChat={(route) => {
+        onAutoSyncRoute={(route, intent) => {
           setSelectedRoute(route);
+          if (intent?.originHubId) setOriginHubId(intent.originHubId);
+          if (intent?.destinationHubId)
+            setDestinationHubId(intent.destinationHubId);
+          if (intent?.student !== undefined) setStudent(intent.student);
           setPlanResult({
             success: true,
-            networkRevision: 'rev_2026_03_pilot',
+            networkRevision: "rev_2026_03_pilot",
             calculatedAt: new Date().toISOString(),
             routes: [route],
             activeAlertsCount: alerts.length,
           });
         }}
+        onSelectRouteFromChat={(route, intent) => {
+          setSelectedRoute(route);
+          if (intent?.originHubId) setOriginHubId(intent.originHubId);
+          if (intent?.destinationHubId)
+            setDestinationHubId(intent.destinationHubId);
+          if (intent?.student !== undefined) setStudent(intent.student);
+          setMobileView("map");
+          setPlanResult({
+            success: true,
+            networkRevision: "rev_2026_03_pilot",
+            calculatedAt: new Date().toISOString(),
+            routes: [route],
+            activeAlertsCount: alerts.length,
+          });
+          const originName = route.legs[0]?.fromStopName || "Origin";
+          const destName =
+            route.legs[route.legs.length - 1]?.toStopName || "Destination";
+          notifications.show({
+            title: "🗺️ Road Directions Plotted",
+            message: `Displaying route from ${originName} to ${destName} on road map.`,
+            color: "teal",
+          });
+        }}
+      />
+
+      {/* Floating AI Chat Button in Bottom Right Corner */}
+      <FloatingChatButton
+        opened={chatOpened}
+        onClick={() => setChatOpened((prev) => !prev)}
+      />
+
+      {/* Shared Commute & Fare Splitter Modal (Bonus Task 4) */}
+      <RideShareModal
+        opened={rideShareOpen}
+        onClose={() => setRideShareOpen(false)}
       />
     </Box>
   );

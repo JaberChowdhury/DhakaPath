@@ -1,4 +1,4 @@
-import { TransitMode } from './network';
+import { TransitMode } from "./network";
 
 export interface FareRule {
   id: string;
@@ -16,7 +16,11 @@ export interface FareRule {
   effective_date: string;
 }
 
-export type BudgetStatus = 'WITHIN_BUDGET' | 'MAY_EXCEED_BUDGET' | 'EXCEEDS_BUDGET' | 'UNPRICED_COMPONENT';
+export type BudgetStatus =
+  | "WITHIN_BUDGET"
+  | "MAY_EXCEED_BUDGET"
+  | "EXCEEDS_BUDGET"
+  | "UNPRICED_COMPONENT";
 
 export interface LegFareQuote {
   regularFare: number;

@@ -1,12 +1,16 @@
-import { NextResponse } from 'next/server';
-import { getActiveAlerts, getDemoDisruptions, getAllAlertsForAdmin } from '@/lib/db/repository';
+import { NextResponse } from "next/server";
+import {
+  getActiveAlerts,
+  getDemoDisruptions,
+  getAllAlertsForAdmin,
+} from "@/lib/db/repository";
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const includeDemos = searchParams.get('includeDemos') === 'true';
-    const forAdmin = searchParams.get('forAdmin') === 'true';
-    const scenarioId = searchParams.get('scenarioId');
+    const includeDemos = searchParams.get("includeDemos") === "true";
+    const forAdmin = searchParams.get("forAdmin") === "true";
+    const scenarioId = searchParams.get("scenarioId");
 
     if (forAdmin || includeDemos) {
       const all = getAllAlertsForAdmin();
@@ -25,7 +29,9 @@ export async function GET(request: Request) {
       timestamp: new Date().toISOString(),
     });
   } catch (err: any) {
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: err.message },
+      { status: 500 },
+    );
   }
 }
-

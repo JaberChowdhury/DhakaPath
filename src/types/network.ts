@@ -1,4 +1,4 @@
-export type TransitMode = 'metro' | 'bus' | 'leguna' | 'rickshaw' | 'walk';
+export type TransitMode = "metro" | "bus" | "leguna" | "rickshaw" | "walk";
 
 export interface Hub {
   id: string;
@@ -22,7 +22,7 @@ export interface Stop {
   boarding_landmark?: string;
   direction_notes?: string;
   is_active: boolean;
-  verification_status: 'unreviewed' | 'verified' | 'rejected';
+  verification_status: "unreviewed" | "verified" | "rejected";
 }
 
 export interface Service {
@@ -33,7 +33,7 @@ export interface Service {
   operator?: string;
   description?: string;
   is_active: boolean;
-  verification_status: 'unreviewed' | 'verified' | 'rejected';
+  verification_status: "unreviewed" | "verified" | "rejected";
 }
 
 export interface ServiceStop {
@@ -54,5 +54,5 @@ export interface Segment {
   baseline_duration_min: number;
   distance_meters: number;
   is_transfer: boolean;
-  verification_status?: 'unreviewed' | 'verified' | 'rejected';
+  verification_status?: "unreviewed" | "verified" | "rejected";
 }

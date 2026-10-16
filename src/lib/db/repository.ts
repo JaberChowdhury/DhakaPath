@@ -1,8 +1,8 @@
-import fs from 'fs';
-import path from 'path';
-import { Hub, Stop, Service, ServiceStop, Segment } from '@/types/network';
-import { FareRule } from '@/types/fares';
-import { DisruptionAlert } from '@/types/alerts';
+import fs from "fs";
+import path from "path";
+import { Hub, Stop, Service, ServiceStop, Segment } from "@/types/network";
+import { FareRule } from "@/types/fares";
+import { DisruptionAlert } from "@/types/alerts";
 
 // Fallback in-memory cache loaded from data/approved
 let cachedHubs: Hub[] | null = null;
@@ -13,10 +13,10 @@ let cachedSegments: Segment[] | null = null;
 let cachedFareRules: FareRule[] | null = null;
 let cachedDemoDisruptions: DisruptionAlert[] | null = null;
 
-function loadDataFile<T>(subDir: 'approved' | 'demo', filename: string): T {
-  const filePath = path.join(process.cwd(), 'data', subDir, filename);
+function loadDataFile<T>(subDir: "approved" | "demo", filename: string): T {
+  const filePath = path.join(process.cwd(), "data", subDir, filename);
   if (fs.existsSync(filePath)) {
-    const data = fs.readFileSync(filePath, 'utf-8');
+    const data = fs.readFileSync(filePath, "utf-8");
     return JSON.parse(data) as T;
   }
   return [] as unknown as T;
@@ -24,49 +24,55 @@ function loadDataFile<T>(subDir: 'approved' | 'demo', filename: string): T {
 
 export function getApprovedHubs(): Hub[] {
   if (!cachedHubs) {
-    cachedHubs = loadDataFile<Hub[]>('approved', 'hubs.json');
+    cachedHubs = loadDataFile<Hub[]>("approved", "hubs.json");
   }
   return cachedHubs;
 }
 
 export function getApprovedStops(): Stop[] {
   if (!cachedStops) {
-    cachedStops = loadDataFile<Stop[]>('approved', 'stops.json');
+    cachedStops = loadDataFile<Stop[]>("approved", "stops.json");
   }
   return cachedStops;
 }
 
 export function getApprovedServices(): Service[] {
   if (!cachedServices) {
-    cachedServices = loadDataFile<Service[]>('approved', 'services.json');
+    cachedServices = loadDataFile<Service[]>("approved", "services.json");
   }
   return cachedServices;
 }
 
 export function getApprovedServiceStops(): ServiceStop[] {
   if (!cachedServiceStops) {
-    cachedServiceStops = loadDataFile<ServiceStop[]>('approved', 'service_stops.json');
+    cachedServiceStops = loadDataFile<ServiceStop[]>(
+      "approved",
+      "service_stops.json",
+    );
   }
   return cachedServiceStops;
 }
 
 export function getApprovedSegments(): Segment[] {
   if (!cachedSegments) {
-    cachedSegments = loadDataFile<Segment[]>('approved', 'segments.json');
+    cachedSegments = loadDataFile<Segment[]>("approved", "segments.json");
   }
   return cachedSegments;
 }
 
 export function getApprovedFareRules(): FareRule[] {
   if (!cachedFareRules) {
-    cachedFareRules = loadDataFile<FareRule[]>('approved', 'fare_rules.json');
+    cachedFareRules = loadDataFile<FareRule[]>("approved", "fare_rules.json");
   }
   return cachedFareRules;
 }
 
 export function getDemoDisruptions(): DisruptionAlert[] {
   if (!cachedDemoDisruptions) {
-    cachedDemoDisruptions = loadDataFile<DisruptionAlert[]>('demo', 'disruptions.json');
+    cachedDemoDisruptions = loadDataFile<DisruptionAlert[]>(
+      "demo",
+      "disruptions.json",
+    );
   }
   return cachedDemoDisruptions;
 }
@@ -79,7 +85,7 @@ export function getNetworkSnapshot() {
     serviceStops: getApprovedServiceStops(),
     segments: getApprovedSegments(),
     fareRules: getApprovedFareRules(),
-    networkRevision: 'rev_2026_03_pilot',
+    networkRevision: "rev_2026_03_pilot",
   };
 }
 
@@ -91,12 +97,17 @@ export function getActiveAlerts(scenarioId?: string | null): DisruptionAlert[] {
   const all = [...demos, ...dynamicAlerts];
 
   if (scenarioId) {
-    return all.filter((a) => a.id === scenarioId || a.status === 'approved');
+    return all.filter((a) => a.id === scenarioId || a.status === "approved");
   }
 
   // Filter approved and unexpired
   const now = new Date().toISOString();
-  return all.filter((a) => a.status === 'approved' && a.lifecycle_stage === 'active' && a.expires_at > now);
+  return all.filter(
+    (a) =>
+      a.status === "approved" &&
+      a.lifecycle_stage === "active" &&
+      a.expires_at > now,
+  );
 }
 
 export function getAllAlertsForAdmin(): DisruptionAlert[] {
@@ -104,13 +115,18 @@ export function getAllAlertsForAdmin(): DisruptionAlert[] {
   return [...demos, ...dynamicAlerts];
 }
 
-export function addPendingReport(report: Omit<DisruptionAlert, 'id' | 'submitted_at' | 'status' | 'lifecycle_stage'>): DisruptionAlert {
+export function addPendingReport(
+  report: Omit<
+    DisruptionAlert,
+    "id" | "submitted_at" | "status" | "lifecycle_stage"
+  >,
+): DisruptionAlert {
   const newAlert: DisruptionAlert = {
     ...report,
     id: `alt_usr_${Date.now()}`,
     submitted_at: new Date().toISOString(),
-    status: 'pending',
-    lifecycle_stage: 'active',
+    status: "pending",
+    lifecycle_stage: "active",
     upvotes: 0,
     downvotes: 0,
   };
@@ -120,8 +136,8 @@ export function addPendingReport(report: Omit<DisruptionAlert, 'id' | 'submitted
 
 export function updateAlertStatus(
   alertId: string,
-  status: 'pending' | 'approved' | 'rejected',
-  lifecycleStage: 'active' | 'disputed' | 'resolved' | 'expired' = 'active'
+  status: "pending" | "approved" | "rejected",
+  lifecycleStage: "active" | "disputed" | "resolved" | "expired" = "active",
 ): DisruptionAlert | null {
   const all = getAllAlertsForAdmin();
   const alert = all.find((a) => a.id === alertId);
@@ -132,7 +148,10 @@ export function updateAlertStatus(
   return alert;
 }
 
-export function updateServiceStatus(serviceId: string, isActive: boolean): Service | null {
+export function updateServiceStatus(
+  serviceId: string,
+  isActive: boolean,
+): Service | null {
   const services = getApprovedServices();
   const service = services.find((s) => s.id === serviceId);
   if (!service) return null;
@@ -140,4 +159,3 @@ export function updateServiceStatus(serviceId: string, isActive: boolean): Servi
   service.is_active = isActive;
   return service;
 }
-

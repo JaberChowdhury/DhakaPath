@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Card,
   Group,
@@ -19,8 +19,8 @@ import {
   Tooltip,
   Paper,
   Title,
-} from '@mantine/core';
-import { notifications } from '@mantine/notifications';
+} from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import {
   IconClock,
   IconCoins,
@@ -36,8 +36,8 @@ import {
   IconPrinter,
   IconInfoCircle,
   IconPlayerStop,
-} from '@tabler/icons-react';
-import { PlannedRoute } from '@/types/api';
+} from "@tabler/icons-react";
+import { PlannedRoute } from "@/types/api";
 
 interface RouteCardProps {
   route: PlannedRoute;
@@ -75,25 +75,25 @@ export function RouteCard({
 
   const getProfileGradient = () => {
     switch (rankingProfile) {
-      case 'fastest':
-        return { from: 'cyan', to: 'blue' };
-      case 'cheapest':
-        return { from: 'teal', to: 'green' };
-      case 'balanced':
+      case "fastest":
+        return { from: "cyan", to: "blue" };
+      case "cheapest":
+        return { from: "teal", to: "green" };
+      case "balanced":
       default:
-        return { from: 'violet', to: 'indigo' };
+        return { from: "violet", to: "indigo" };
     }
   };
 
   const getModeIcon = (mode: string) => {
     switch (mode) {
-      case 'metro':
+      case "metro":
         return <IconTrain size={16} />;
-      case 'bus':
+      case "bus":
         return <IconBus size={16} />;
-      case 'leguna':
+      case "leguna":
         return <IconCar size={16} />;
-      case 'walk':
+      case "walk":
         return <IconWalk size={16} />;
       default:
         return <IconMapPin size={16} />;
@@ -102,27 +102,27 @@ export function RouteCard({
 
   const getModeColor = (mode: string) => {
     switch (mode) {
-      case 'metro':
-        return 'teal';
-      case 'bus':
-        return 'blue';
-      case 'leguna':
-        return 'orange';
-      case 'rickshaw':
-        return 'grape';
+      case "metro":
+        return "teal";
+      case "bus":
+        return "blue";
+      case "leguna":
+        return "orange";
+      case "rickshaw":
+        return "grape";
       default:
-        return 'gray';
+        return "gray";
     }
   };
 
   const handleSpeakBriefing = (e: React.MouseEvent) => {
     e.stopPropagation();
 
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
       notifications.show({
-        title: 'Speech Unavailable',
-        message: 'Speech synthesis is not supported on this browser.',
-        color: 'yellow',
+        title: "Speech Unavailable",
+        message: "Speech synthesis is not supported on this browser.",
+        color: "yellow",
       });
       return;
     }
@@ -135,10 +135,10 @@ export function RouteCard({
 
     const firstLeg = legs[0];
     const text = `DhakaPath Route Briefing. Your optimal journey takes approximately ${totalDurationMin} minutes with ${
-      transfers === 0 ? 'no transfers' : `${transfers} transfers`
+      transfers === 0 ? "no transfers" : `${transfers} transfers`
     }. Total fare is ${displayFare} Taka. Start by boarding ${firstLeg.serviceName} at ${firstLeg.fromStopName}. Landmark: ${
-      firstLeg.boardingLandmark || 'Main transit counter'
-    }. ${warnings.length > 0 ? warnings.join('. ') : 'Corridor is operating normally.'} Have a safe journey.`;
+      firstLeg.boardingLandmark || "Main transit counter"
+    }. ${warnings.length > 0 ? warnings.join(". ") : "Corridor is operating normally."} Have a safe journey.`;
 
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = 1.0;
@@ -150,9 +150,9 @@ export function RouteCard({
     window.speechSynthesis.speak(utterance);
 
     notifications.show({
-      title: 'Playing Audio Briefing',
-      message: 'Audio playback active. Tap the speaker again to stop.',
-      color: 'teal',
+      title: "Playing Audio Briefing",
+      message: "Audio playback active. Tap the speaker again to stop.",
+      color: "teal",
     });
   };
 
@@ -168,24 +168,39 @@ export function RouteCard({
         radius="md"
         onClick={onSelect}
         style={{
-          background: isSelected ? 'rgba(45, 212, 191, 0.15)' : 'var(--bg-card)',
-          backdropFilter: 'blur(12px)',
-          border: isSelected ? '1.5px solid #2dd4bf' : '1px solid var(--border-subtle)',
-          cursor: 'pointer',
-          transition: 'all 0.2s ease',
-          boxShadow: isSelected ? '0 0 20px rgba(45, 212, 191, 0.25)' : 'var(--shadow-card)',
+          background: isSelected
+            ? "rgba(45, 212, 191, 0.15)"
+            : "var(--bg-card)",
+          backdropFilter: "blur(12px)",
+          border: isSelected
+            ? "1.5px solid #2dd4bf"
+            : "1px solid var(--border-subtle)",
+          cursor: "pointer",
+          transition: "all 0.2s ease",
+          boxShadow: isSelected
+            ? "0 0 20px rgba(45, 212, 191, 0.25)"
+            : "var(--shadow-card)",
         }}
       >
         <Stack gap="xs">
           {/* Top Header: Ranking Profile, Disruption Indicator, Actions */}
           <Group justify="space-between" align="center">
             <Group gap={6}>
-              <Badge size="sm" variant="gradient" gradient={getProfileGradient()}>
+              <Badge
+                size="sm"
+                variant="gradient"
+                gradient={getProfileGradient()}
+              >
                 {rankingProfile.toUpperCase()}
               </Badge>
 
               {hasActiveDisruptions && (
-                <Badge size="sm" color="red" variant="filled" leftSection={<IconAlertTriangle size={12} />}>
+                <Badge
+                  size="sm"
+                  color="red"
+                  variant="filled"
+                  leftSection={<IconAlertTriangle size={12} />}
+                >
                   Active Disruption
                 </Badge>
               )}
@@ -193,14 +208,22 @@ export function RouteCard({
 
             {/* Quick Action Controls: Audio & Print */}
             <Group gap={4}>
-              <Tooltip label={speaking ? 'Stop Audio Briefing' : 'Listen to Audio Briefing'}>
+              <Tooltip
+                label={
+                  speaking ? "Stop Audio Briefing" : "Listen to Audio Briefing"
+                }
+              >
                 <ActionIcon
                   size="sm"
-                  variant={speaking ? 'filled' : 'subtle'}
+                  variant={speaking ? "filled" : "subtle"}
                   color="teal"
                   onClick={handleSpeakBriefing}
                 >
-                  {speaking ? <IconPlayerStop size={14} /> : <IconVolume size={14} />}
+                  {speaking ? (
+                    <IconPlayerStop size={14} />
+                  ) : (
+                    <IconVolume size={14} />
+                  )}
                 </ActionIcon>
               </Tooltip>
 
@@ -220,19 +243,19 @@ export function RouteCard({
                 <Badge
                   size="xs"
                   color={
-                    budgetCategorization === 'WITHIN_BUDGET'
-                      ? 'teal'
-                      : budgetCategorization === 'MAY_EXCEED_BUDGET'
-                      ? 'yellow'
-                      : 'red'
+                    budgetCategorization === "WITHIN_BUDGET"
+                      ? "teal"
+                      : budgetCategorization === "MAY_EXCEED_BUDGET"
+                        ? "yellow"
+                        : "red"
                   }
                   variant="light"
                 >
-                  {budgetCategorization === 'WITHIN_BUDGET'
-                    ? 'Within Budget'
-                    : budgetCategorization === 'MAY_EXCEED_BUDGET'
-                    ? 'May Exceed'
-                    : 'Over Budget'}
+                  {budgetCategorization === "WITHIN_BUDGET"
+                    ? "Within Budget"
+                    : budgetCategorization === "MAY_EXCEED_BUDGET"
+                      ? "May Exceed"
+                      : "Over Budget"}
                 </Badge>
               )}
             </Group>
@@ -243,7 +266,7 @@ export function RouteCard({
             <Group gap="md">
               <Group gap={4} align="center">
                 <IconClock size={18} color="#38bdf8" />
-                <Text fw={700} size="lg" style={{ color: 'var(--text-main)' }}>
+                <Text fw={700} size="lg" style={{ color: "var(--text-main)" }}>
                   {totalDurationMin} min
                 </Text>
               </Group>
@@ -251,18 +274,25 @@ export function RouteCard({
               <Group gap={4} align="center">
                 <IconArrowsExchange size={18} color="#94a3b8" />
                 <Text size="sm" c="dimmed">
-                  {transfers === 0 ? 'Direct Route' : `${transfers} ${transfers === 1 ? 'Transfer' : 'Transfers'}`}
+                  {transfers === 0
+                    ? "Direct Route"
+                    : `${transfers} ${transfers === 1 ? "Transfer" : "Transfers"}`}
                 </Text>
               </Group>
             </Group>
 
             <Group gap={6} align="baseline">
               <IconCoins size={18} color="#2dd4bf" />
-              <Text fw={700} size="xl" style={{ color: '#2dd4bf' }}>
+              <Text fw={700} size="xl" style={{ color: "#2dd4bf" }}>
                 {displayFare} ৳
               </Text>
               {isStudent && savings > 0 && (
-                <Badge size="xs" color="teal" variant="light" leftSection={<IconDiscountCheck size={12} />}>
+                <Badge
+                  size="xs"
+                  color="teal"
+                  variant="light"
+                  leftSection={<IconDiscountCheck size={12} />}
+                >
                   Save {savings} ৳
                 </Badge>
               )}
@@ -292,8 +322,13 @@ export function RouteCard({
 
           {/* Warnings / Advisory Banner */}
           {warnings.length > 0 && (
-            <Alert color="orange" variant="light" p="xs" icon={<IconAlertTriangle size={16} />}>
-              <Text size="xs">{warnings.join(' ')}</Text>
+            <Alert
+              color="orange"
+              variant="light"
+              p="xs"
+              icon={<IconAlertTriangle size={16} />}
+            >
+              <Text size="xs">{warnings.join(" ")}</Text>
             </Alert>
           )}
 
@@ -301,7 +336,10 @@ export function RouteCard({
 
           {/* Detailed Leg Accordion */}
           <Accordion variant="separated" radius="sm">
-            <Accordion.Item value="steps" style={{ background: 'transparent', border: 'none' }}>
+            <Accordion.Item
+              value="steps"
+              style={{ background: "transparent", border: "none" }}
+            >
               <Accordion.Control p={0}>
                 <Text size="xs" c="cyan" fw={500}>
                   View Landmark-by-Landmark Steps ({legs.length} legs)
@@ -314,18 +352,26 @@ export function RouteCard({
                       key={idx}
                       p="xs"
                       style={{
-                        background: 'var(--bg-card-inner)',
+                        background: "var(--bg-card-inner)",
                         borderRadius: 8,
                         borderLeft: `3px solid var(--mantine-color-${getModeColor(leg.mode)}-6)`,
                       }}
                     >
                       <Group justify="space-between" align="flex-start">
                         <Group gap="xs">
-                          <ThemeIcon size="sm" variant="light" color={getModeColor(leg.mode)}>
+                          <ThemeIcon
+                            size="sm"
+                            variant="light"
+                            color={getModeColor(leg.mode)}
+                          >
                             {getModeIcon(leg.mode)}
                           </ThemeIcon>
                           <Box>
-                            <Text size="sm" fw={600} style={{ color: 'var(--text-main)' }}>
+                            <Text
+                              size="sm"
+                              fw={600}
+                              style={{ color: "var(--text-main)" }}
+                            >
                               {leg.serviceName}
                             </Text>
                             <Text size="xs" c="dimmed">
@@ -334,8 +380,12 @@ export function RouteCard({
                           </Box>
                         </Group>
 
-                        <Box style={{ textAlign: 'right' }}>
-                          <Text size="xs" fw={600} style={{ color: 'var(--text-main)' }}>
+                        <Box style={{ textAlign: "right" }}>
+                          <Text
+                            size="xs"
+                            fw={600}
+                            style={{ color: "var(--text-main)" }}
+                          >
                             ~{leg.durationMin} min
                           </Text>
                           <Text size="xs" c="dimmed">
@@ -345,7 +395,12 @@ export function RouteCard({
                       </Group>
 
                       {leg.boardingLandmark && (
-                        <Text size="xs" c="teal" mt={4} style={{ fontStyle: 'italic' }}>
+                        <Text
+                          size="xs"
+                          c="teal"
+                          mt={4}
+                          style={{ fontStyle: "italic" }}
+                        >
                           📍 Boarding: {leg.boardingLandmark}
                         </Text>
                       )}
@@ -358,7 +413,7 @@ export function RouteCard({
 
                       {leg.disruptions.length > 0 && (
                         <Text size="xs" c="red" mt={2} fw={500}>
-                          ⚠️ Disruption: {leg.disruptions.join(', ')}
+                          ⚠️ Disruption: {leg.disruptions.join(", ")}
                         </Text>
                       )}
                     </Box>
@@ -378,19 +433,31 @@ export function RouteCard({
         size="lg"
         centered
         styles={{
-          content: { background: 'var(--bg-card)', color: 'var(--text-main)', border: '1px solid var(--border-subtle)' },
-          header: { background: 'var(--bg-card)', color: 'var(--text-main)' },
+          content: {
+            background: "var(--bg-card)",
+            color: "var(--text-main)",
+            border: "1px solid var(--border-subtle)",
+          },
+          header: { background: "var(--bg-card)", color: "var(--text-main)" },
         }}
       >
         <Stack gap="md" id="printable-transit-card">
-          <Paper p="sm" radius="md" style={{ background: 'var(--bg-card-inner)', border: '1px solid var(--border-subtle)' }}>
+          <Paper
+            p="sm"
+            radius="md"
+            style={{
+              background: "var(--bg-card-inner)",
+              border: "1px solid var(--border-subtle)",
+            }}
+          >
             <Group justify="space-between" align="center">
               <Box>
-                <Title order={4} style={{ color: '#2dd4bf' }}>
+                <Title order={4} style={{ color: "#2dd4bf" }}>
                   DhakaPath Transit Journey Card
                 </Title>
                 <Text size="xs" c="dimmed">
-                  Calculation Timestamp: {new Date().toLocaleString()} (Verified for immediate commute)
+                  Calculation Timestamp: {new Date().toLocaleString()} (Verified
+                  for immediate commute)
                 </Text>
               </Box>
               <Badge color="teal" size="md">
@@ -415,15 +482,23 @@ export function RouteCard({
                 <Table.Tr key={i}>
                   <Table.Td fw={700}>#{i + 1}</Table.Td>
                   <Table.Td>
-                    <Text size="sm" fw={600} style={{ color: 'var(--text-main)' }}>
+                    <Text
+                      size="sm"
+                      fw={600}
+                      style={{ color: "var(--text-main)" }}
+                    >
                       {leg.serviceName}
                     </Text>
-                    <Badge size="xs" variant="outline" color={getModeColor(leg.mode)}>
+                    <Badge
+                      size="xs"
+                      variant="outline"
+                      color={getModeColor(leg.mode)}
+                    >
                       {leg.mode}
                     </Badge>
                   </Table.Td>
                   <Table.Td>
-                    <Text size="xs" style={{ color: 'var(--text-main)' }}>
+                    <Text size="xs" style={{ color: "var(--text-main)" }}>
                       {leg.fromStopName}
                     </Text>
                     <Text size="xs" c="dimmed">
@@ -431,10 +506,12 @@ export function RouteCard({
                     </Text>
                   </Table.Td>
                   <Table.Td>{leg.durationMin} min</Table.Td>
-                  <Table.Td fw={600}>{isStudent ? leg.fareStudent : leg.fareRegular} ৳</Table.Td>
+                  <Table.Td fw={600}>
+                    {isStudent ? leg.fareStudent : leg.fareRegular} ৳
+                  </Table.Td>
                   <Table.Td>
                     <Text size="xs" c="teal">
-                      {leg.boardingLandmark || 'Standard platform'}
+                      {leg.boardingLandmark || "Standard platform"}
                     </Text>
                     {leg.directionNotes && (
                       <Text size="xs" c="dimmed">
@@ -447,28 +524,47 @@ export function RouteCard({
             </Table.Tbody>
           </Table>
 
-          <Paper p="xs" radius="sm" style={{ background: 'var(--bg-card-inner)', border: '1px solid var(--border-subtle)' }}>
+          <Paper
+            p="xs"
+            radius="sm"
+            style={{
+              background: "var(--bg-card-inner)",
+              border: "1px solid var(--border-subtle)",
+            }}
+          >
             <Group justify="space-between">
               <Text size="xs" c="dimmed">
-                Profile: <Text span fw={600} style={{ color: 'var(--text-main)' }}>{rankingProfile.toUpperCase()}</Text> | Student Concession: <Text span fw={600} style={{ color: 'var(--text-main)' }}>{isStudent ? 'Yes (50% Bus Discount Applied)' : 'No'}</Text>
+                Profile:{" "}
+                <Text span fw={600} style={{ color: "var(--text-main)" }}>
+                  {rankingProfile.toUpperCase()}
+                </Text>{" "}
+                | Student Concession:{" "}
+                <Text span fw={600} style={{ color: "var(--text-main)" }}>
+                  {isStudent ? "Yes (50% Bus Discount Applied)" : "No"}
+                </Text>
               </Text>
-              <Text size="xs" fw={700} style={{ color: '#2dd4bf' }}>
+              <Text size="xs" fw={700} style={{ color: "#2dd4bf" }}>
                 Total: {displayFare} ৳ (~{totalDurationMin} min)
               </Text>
             </Group>
           </Paper>
 
           <Group justify="flex-end" mt="xs">
-            <Button size="xs" variant="subtle" color="gray" onClick={() => setPrintModalOpen(false)}>
+            <Button
+              size="xs"
+              variant="subtle"
+              color="gray"
+              onClick={() => setPrintModalOpen(false)}
+            >
               Close
             </Button>
             <Button
               size="xs"
               variant="gradient"
-              gradient={{ from: 'teal', to: 'cyan' }}
+              gradient={{ from: "teal", to: "cyan" }}
               leftSection={<IconPrinter size={14} />}
               onClick={() => {
-                if (typeof window !== 'undefined') {
+                if (typeof window !== "undefined") {
                   window.print();
                 }
               }}

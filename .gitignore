@@ -41,3 +41,7 @@ context/apikey.md
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Screenshots
+*.png
+

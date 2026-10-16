@@ -1,13 +1,19 @@
-import { Segment, Stop, TransitMode } from '@/types/network';
-import { PlanRequest, PlanResponse, PlannedRoute, RouteLeg } from '@/types/api';
+import { Segment, Stop, TransitMode } from "@/types/network";
+import { PlanRequest, PlanResponse, PlannedRoute, RouteLeg } from "@/types/api";
 import {
   getApprovedHubs,
   getApprovedStops,
   getApprovedServices,
   getApprovedSegments,
-} from '@/lib/db/repository';
-import { prepareSessionAlerts, evaluateSegmentDisruptions } from '@/lib/alerts/engine';
-import { quoteLegFare, evaluateRouteFareBreakdown } from '@/lib/fares/calculator';
+} from "@/lib/db/repository";
+import {
+  prepareSessionAlerts,
+  evaluateSegmentDisruptions,
+} from "@/lib/alerts/engine";
+import {
+  quoteLegFare,
+  evaluateRouteFareBreakdown,
+} from "@/lib/fares/calculator";
 
 interface SearchState {
   currentStopId: string;
@@ -24,7 +30,7 @@ export function planTrip(request: PlanRequest): PlanResponse {
     student = false,
     budgetBdt = null,
     avoidHubIds = [],
-    allowedModes = ['metro', 'bus', 'leguna', 'rickshaw', 'walk'],
+    allowedModes = ["metro", "bus", "leguna", "rickshaw", "walk"],
     maxTransfers = 3,
     scenarioId = null,
   } = request;
@@ -42,9 +48,9 @@ export function planTrip(request: PlanRequest): PlanResponse {
   if (!originHub || !destHub) {
     return {
       success: false,
-      status: 'OUTSIDE_COVERAGE',
+      status: "OUTSIDE_COVERAGE",
       message: `Selected hub(s) are outside the supported 14-hub pilot corridor.`,
-      networkRevision: 'rev_2026_03_pilot',
+      networkRevision: "rev_2026_03_pilot",
       calculatedAt: new Date().toISOString(),
       routes: [],
       activeAlertsCount: alerts.length,
@@ -54,17 +60,23 @@ export function planTrip(request: PlanRequest): PlanResponse {
   if (originHubId === destinationHubId) {
     return {
       success: false,
-      status: 'INVALID_REQUEST',
-      message: 'Origin and destination hubs are identical.',
-      networkRevision: 'rev_2026_03_pilot',
+      status: "INVALID_REQUEST",
+      message: "Origin and destination hubs are identical.",
+      networkRevision: "rev_2026_03_pilot",
       calculatedAt: new Date().toISOString(),
       routes: [],
       activeAlertsCount: alerts.length,
     };
   }
 
-  const originStops = stops.filter((s) => s.hub_id === originHubId && s.is_active);
-  const destStopIds = new Set(stops.filter((s) => s.hub_id === destinationHubId && s.is_active).map((s) => s.id));
+  const originStops = stops.filter(
+    (s) => s.hub_id === originHubId && s.is_active,
+  );
+  const destStopIds = new Set(
+    stops
+      .filter((s) => s.hub_id === destinationHubId && s.is_active)
+      .map((s) => s.id),
+  );
 
   // Build Adjacency Graph with Disruption Checks
   const stopMap = new Map<string, Stop>(stops.map((s) => [s.id, s]));
@@ -86,7 +98,10 @@ export function planTrip(request: PlanRequest): PlanResponse {
     if (!toStop) continue;
 
     // Avoided hubs filter (exclude if target stop belongs to avoided hub, unless it's destination)
-    if (avoidHubIds.includes(toStop.hub_id) && toStop.hub_id !== destinationHubId) {
+    if (
+      avoidHubIds.includes(toStop.hub_id) &&
+      toStop.hub_id !== destinationHubId
+    ) {
       continue;
     }
 
@@ -110,7 +125,11 @@ export function planTrip(request: PlanRequest): PlanResponse {
   }
 
   // Path Search (DFS with bounded depth and transfer limits)
-  const candidatePaths: { segments: Segment[]; duration: number; disruptions: string[] }[] = [];
+  const candidatePaths: {
+    segments: Segment[];
+    duration: number;
+    disruptions: string[];
+  }[] = [];
 
   for (const startStop of originStops) {
     const queue: SearchState[] = [
@@ -127,7 +146,10 @@ export function planTrip(request: PlanRequest): PlanResponse {
       const current = queue.shift()!;
 
       // Check if reached destination
-      if (destStopIds.has(current.currentStopId) && current.pathSegments.length > 0) {
+      if (
+        destStopIds.has(current.currentStopId) &&
+        current.pathSegments.length > 0
+      ) {
         candidatePaths.push({
           segments: [...current.pathSegments],
           duration: current.effectiveMinutes,
@@ -163,9 +185,9 @@ export function planTrip(request: PlanRequest): PlanResponse {
   if (candidatePaths.length === 0) {
     return {
       success: false,
-      status: 'NO_VALID_ROUTE',
+      status: "NO_VALID_ROUTE",
       message: `No valid route could be found connecting ${originHub.name_en} to ${destHub.name_en}. All connecting links are impassable or excluded by constraints.`,
-      networkRevision: 'rev_2026_03_pilot',
+      networkRevision: "rev_2026_03_pilot",
       calculatedAt: new Date().toISOString(),
       routes: [],
       activeAlertsCount: alerts.length,
@@ -194,7 +216,16 @@ export function planTrip(request: PlanRequest): PlanResponse {
         currentLegSegments.push(seg);
       } else {
         if (currentLegSegments.length > 0) {
-          legs.push(buildLeg(legs.length, currentLegSegments, stopMap, serviceMap, alerts, student));
+          legs.push(
+            buildLeg(
+              legs.length,
+              currentLegSegments,
+              stopMap,
+              serviceMap,
+              alerts,
+              student,
+            ),
+          );
         }
         currentLegSegments = [seg];
         currentServiceId = seg.service_id;
@@ -203,28 +234,43 @@ export function planTrip(request: PlanRequest): PlanResponse {
     }
 
     if (currentLegSegments.length > 0) {
-      legs.push(buildLeg(legs.length, currentLegSegments, stopMap, serviceMap, alerts, student));
+      legs.push(
+        buildLeg(
+          legs.length,
+          currentLegSegments,
+          stopMap,
+          serviceMap,
+          alerts,
+          student,
+        ),
+      );
     }
 
     // Transfers = vehicle boardings after the first
-    const vehicleLegs = legs.filter((l) => !l.isTransfer && l.mode !== 'walk');
+    const vehicleLegs = legs.filter((l) => !l.isTransfer && l.mode !== "walk");
     const transfers = Math.max(0, vehicleLegs.length - 1);
 
     if (transfers > maxTransfers) continue;
 
     // Calculate Fares
     const fareBreakdown = evaluateRouteFareBreakdown(
-      legs.map((l) => ({ mode: l.mode, serviceId: l.serviceId, distanceMeters: l.distanceMeters })),
+      legs.map((l) => ({
+        mode: l.mode,
+        serviceId: l.serviceId,
+        distanceMeters: l.distanceMeters,
+      })),
       student,
-      budgetBdt
+      budgetBdt,
     );
 
     const hasActiveDisruptions = candidate.disruptions.length > 0;
     const warnings: string[] = [];
 
-    if (fareBreakdown.budgetCategorization === 'MAY_EXCEED_BUDGET') {
-      warnings.push(`Trip may exceed budget of ${budgetBdt} BDT due to connector fare ranges.`);
-    } else if (fareBreakdown.budgetCategorization === 'EXCEEDS_BUDGET') {
+    if (fareBreakdown.budgetCategorization === "MAY_EXCEED_BUDGET") {
+      warnings.push(
+        `Trip may exceed budget of ${budgetBdt} BDT due to connector fare ranges.`,
+      );
+    } else if (fareBreakdown.budgetCategorization === "EXCEEDS_BUDGET") {
       warnings.push(`Trip exceeds your budget of ${budgetBdt} BDT.`);
     }
 
@@ -234,7 +280,7 @@ export function planTrip(request: PlanRequest): PlanResponse {
 
     constructedRoutes.push({
       id: `route_${idx}_${originHubId}_${destinationHubId}`,
-      rankingProfile: 'balanced',
+      rankingProfile: "balanced",
       totalDurationMin: candidate.duration,
       transfers,
       fareRegularBdt: fareBreakdown.totalRegularBdt,
@@ -250,9 +296,9 @@ export function planTrip(request: PlanRequest): PlanResponse {
   if (constructedRoutes.length === 0) {
     return {
       success: false,
-      status: 'NO_VALID_ROUTE',
+      status: "NO_VALID_ROUTE",
       message: `No routes met the transfer limit of ${maxTransfers} transfers.`,
-      networkRevision: 'rev_2026_03_pilot',
+      networkRevision: "rev_2026_03_pilot",
       calculatedAt: new Date().toISOString(),
       routes: [],
       activeAlertsCount: alerts.length,
@@ -264,22 +310,32 @@ export function planTrip(request: PlanRequest): PlanResponse {
   constructedRoutes.sort((a, b) => a.totalDurationMin - b.totalDurationMin);
 
   // Distinct profiles
-  const fastest = { ...constructedRoutes[0], rankingProfile: 'fastest' as const };
+  const fastest = {
+    ...constructedRoutes[0],
+    rankingProfile: "fastest" as const,
+  };
 
-  const cheapest = [...constructedRoutes]
-    .sort((a, b) => (student ? a.fareStudentBdt - b.fareStudentBdt : a.fareRegularBdt - b.fareRegularBdt))[0];
-  const cheapestProfile = { ...cheapest, rankingProfile: 'cheapest' as const };
+  const cheapest = [...constructedRoutes].sort((a, b) =>
+    student
+      ? a.fareStudentBdt - b.fareStudentBdt
+      : a.fareRegularBdt - b.fareRegularBdt,
+  )[0];
+  const cheapestProfile = { ...cheapest, rankingProfile: "cheapest" as const };
 
-  const balanced = [...constructedRoutes]
-    .sort((a, b) => (a.totalDurationMin + 12 * a.transfers) - (b.totalDurationMin + 12 * b.transfers))[0];
-  const balancedProfile = { ...balanced, rankingProfile: 'balanced' as const };
+  const balanced = [...constructedRoutes].sort(
+    (a, b) =>
+      a.totalDurationMin +
+      12 * a.transfers -
+      (b.totalDurationMin + 12 * b.transfers),
+  )[0];
+  const balancedProfile = { ...balanced, rankingProfile: "balanced" as const };
 
   // Form distinct list without duplicate IDs
   const rankedRoutes: PlannedRoute[] = [];
   const seenLegSignatures = new Set<string>();
 
   for (const r of [fastest, cheapestProfile, balancedProfile]) {
-    const sig = r.legs.map((l) => `${l.fromStopId}->${l.toStopId}`).join('|');
+    const sig = r.legs.map((l) => `${l.fromStopId}->${l.toStopId}`).join("|");
     if (!seenLegSignatures.has(sig)) {
       seenLegSignatures.add(sig);
       rankedRoutes.push(r);
@@ -288,7 +344,7 @@ export function planTrip(request: PlanRequest): PlanResponse {
 
   // Append other distinct routes if room
   for (const r of constructedRoutes) {
-    const sig = r.legs.map((l) => `${l.fromStopId}->${l.toStopId}`).join('|');
+    const sig = r.legs.map((l) => `${l.fromStopId}->${l.toStopId}`).join("|");
     if (!seenLegSignatures.has(sig) && rankedRoutes.length < 3) {
       seenLegSignatures.add(sig);
       rankedRoutes.push(r);
@@ -297,8 +353,8 @@ export function planTrip(request: PlanRequest): PlanResponse {
 
   return {
     success: true,
-    status: 'OK',
-    networkRevision: 'rev_2026_03_pilot',
+    status: "OK",
+    networkRevision: "rev_2026_03_pilot",
     calculatedAt: new Date().toISOString(),
     routes: rankedRoutes,
     activeAlertsCount: alerts.length,
@@ -311,7 +367,7 @@ function buildLeg(
   stopMap: Map<string, Stop>,
   serviceMap: Map<string, any>,
   alerts: any[],
-  isStudent: boolean
+  isStudent: boolean,
 ): RouteLeg {
   const firstSeg = segments[0];
   const lastSeg = segments[segments.length - 1];
@@ -330,10 +386,21 @@ function buildLeg(
     overlay.activeAlerts.forEach((a) => legDisruptions.push(a.title));
   }
 
-  const service = firstSeg.service_id ? serviceMap.get(firstSeg.service_id) : null;
-  const serviceName = service ? service.name : firstSeg.mode === 'walk' ? 'Walking Transfer' : 'Local Feeder';
+  const service = firstSeg.service_id
+    ? serviceMap.get(firstSeg.service_id)
+    : null;
+  const serviceName = service
+    ? service.name
+    : firstSeg.mode === "walk"
+      ? "Walking Transfer"
+      : "Local Feeder";
 
-  const fareQuote = quoteLegFare(firstSeg.mode, firstSeg.service_id, totalDistance, isStudent);
+  const fareQuote = quoteLegFare(
+    firstSeg.mode,
+    firstSeg.service_id,
+    totalDistance,
+    isStudent,
+  );
 
   return {
     legIndex,

@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Paper,
   Stack,
@@ -17,7 +17,7 @@ import {
   ThemeIcon,
   Box,
   SimpleGrid,
-} from '@mantine/core';
+} from "@mantine/core";
 import {
   IconSearch,
   IconMapPin,
@@ -30,9 +30,9 @@ import {
   IconCheck,
   IconArrowRight,
   IconInfoCircle,
-} from '@tabler/icons-react';
-import { Hub, Stop, Service, ServiceStop, TransitMode } from '@/types/network';
-import { DisruptionAlert } from '@/types/alerts';
+} from "@tabler/icons-react";
+import { Hub, Stop, Service, ServiceStop, TransitMode } from "@/types/network";
+import { DisruptionAlert } from "@/types/alerts";
 
 interface TransitNetworkBrowserProps {
   hubs: Hub[];
@@ -47,8 +47,8 @@ export function TransitNetworkBrowser({
   alerts,
   onSelectHubForPlan,
 }: TransitNetworkBrowserProps) {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<string>('hubs');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState<string>("hubs");
 
   // Filter hubs by search query (name en, name bn, or alias)
   const filteredHubs = hubs.filter((h) => {
@@ -75,83 +75,83 @@ export function TransitNetworkBrowser({
     stopsSequence: string[];
   }> = [
     {
-      id: 'srv_metro_mrt6',
-      name: 'MRT Line 6 (ঢাকা মেট্রোরেল)',
-      mode: 'metro',
-      operator: 'Dhaka Mass Transit Company Ltd (DMTCL)',
-      routeCode: 'MRT-6',
-      description: 'Grade-separated elevated rapid transit corridor along North-South spine.',
-      regularFare: '20 - 100 ৳ (distance graduated)',
-      studentFare: 'Not Applicable (10% discount on registered MRT Pass)',
-      minFloor: '20 ৳',
+      id: "srv_metro_mrt6",
+      name: "MRT Line 6 (ঢাকা মেট্রোরেল)",
+      mode: "metro",
+      operator: "Dhaka Mass Transit Company Ltd (DMTCL)",
+      routeCode: "MRT-6",
+      description:
+        "Grade-separated elevated rapid transit corridor along North-South spine.",
+      regularFare: "20 - 100 ৳ (distance graduated)",
+      studentFare: "Not Applicable (10% discount on registered MRT Pass)",
+      minFloor: "20 ৳",
       stopsSequence: [
-        'Uttara North',
-        'Mirpur 10',
-        'Kazipara',
-        'Shewrapara',
-        'Agargaon',
-        'Farmgate',
-        'Karwan Bazar',
-        'Shahbagh',
-        'Motijheel',
+        "Uttara North",
+        "Mirpur 10",
+        "Kazipara",
+        "Shewrapara",
+        "Agargaon",
+        "Farmgate",
+        "Karwan Bazar",
+        "Shahbagh",
+        "Motijheel",
       ],
     },
     {
-      id: 'srv_bus_bikolpo',
-      name: 'Bikolpo Auto Service (বিকল্প অটো সার্ভিস)',
-      mode: 'bus',
-      operator: 'Bikolpo Paribahan Syndicate',
-      routeCode: 'BIK-01',
-      description: 'Major arterial city bus connecting Mirpur, Central Dhaka, and Motijheel Commercial Area.',
-      regularFare: '25 ৳ flat',
-      studentFare: '13 ৳ (Statutory 50% discount with 10 BDT floor applied)',
-      minFloor: '10 ৳',
+      id: "srv_bus_bikolpo",
+      name: "Bikolpo Auto Service (বিকল্প অটো সার্ভিস)",
+      mode: "bus",
+      operator: "Bikolpo Paribahan Syndicate",
+      routeCode: "BIK-01",
+      description:
+        "Major arterial city bus connecting Mirpur, Central Dhaka, and Motijheel Commercial Area.",
+      regularFare: "25 ৳ flat",
+      studentFare: "13 ৳ (Statutory 50% discount with 10 BDT floor applied)",
+      minFloor: "10 ৳",
       stopsSequence: [
-        'Mirpur 10',
-        'Kazipara',
-        'Shewrapara',
-        'Agargaon',
-        'Farmgate',
-        'Karwan Bazar',
-        'Shahbagh',
-        'Motijheel',
+        "Mirpur 10",
+        "Kazipara",
+        "Shewrapara",
+        "Agargaon",
+        "Farmgate",
+        "Karwan Bazar",
+        "Shahbagh",
+        "Motijheel",
       ],
     },
     {
-      id: 'srv_bus_prochesta',
-      name: 'Prochesta Paribahan (প্রচেষ্টা পরিবহন)',
-      mode: 'bus',
-      operator: 'Prochesta Ltd.',
-      routeCode: 'PRO-02',
-      description: 'Airport Road and East Central corridor bus connecting Uttara to Motijheel via Mohakhali and Malibagh.',
-      regularFare: '30 ৳ flat',
-      studentFare: '15 ৳ (Statutory 50% discount with 10 BDT floor applied)',
-      minFloor: '10 ৳',
+      id: "srv_bus_prochesta",
+      name: "Prochesta Paribahan (প্রচেষ্টা পরিবহন)",
+      mode: "bus",
+      operator: "Prochesta Ltd.",
+      routeCode: "PRO-02",
+      description:
+        "Airport Road and East Central corridor bus connecting Uttara to Motijheel via Mohakhali and Malibagh.",
+      regularFare: "30 ৳ flat",
+      studentFare: "15 ৳ (Statutory 50% discount with 10 BDT floor applied)",
+      minFloor: "10 ৳",
       stopsSequence: [
-        'Uttara North',
-        'Airport',
-        'Banani',
-        'Mohakhali',
-        'Moghbazar',
-        'Malibagh',
-        'Motijheel',
+        "Uttara North",
+        "Airport",
+        "Banani",
+        "Mohakhali",
+        "Moghbazar",
+        "Malibagh",
+        "Motijheel",
       ],
     },
     {
-      id: 'srv_leguna_banasree',
-      name: 'Banasree-Gulshan Leguna (বনশ্রী-গুলশান লেগুনা)',
-      mode: 'leguna',
-      operator: 'Human Hauler Welfare Union',
-      routeCode: 'LEG-09',
-      description: 'High-frequency feeder connector bridging East Dhaka residential areas to Gulshan Diplomatic Zone.',
-      regularFare: '15 - 25 ৳',
-      studentFare: 'Not Applicable (Exempt commercial feeder tariff)',
-      minFloor: '15 ৳',
-      stopsSequence: [
-        'Rampura',
-        'Banasree',
-        'Gulshan 1',
-      ],
+      id: "srv_leguna_banasree",
+      name: "Banasree-Gulshan Leguna (বনশ্রী-গুলশান লেগুনা)",
+      mode: "leguna",
+      operator: "Human Hauler Welfare Union",
+      routeCode: "LEG-09",
+      description:
+        "High-frequency feeder connector bridging East Dhaka residential areas to Gulshan Diplomatic Zone.",
+      regularFare: "15 - 25 ৳",
+      studentFare: "Not Applicable (Exempt commercial feeder tariff)",
+      minFloor: "15 ৳",
+      stopsSequence: ["Rampura", "Banasree", "Gulshan 1"],
     },
   ];
 
@@ -163,7 +163,8 @@ export function TransitNetworkBrowser({
     // Check if any active alert affects this hub
     const activeDisruptions = alerts.filter((a) => {
       // Direct title match or affected segment involvement
-      const titleMatch = a.title.toLowerCase().includes(hub.name_en.toLowerCase()) ||
+      const titleMatch =
+        a.title.toLowerCase().includes(hub.name_en.toLowerCase()) ||
         (hub.name_bn && a.title.includes(hub.name_bn));
       return titleMatch;
     });
@@ -178,33 +179,33 @@ export function TransitNetworkBrowser({
 
     return {
       hasAlert: false,
-      message: 'No active disruptions reported',
-      severity: 'none',
+      message: "No active disruptions reported",
+      severity: "none",
     };
   };
 
   const getModeColor = (mode: TransitMode) => {
     switch (mode) {
-      case 'metro':
-        return 'teal';
-      case 'bus':
-        return 'blue';
-      case 'leguna':
-        return 'orange';
-      case 'rickshaw':
-        return 'grape';
+      case "metro":
+        return "teal";
+      case "bus":
+        return "blue";
+      case "leguna":
+        return "orange";
+      case "rickshaw":
+        return "grape";
       default:
-        return 'gray';
+        return "gray";
     }
   };
 
   const getModeIcon = (mode: TransitMode) => {
     switch (mode) {
-      case 'metro':
+      case "metro":
         return <IconTrain size={16} />;
-      case 'bus':
+      case "bus":
         return <IconBus size={16} />;
-      case 'leguna':
+      case "leguna":
         return <IconCar size={16} />;
       default:
         return <IconMapPin size={16} />;
@@ -218,17 +219,17 @@ export function TransitNetworkBrowser({
         p="md"
         radius="md"
         style={{
-          background: 'var(--bg-card)',
-          backdropFilter: 'blur(12px)',
-          border: '1px solid var(--border-subtle)',
-          boxShadow: 'var(--shadow-card)',
+          background: "var(--bg-card)",
+          backdropFilter: "blur(12px)",
+          border: "1px solid var(--border-subtle)",
+          boxShadow: "var(--shadow-card)",
         }}
       >
         <Group justify="space-between" align="center" wrap="wrap">
           <Box>
             <Group gap="xs">
               <IconRoute size={24} color="#2dd4bf" />
-              <Title order={3} style={{ color: 'var(--text-main)' }}>
+              <Title order={3} style={{ color: "var(--text-main)" }}>
                 Dhaka Transit Network (ঢাকা ট্রানজিট নেটওয়ার্ক)
               </Title>
               <Badge color="teal" variant="light">
@@ -236,7 +237,8 @@ export function TransitNetworkBrowser({
               </Badge>
             </Group>
             <Text size="xs" c="dimmed" mt={4}>
-              Official multimodal corridor catalog covering Rapid Transit (MRT-6), City Buses, Feeder Haulers, and Rickshaw links.
+              Official multimodal corridor catalog covering Rapid Transit
+              (MRT-6), City Buses, Feeder Haulers, and Rickshaw links.
             </Text>
           </Box>
 
@@ -248,14 +250,22 @@ export function TransitNetworkBrowser({
             size="xs"
             style={{ width: 260 }}
             styles={{
-              input: { background: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-main)' },
+              input: {
+                background: "var(--input-bg)",
+                borderColor: "var(--input-border)",
+                color: "var(--text-main)",
+              },
             }}
           />
         </Group>
       </Paper>
 
       {/* Tabs */}
-      <Tabs value={activeTab} onChange={(val) => setActiveTab(val || 'hubs')} color="teal">
+      <Tabs
+        value={activeTab}
+        onChange={(val) => setActiveTab(val || "hubs")}
+        color="teal"
+      >
         <Tabs.List>
           <Tabs.Tab value="hubs" leftSection={<IconMapPin size={16} />}>
             Multimodal Hubs ({filteredHubs.length})
@@ -282,19 +292,27 @@ export function TransitNetworkBrowser({
                   p="md"
                   radius="md"
                   style={{
-                    background: 'var(--bg-card)',
+                    background: "var(--bg-card)",
                     border: status.hasAlert
-                      ? '1px solid #f59e0b'
-                      : '1px solid var(--border-subtle)',
-                    boxShadow: 'var(--shadow-card)',
-                    transition: 'transform 0.15s ease',
+                      ? "1px solid #f59e0b"
+                      : "1px solid var(--border-subtle)",
+                    boxShadow: "var(--shadow-card)",
+                    transition: "transform 0.15s ease",
                   }}
                 >
-                  <Stack gap="xs" justify="space-between" style={{ height: '100%' }}>
+                  <Stack
+                    gap="xs"
+                    justify="space-between"
+                    style={{ height: "100%" }}
+                  >
                     <Box>
                       <Group justify="space-between" align="flex-start">
                         <Box>
-                          <Text fw={700} size="md" style={{ color: 'var(--text-main)' }}>
+                          <Text
+                            fw={700}
+                            size="md"
+                            style={{ color: "var(--text-main)" }}
+                          >
                             {hub.name_en}
                           </Text>
                           <Text size="xs" c="dimmed">
@@ -304,11 +322,19 @@ export function TransitNetworkBrowser({
 
                         <Badge
                           size="xs"
-                          color={status.hasAlert ? 'yellow' : 'teal'}
+                          color={status.hasAlert ? "yellow" : "teal"}
                           variant="light"
-                          leftSection={status.hasAlert ? <IconAlertTriangle size={10} /> : <IconCheck size={10} />}
+                          leftSection={
+                            status.hasAlert ? (
+                              <IconAlertTriangle size={10} />
+                            ) : (
+                              <IconCheck size={10} />
+                            )
+                          }
                         >
-                          {status.hasAlert ? 'Alert Reported' : 'Normal Operations'}
+                          {status.hasAlert
+                            ? "Alert Reported"
+                            : "Normal Operations"}
                         </Badge>
                       </Group>
 
@@ -330,7 +356,11 @@ export function TransitNetworkBrowser({
                       {/* Landmarks */}
                       {hubStops.length > 0 && hubStops[0].boarding_landmark && (
                         <Text size="xs" c="gray.3" mt="xs">
-                          📍 <Text span c="dimmed">Boarding:</Text> {hubStops[0].boarding_landmark}
+                          📍{" "}
+                          <Text span c="dimmed">
+                            Boarding:
+                          </Text>{" "}
+                          {hubStops[0].boarding_landmark}
                         </Text>
                       )}
 
@@ -370,20 +400,28 @@ export function TransitNetworkBrowser({
                 p="md"
                 radius="md"
                 style={{
-                  background: 'var(--bg-card)',
-                  border: '1px solid var(--border-subtle)',
-                  boxShadow: 'var(--shadow-card)',
+                  background: "var(--bg-card)",
+                  border: "1px solid var(--border-subtle)",
+                  boxShadow: "var(--shadow-card)",
                 }}
               >
                 <Stack gap="sm">
                   <Group justify="space-between" align="flex-start">
                     <Box>
                       <Group gap="xs">
-                        <ThemeIcon size="md" color={getModeColor(srv.mode)} variant="light">
+                        <ThemeIcon
+                          size="md"
+                          color={getModeColor(srv.mode)}
+                          variant="light"
+                        >
                           {getModeIcon(srv.mode)}
                         </ThemeIcon>
                         <Box>
-                          <Text fw={700} size="md" style={{ color: 'var(--text-main)' }}>
+                          <Text
+                            fw={700}
+                            size="md"
+                            style={{ color: "var(--text-main)" }}
+                          >
                             {srv.name}
                           </Text>
                           <Text size="xs" c="dimmed">
@@ -393,7 +431,11 @@ export function TransitNetworkBrowser({
                       </Group>
                     </Box>
 
-                    <Badge size="sm" color={getModeColor(srv.mode)} variant="filled">
+                    <Badge
+                      size="sm"
+                      color={getModeColor(srv.mode)}
+                      variant="filled"
+                    >
                       {srv.mode.toUpperCase()}
                     </Badge>
                   </Group>
@@ -426,31 +468,56 @@ export function TransitNetworkBrowser({
                   {/* Fare and Concession Specs */}
                   <Grid mt="xs" gap="xs">
                     <Grid.Col span={{ base: 12, sm: 4 }}>
-                      <Paper p="xs" radius="sm" style={{ background: 'var(--bg-card-inner)', border: '1px solid var(--border-subtle)' }}>
+                      <Paper
+                        p="xs"
+                        radius="sm"
+                        style={{
+                          background: "var(--bg-card-inner)",
+                          border: "1px solid var(--border-subtle)",
+                        }}
+                      >
                         <Text size="xs" c="dimmed">
                           Regular Tariff:
                         </Text>
-                        <Text size="sm" fw={600} style={{ color: '#2dd4bf' }}>
+                        <Text size="sm" fw={600} style={{ color: "#2dd4bf" }}>
                           {srv.regularFare}
                         </Text>
                       </Paper>
                     </Grid.Col>
                     <Grid.Col span={{ base: 12, sm: 4 }}>
-                      <Paper p="xs" radius="sm" style={{ background: 'var(--bg-card-inner)', border: '1px solid var(--border-subtle)' }}>
+                      <Paper
+                        p="xs"
+                        radius="sm"
+                        style={{
+                          background: "var(--bg-card-inner)",
+                          border: "1px solid var(--border-subtle)",
+                        }}
+                      >
                         <Text size="xs" c="dimmed">
                           Student Concession:
                         </Text>
-                        <Text size="sm" fw={600} style={{ color: '#38bdf8' }}>
+                        <Text size="sm" fw={600} style={{ color: "#38bdf8" }}>
                           {srv.studentFare}
                         </Text>
                       </Paper>
                     </Grid.Col>
                     <Grid.Col span={{ base: 12, sm: 4 }}>
-                      <Paper p="xs" radius="sm" style={{ background: 'var(--bg-card-inner)', border: '1px solid var(--border-subtle)' }}>
+                      <Paper
+                        p="xs"
+                        radius="sm"
+                        style={{
+                          background: "var(--bg-card-inner)",
+                          border: "1px solid var(--border-subtle)",
+                        }}
+                      >
                         <Text size="xs" c="dimmed">
                           Statutory Floor:
                         </Text>
-                        <Text size="sm" fw={600} style={{ color: 'var(--text-main)' }}>
+                        <Text
+                          size="sm"
+                          fw={600}
+                          style={{ color: "var(--text-main)" }}
+                        >
                           {srv.minFloor}
                         </Text>
                       </Paper>
@@ -464,15 +531,24 @@ export function TransitNetworkBrowser({
 
         {/* Tab 3: Fare Schedules */}
         <Tabs.Panel value="fares" pt="md">
-          <Paper p="md" radius="md" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+          <Paper
+            p="md"
+            radius="md"
+            style={{
+              background: "var(--bg-card)",
+              border: "1px solid var(--border-subtle)",
+              boxShadow: "var(--shadow-card)",
+            }}
+          >
             <Group gap="xs" mb="xs">
               <IconCoins size={20} color="#2dd4bf" />
-              <Title order={4} style={{ color: 'var(--text-main)' }}>
+              <Title order={4} style={{ color: "var(--text-main)" }}>
                 Statutory Fare Schedule & Student Discount Policies
               </Title>
             </Group>
             <Text size="xs" c="dimmed" mb="md">
-              Evaluated per continuous vehicle ride (not per graph segment). Buses apply: max(10 BDT, ceil(regular × 0.5)).
+              Evaluated per continuous vehicle ride (not per graph segment).
+              Buses apply: max(10 BDT, ceil(regular × 0.5)).
             </Text>
 
             <Table striped verticalSpacing="sm">
@@ -487,7 +563,7 @@ export function TransitNetworkBrowser({
               </Table.Thead>
               <Table.Tbody>
                 <Table.Tr>
-                  <Table.Td fw={600} style={{ color: '#2dd4bf' }}>
+                  <Table.Td fw={600} style={{ color: "#2dd4bf" }}>
                     🚇 MRT Line 6
                   </Table.Td>
                   <Table.Td>Distance graduated (Elevated rail)</Table.Td>
@@ -496,7 +572,7 @@ export function TransitNetworkBrowser({
                   <Table.Td>20 ৳</Table.Td>
                 </Table.Tr>
                 <Table.Tr>
-                  <Table.Td fw={600} style={{ color: '#38bdf8' }}>
+                  <Table.Td fw={600} style={{ color: "#38bdf8" }}>
                     🚌 Bikolpo Auto Service
                   </Table.Td>
                   <Table.Td>Per continuous ride</Table.Td>
@@ -505,7 +581,7 @@ export function TransitNetworkBrowser({
                   <Table.Td>10 ৳</Table.Td>
                 </Table.Tr>
                 <Table.Tr>
-                  <Table.Td fw={600} style={{ color: '#38bdf8' }}>
+                  <Table.Td fw={600} style={{ color: "#38bdf8" }}>
                     🚌 Prochesta Paribahan
                   </Table.Td>
                   <Table.Td>Per continuous ride</Table.Td>
@@ -514,7 +590,7 @@ export function TransitNetworkBrowser({
                   <Table.Td>10 ৳</Table.Td>
                 </Table.Tr>
                 <Table.Tr>
-                  <Table.Td fw={600} style={{ color: '#f59e0b' }}>
+                  <Table.Td fw={600} style={{ color: "#f59e0b" }}>
                     🚐 Banasree Leguna
                   </Table.Td>
                   <Table.Td>Fixed corridor tariff</Table.Td>
@@ -523,7 +599,7 @@ export function TransitNetworkBrowser({
                   <Table.Td>15 ৳</Table.Td>
                 </Table.Tr>
                 <Table.Tr>
-                  <Table.Td fw={600} style={{ color: '#a855f7' }}>
+                  <Table.Td fw={600} style={{ color: "#a855f7" }}>
                     🛺 Feeder Rickshaw
                   </Table.Td>
                   <Table.Td>Non-metered negotiated range</Table.Td>

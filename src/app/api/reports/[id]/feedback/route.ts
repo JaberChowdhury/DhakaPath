@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server';
-import { getActiveAlerts } from '@/lib/db/repository';
+import { NextResponse } from "next/server";
+import { getActiveAlerts } from "@/lib/db/repository";
 
 export async function POST(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
@@ -14,15 +14,18 @@ export async function POST(
     const alert = alerts.find((a) => a.id === id);
 
     if (!alert) {
-      return NextResponse.json({ success: false, error: 'Alert not found' }, { status: 404 });
+      return NextResponse.json(
+        { success: false, error: "Alert not found" },
+        { status: 404 },
+      );
     }
 
-    if (voteType === 'confirm') {
+    if (voteType === "confirm") {
       alert.upvotes = (alert.upvotes || 0) + 1;
-    } else if (voteType === 'dispute') {
+    } else if (voteType === "dispute") {
       alert.downvotes = (alert.downvotes || 0) + 1;
-    } else if (voteType === 'resolved') {
-      alert.lifecycle_stage = 'resolved';
+    } else if (voteType === "resolved") {
+      alert.lifecycle_stage = "resolved";
     }
 
     return NextResponse.json({
@@ -31,6 +34,9 @@ export async function POST(
       alert,
     });
   } catch (err: any) {
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: err.message },
+      { status: 500 },
+    );
   }
 }

@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React from 'react';
+import React from "react";
 import {
   Paper,
   Stack,
@@ -14,7 +14,7 @@ import {
   ThemeIcon,
   Box,
   Divider,
-} from '@mantine/core';
+} from "@mantine/core";
 import {
   IconSparkles,
   IconArrowRight,
@@ -25,8 +25,8 @@ import {
   IconCheck,
   IconX,
   IconRefresh,
-} from '@tabler/icons-react';
-import { PlannedRoute } from '@/types/api';
+} from "@tabler/icons-react";
+import { PlannedRoute } from "@/types/api";
 
 interface SimulationComparisonBannerProps {
   scenarioId: string;
@@ -45,40 +45,45 @@ export function SimulationComparisonBanner({
 }: SimulationComparisonBannerProps) {
   const getScenarioDetails = () => {
     switch (scenarioId) {
-      case 'disrupt_malibagh_waterlogging':
+      case "disrupt_malibagh_waterlogging":
         return {
-          title: '🌊 Waterlogging at Malibagh Railgate',
-          brokenSegment: 'Malibagh Railgate ➔ Mouchak (Road Corridor)',
-          affectedModes: ['bus', 'rickshaw', 'leguna'],
-          rerouteReason: 'Roadway inundated with knee-deep water. Traffic rerouted via Gulshan 1 and Mohakhali bypass.',
+          title: "🌊 Waterlogging at Malibagh Railgate",
+          brokenSegment: "Malibagh Railgate ➔ Mouchak (Road Corridor)",
+          affectedModes: ["bus", "rickshaw", "leguna"],
+          rerouteReason:
+            "Roadway inundated with knee-deep water. Traffic rerouted via Gulshan 1 and Mohakhali bypass.",
         };
-      case 'disrupt_farmgate_vip_movement':
+      case "disrupt_farmgate_vip_movement":
         return {
-          title: '🚔 VIP Motorcade Movement at Farmgate',
-          brokenSegment: 'Farmgate Intersection Corridor',
-          affectedModes: ['bus'],
-          rerouteReason: 'Surface road holds for VIP convoy create +20 min delay on arterial buses. Metro remains unaffected.',
+          title: "🚔 VIP Motorcade Movement at Farmgate",
+          brokenSegment: "Farmgate Intersection Corridor",
+          affectedModes: ["bus"],
+          rerouteReason:
+            "Surface road holds for VIP convoy create +20 min delay on arterial buses. Metro remains unaffected.",
         };
-      case 'disrupt_mrt_shewrapara_delay':
+      case "disrupt_mrt_shewrapara_delay":
         return {
-          title: '🚇 MRT Line 6 Signaling Calibration',
-          brokenSegment: 'Shewrapara Elevated Viaduct',
-          affectedModes: ['metro'],
-          rerouteReason: 'Temporary speed restrictions add +10 min transit time on rapid transit trains.',
+          title: "🚇 MRT Line 6 Signaling Calibration",
+          brokenSegment: "Shewrapara Elevated Viaduct",
+          affectedModes: ["metro"],
+          rerouteReason:
+            "Temporary speed restrictions add +10 min transit time on rapid transit trains.",
         };
-      case 'disrupt_rampura_blockade':
+      case "disrupt_rampura_blockade":
         return {
-          title: '🚫 Rampura Canal Access Blockade',
-          brokenSegment: 'Rampura Bridge Feeder Corridor',
-          affectedModes: ['rickshaw', 'walk', 'leguna'],
-          rerouteReason: 'Critical connector severed with no bypass. Demonstrates honest NO_VALID_ROUTE outcome without hallucination.',
+          title: "🚫 Rampura Canal Access Blockade",
+          brokenSegment: "Rampura Bridge Feeder Corridor",
+          affectedModes: ["rickshaw", "walk", "leguna"],
+          rerouteReason:
+            "Critical connector severed with no bypass. Demonstrates honest NO_VALID_ROUTE outcome without hallucination.",
         };
       default:
         return {
           title: `Synthetic Disruption: ${scenarioId}`,
-          brokenSegment: 'Corridor Segments',
-          affectedModes: ['bus'],
-          rerouteReason: 'Injected disruption alters transit travel times and segment accessibility.',
+          brokenSegment: "Corridor Segments",
+          affectedModes: ["bus"],
+          rerouteReason:
+            "Injected disruption alters transit travel times and segment accessibility.",
         };
     }
   };
@@ -89,8 +94,12 @@ export function SimulationComparisonBanner({
   const disruptedDuration = disruptedRoute?.totalDurationMin || 0;
   const timeDelta = disruptedDuration - baselineDuration;
 
-  const baselineFare = isStudent ? baselineRoute?.fareStudentBdt || 0 : baselineRoute?.fareRegularBdt || 0;
-  const disruptedFare = isStudent ? disruptedRoute?.fareStudentBdt || 0 : disruptedRoute?.fareRegularBdt || 0;
+  const baselineFare = isStudent
+    ? baselineRoute?.fareStudentBdt || 0
+    : baselineRoute?.fareRegularBdt || 0;
+  const disruptedFare = isStudent
+    ? disruptedRoute?.fareStudentBdt || 0
+    : disruptedRoute?.fareRegularBdt || 0;
   const fareDelta = disruptedFare - baselineFare;
 
   return (
@@ -98,9 +107,10 @@ export function SimulationComparisonBanner({
       p="md"
       radius="md"
       style={{
-        background: 'linear-gradient(135deg, rgba(30, 20, 50, 0.9) 0%, rgba(18, 25, 38, 0.95) 100%)',
-        border: '1.5px solid #a855f7',
-        boxShadow: '0 8px 32px rgba(168, 85, 247, 0.25)',
+        background:
+          "linear-gradient(135deg, rgba(30, 20, 50, 0.9) 0%, rgba(18, 25, 38, 0.95) 100%)",
+        border: "1.5px solid #a855f7",
+        boxShadow: "0 8px 32px rgba(168, 85, 247, 0.25)",
       }}
     >
       <Stack gap="sm">
@@ -112,7 +122,7 @@ export function SimulationComparisonBanner({
             </ThemeIcon>
             <Box>
               <Group gap={6} align="center">
-                <Title order={4} style={{ color: '#fff' }}>
+                <Title order={4} style={{ color: "#fff" }}>
                   {details.title}
                 </Title>
                 <Badge color="grape" variant="light" size="xs">
@@ -137,11 +147,18 @@ export function SimulationComparisonBanner({
         </Group>
 
         {/* Broken Segment Info */}
-        <Box p="xs" style={{ background: 'rgba(239, 68, 68, 0.1)', borderRadius: 8, border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+        <Box
+          p="xs"
+          style={{
+            background: "rgba(239, 68, 68, 0.1)",
+            borderRadius: 8,
+            border: "1px solid rgba(239, 68, 68, 0.3)",
+          }}
+        >
           <Group justify="space-between" align="center">
             <Group gap="xs">
               <IconAlertTriangle size={16} color="#ef4444" />
-              <Text size="xs" fw={600} style={{ color: '#fca5a5' }}>
+              <Text size="xs" fw={600} style={{ color: "#fca5a5" }}>
                 Blocked / Impassable Corridor:
               </Text>
               <Badge color="red" size="xs" variant="filled">
@@ -157,7 +174,11 @@ export function SimulationComparisonBanner({
             </Group>
           </Group>
           <Text size="xs" c="gray.3" mt={4}>
-            💡 <Text span fw={600}>Reroute Rationale:</Text> {details.rerouteReason}
+            💡{" "}
+            <Text span fw={600}>
+              Reroute Rationale:
+            </Text>{" "}
+            {details.rerouteReason}
           </Text>
         </Box>
 
@@ -170,8 +191,8 @@ export function SimulationComparisonBanner({
                 p="sm"
                 radius="sm"
                 style={{
-                  background: 'rgba(10, 15, 24, 0.6)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  background: "rgba(10, 15, 24, 0.6)",
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
                 }}
               >
                 <Stack gap={4}>
@@ -187,13 +208,13 @@ export function SimulationComparisonBanner({
                   <Group justify="space-between" align="baseline" mt={4}>
                     <Group gap={4}>
                       <IconClock size={16} color="#94a3b8" />
-                      <Text fw={700} size="md" style={{ color: '#fff' }}>
+                      <Text fw={700} size="md" style={{ color: "#fff" }}>
                         {baselineDuration} min
                       </Text>
                     </Group>
                     <Group gap={4}>
                       <IconCoins size={16} color="#94a3b8" />
-                      <Text fw={700} size="md" style={{ color: '#94a3b8' }}>
+                      <Text fw={700} size="md" style={{ color: "#94a3b8" }}>
                         {baselineFare} ৳
                       </Text>
                     </Group>
@@ -216,8 +237,8 @@ export function SimulationComparisonBanner({
                 p="sm"
                 radius="sm"
                 style={{
-                  background: 'rgba(10, 15, 24, 0.6)',
-                  border: '1px solid #2dd4bf',
+                  background: "rgba(10, 15, 24, 0.6)",
+                  border: "1px solid #2dd4bf",
                 }}
               >
                 <Stack gap={4}>
@@ -233,7 +254,7 @@ export function SimulationComparisonBanner({
                   <Group justify="space-between" align="baseline" mt={4}>
                     <Group gap={6} align="center">
                       <IconClock size={16} color="#38bdf8" />
-                      <Text fw={700} size="md" style={{ color: '#fff' }}>
+                      <Text fw={700} size="md" style={{ color: "#fff" }}>
                         {disruptedDuration} min
                       </Text>
                       {timeDelta > 0 && (
@@ -244,7 +265,7 @@ export function SimulationComparisonBanner({
                     </Group>
                     <Group gap={6} align="center">
                       <IconCoins size={16} color="#2dd4bf" />
-                      <Text fw={700} size="md" style={{ color: '#2dd4bf' }}>
+                      <Text fw={700} size="md" style={{ color: "#2dd4bf" }}>
                         {disruptedFare} ৳
                       </Text>
                       {fareDelta > 0 && (
