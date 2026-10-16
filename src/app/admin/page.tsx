@@ -30,6 +30,7 @@ import {
   Divider,
   Alert,
   SimpleGrid,
+  Accordion,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
@@ -52,15 +53,16 @@ import {
   IconPlus,
   IconEdit,
   IconAlertTriangle,
-  IconRoute,
   IconUpload,
   IconSearch,
-  IconClock,
-  IconArrowRight,
   IconLayersIntersect,
   IconCircleCheck,
+  IconMapPin,
+  IconFileText,
+  IconEye,
 } from "@tabler/icons-react";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { OcrSubmission, OcrExtractedData } from "@/types/digitizer";
 
 interface DisruptionAlertItem {
   id: string;
@@ -124,10 +126,7 @@ const DHAKA_HUBS = [
 ];
 
 const SCENARIOS = [
-  {
-    value: "none",
-    label: "None (Baseline Clear Transit Conditions)",
-  },
+  { value: "none", label: "None (Baseline Clear Transit Conditions)" },
   {
     value: "disrupt_malibagh_waterlogging",
     label: "🌊 Malibagh Waterlogging (Closed for Rickshaws/Cars, +25m delay)",
@@ -167,6 +166,7 @@ export default function AdminPortalPage() {
   const [alertsLoading, setAlertsLoading] = useState(true);
   const [alertFilter, setAlertFilter] = useState<string>("all");
   const [alertSearch, setAlertSearch] = useState<string>("");
+  const [moderatingId, setModeratingId] = useState<string | null>(null);
 
   // Create Alert Modal State
   const [
@@ -216,14 +216,36 @@ export default function AdminPortalPage() {
   const [editingStudentFloor, setEditingStudentFloor] = useState<number>(10);
   const [savingFare, setSavingFare] = useState(false);
 
-  // Signboard Digitization State
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [uploadedPreview, setUploadedPreview] = useState<string | null>(null);
-  const [selectedSample, setSelectedSample] =
-    useState<string>("sample_bikolpo");
-  const [scanning, setScanning] = useState(false);
-  const [extractedData, setExtractedData] = useState<any | null>(null);
-  const [importingToCms, setImportingToCms] = useState(false);
+  // OCR Submissions Queue & Review State
+  const [ocrSubmissions, setOcrSubmissions] = useState<OcrSubmission[]>([]);
+  const [ocrLoading, setOcrLoading] = useState(false);
+  const [ocrFilter, setOcrFilter] = useState<string>("all");
+  const [ocrViewMode, setOcrViewMode] = useState<string>("queue"); // "queue" | "scanner"
+  const [ocrReviewOpened, { open: openOcrReview, close: closeOcrReview }] =
+    useDisclosure(false);
+  const [selectedOcrSub, setSelectedOcrSub] = useState<OcrSubmission | null>(
+    null,
+  );
+  const [adminOcrName, setAdminOcrName] = useState("");
+  const [adminOcrMode, setAdminOcrMode] = useState<string>("bus");
+  const [adminOcrOperator, setAdminOcrOperator] = useState("");
+  const [adminOcrOrigin, setAdminOcrOrigin] = useState("");
+  const [adminOcrDestination, setAdminOcrDestination] = useState("");
+  const [adminOcrVia, setAdminOcrVia] = useState("");
+  const [adminOcrFareReg, setAdminOcrFareReg] = useState<number | "">("");
+  const [adminOcrFareStudent, setAdminOcrFareStudent] = useState<number | "">(
+    "",
+  );
+  const [adminOcrLandmark, setAdminOcrLandmark] = useState("");
+  const [adminReviewNotes, setAdminReviewNotes] = useState("");
+  const [processingOcr, setProcessingOcr] = useState(false);
+
+  // Admin Direct Scanner State
+  const [scannerFile, setScannerFile] = useState<File | null>(null);
+  const [scannerPreview, setScannerPreview] = useState<string | null>(null);
+  const [scannerSample, setScannerSample] = useState<string>("sample_bikolpo");
+  const [scannerRunning, setScannerRunning] = useState(false);
+  const [scannerResult, setScannerResult] = useState<any | null>(null);
 
   // Disruption Simulator (Phase 6) State
   const [simOrigin, setSimOrigin] = useState<string>("hub_banasree");
@@ -246,7 +268,6 @@ export default function AdminPortalPage() {
   // AI Key Pool State
   const [aiPoolData, setAiPoolData] = useState<any>(null);
   const [aiPoolLoading, setAiPoolLoading] = useState(false);
-  const [testingAiKey, setTestingAiKey] = useState(false);
 
   // Verify Admin Session on mount - Strict Protection
   useEffect(() => {
@@ -294,9 +315,14 @@ export default function AdminPortalPage() {
   const fetchAlerts = async () => {
     setAlertsLoading(true);
     try {
-      const res = await fetch("/api/alerts?forAdmin=true");
+      const res = await fetch(`/api/alerts?forAdmin=true&_t=${Date.now()}`, {
+        cache: "no-store",
+        headers: { "Cache-Control": "no-cache" },
+      });
       const data = await res.json();
-      setAlerts(data.alerts || []);
+      if (data.alerts) {
+        setAlerts(data.alerts);
+      }
     } catch {
       //
     } finally {
@@ -336,7 +362,23 @@ export default function AdminPortalPage() {
     }
   };
 
-  // 4. Fetch AI Pool
+  // 4. Fetch OCR Submissions
+  const fetchOcrSubmissions = async () => {
+    setOcrLoading(true);
+    try {
+      const res = await fetch("/api/ocr/submissions");
+      const data = await res.json();
+      if (data.success) {
+        setOcrSubmissions(data.submissions || []);
+      }
+    } catch {
+      //
+    } finally {
+      setOcrLoading(false);
+    }
+  };
+
+  // 5. Fetch AI Pool
   const fetchAiPool = async () => {
     setAiPoolLoading(true);
     try {
@@ -356,65 +398,109 @@ export default function AdminPortalPage() {
     fetchAlerts();
     fetchServices();
     fetchFareRules();
+    fetchOcrSubmissions();
     fetchAiPool();
   }, []);
 
-  // Handle Moderation Action
+  // Handle Moderation Action (Optimistic & Resilient)
   const handleModeration = async (
     alertId: string,
     action: "approve" | "reject" | "resolve",
   ) => {
+    const status =
+      action === "approve"
+        ? "approved"
+        : action === "reject"
+          ? "rejected"
+          : "approved";
+    const lifecycleStage = action === "resolve" ? "resolved" : "active";
+
+    // 1. Optimistic Local State Update (0ms immediate responsiveness)
+    setAlerts((prev) =>
+      prev.map((a) =>
+        a.id === alertId
+          ? { ...a, status, lifecycle_stage: lifecycleStage }
+          : a,
+      ),
+    );
+    setModeratingId(alertId);
+
     try {
-      const status =
-        action === "approve"
-          ? "approved"
-          : action === "reject"
-            ? "rejected"
-            : "approved";
-      const lifecycleStage = action === "resolve" ? "resolved" : "active";
       const res = await fetch(`/api/reports/${alertId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status, lifecycleStage }),
       });
 
-      if (res.ok) {
+      const data = await res.json();
+
+      if (res.ok && data.success) {
         notifications.show({
           title: "Moderation Recorded",
-          message: `Alert ${alertId} updated to ${status} (${lifecycleStage}).`,
-          color: "dark",
+          message: `Alert updated to ${status} (${lifecycleStage}).`,
+          color:
+            action === "approve"
+              ? "green"
+              : action === "reject"
+                ? "red"
+                : "teal",
+        });
+
+        // Reconcile server response
+        if (data.alert) {
+          setAlerts((prev) =>
+            prev.map((a) => (a.id === alertId ? data.alert : a)),
+          );
+        }
+      } else {
+        notifications.show({
+          title: "Moderation Failed",
+          message: data.error || "Failed to record moderation action.",
+          color: "red",
         });
         fetchAlerts();
       }
     } catch {
       notifications.show({
-        title: "Error",
-        message: "Failed to record moderation action.",
+        title: "Network Error",
+        message: "Failed to connect to moderation service.",
         color: "red",
       });
+      fetchAlerts();
+    } finally {
+      setModeratingId(null);
     }
   };
 
-  // Handle Delete Alert
+  // Handle Delete Alert (Optimistic & Resilient)
   const handleDeleteAlert = async (alertId: string) => {
+    // 1. Optimistic removal immediately
+    setAlerts((prev) => prev.filter((a) => a.id !== alertId));
+
     try {
-      const res = await fetch(`/api/reports/${alertId}`, {
-        method: "DELETE",
-      });
-      if (res.ok) {
+      const res = await fetch(`/api/reports/${alertId}`, { method: "DELETE" });
+      const data = await res.json();
+      if (res.ok && data.success) {
         notifications.show({
           title: "Alert Purged",
           message: `Incident ${alertId} was removed from the system.`,
           color: "dark",
         });
-        setAlerts((prev) => prev.filter((a) => a.id !== alertId));
+      } else {
+        notifications.show({
+          title: "Error Purging Alert",
+          message: data.error || "Failed to remove alert.",
+          color: "red",
+        });
+        fetchAlerts();
       }
     } catch {
       notifications.show({
-        title: "Error",
-        message: "Failed to delete alert.",
+        title: "Network Error",
+        message: "Failed to connect to purge endpoint.",
         color: "red",
       });
+      fetchAlerts();
     }
   };
 
@@ -446,7 +532,9 @@ export default function AdminPortalPage() {
       });
 
       const data = await res.json();
-      if (res.ok && data.success) {
+      if (res.ok && data.success && data.alert) {
+        // Optimistically insert alert at top
+        setAlerts((prev) => [data.alert, ...prev]);
         notifications.show({
           title: "Official Alert Published",
           message: `${newAlertTitle} has been broadcast to all commuters.`,
@@ -460,7 +548,7 @@ export default function AdminPortalPage() {
       } else {
         notifications.show({
           title: "Dispatch Failed",
-          message: data.error || "Failed to create official alert.",
+          message: data.error || "Failed to broadcast official alert.",
           color: "red",
         });
       }
@@ -611,134 +699,225 @@ export default function AdminPortalPage() {
     }
   };
 
-  // Handle Custom File Upload in Signboard Digitizer
-  const handleFileUpload = (file: File | null) => {
-    setUploadedFile(file);
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setUploadedPreview(url);
-    } else {
-      setUploadedPreview(null);
-    }
+  // Open OCR Review Inspection Modal
+  const handleOpenOcrReview = (sub: OcrSubmission) => {
+    setSelectedOcrSub(sub);
+    setAdminOcrName(sub.extractedData.serviceName || "");
+    setAdminOcrMode(sub.extractedData.mode || "bus");
+    setAdminOcrOperator(sub.extractedData.operator || "");
+    setAdminOcrOrigin(sub.extractedData.origin || "");
+    setAdminOcrDestination(sub.extractedData.destination || "");
+    setAdminOcrVia(sub.extractedData.viaStoppages?.join(", ") || "");
+    setAdminOcrFareReg(
+      sub.extractedData.fareRegular !== null
+        ? sub.extractedData.fareRegular
+        : "",
+    );
+    setAdminOcrFareStudent(
+      sub.extractedData.fareStudent !== null
+        ? sub.extractedData.fareStudent
+        : "",
+    );
+    setAdminOcrLandmark(sub.extractedData.boardingLandmark || "");
+    setAdminReviewNotes(sub.adminNotes || "");
+    openOcrReview();
   };
 
-  // Handle Scan Signboard
-  const handleScanSignboard = () => {
-    setScanning(true);
-    setTimeout(() => {
-      if (uploadedFile) {
-        // OCR parsed from custom uploaded image
-        setExtractedData({
-          title: `Digitized Notice: ${uploadedFile.name}`,
-          serviceName: "Balaka Express Bus",
-          mode: "bus",
-          operator: "Balaka Transport Syndicate",
-          origin: "Sayedabad",
-          destination: "Gazipur Chowrasta",
-          via: ["Malibagh", "Moghbazar", "Mohakhali", "Airport", "Uttara"],
-          fareRegular: 45,
-          fareStudent: 23,
-          boardingLandmark: "Counter #3, Under Flyover Approach",
-          confidence: "94% (OCR confidence from uploaded image)",
-        });
-      } else if (selectedSample === "sample_bikolpo") {
-        setExtractedData({
-          title: "Bikolpo Auto Service Route Board",
-          serviceName: "Bikolpo Auto Service",
-          mode: "bus",
-          operator: "Bikolpo Paribahan Syndicate Ltd.",
-          origin: "Mirpur 10",
-          destination: "Motijheel",
-          via: ["Agargaon", "Farmgate", "Karwan Bazar", "Shahbagh"],
-          fareRegular: 25,
-          fareStudent: 13,
-          boardingLandmark: "Police Box Counter, East Side of Mirpur 10 Circle",
-          confidence: "98% (High confidence optical match)",
-        });
-      } else if (selectedSample === "sample_mrt") {
-        setExtractedData({
-          title: "MRT Line 6 Station Notice",
-          serviceName: "MRT Line 6",
-          mode: "metro",
-          operator: "Dhaka Mass Transit Company Ltd (DMTCL)",
-          origin: "Uttara North",
-          destination: "Motijheel",
-          via: [
-            "Pallabi",
-            "Mirpur 10",
-            "Agargaon",
-            "Farmgate",
-            "Shahbagh",
-            "Secretariat",
-          ],
-          fareRegular: 100,
-          fareStudent: 100,
-          boardingLandmark: "Elevated Concourse, Gates 1 & 2",
-          confidence: "99% (Official DMTCL tariff format)",
-        });
-      } else {
-        setExtractedData({
-          title: "Rampura-Banasree Leguna Stoppage Board",
-          serviceName: "Banasree Leguna",
-          mode: "leguna",
-          operator: "Human Hauler Welfare Union",
-          origin: "Rampura Bridge",
-          destination: "Gulshan 1",
-          via: ["Banasree Block C", "Police Plaza"],
-          fareRegular: 20,
-          fareStudent: 20,
-          boardingLandmark: "Under Rampura Foot-over Bridge",
-          confidence: "91% (Handwritten signboard extracted)",
-        });
-      }
-      setScanning(false);
-      notifications.show({
-        title: "Signboard Digitized",
-        message:
-          "Optical extraction completed. Review and edit structured data below before import.",
-        color: "dark",
-      });
-    }, 850);
-  };
+  // Handle OCR Approval & Publish
+  const handleApproveOcrSubmission = async (publishToCms: boolean = true) => {
+    if (!selectedOcrSub) return;
+    setProcessingOcr(true);
 
-  // Handle Approve & Merge Extracted Notice into CMS
-  const handleApproveImport = async () => {
-    if (!extractedData) return;
-    setImportingToCms(true);
     try {
-      const res = await fetch("/api/admin/services", {
-        method: "POST",
+      const res = await fetch(`/api/ocr/submissions/${selectedOcrSub.id}`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: extractedData.serviceName,
-          mode: extractedData.mode,
-          operator: extractedData.operator,
-          route_code: `${extractedData.mode.toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`,
-          description: `Extracted via optical digitizer. Origin: ${extractedData.origin}, Destination: ${extractedData.destination}. Stoppages: ${extractedData.via?.join(", ")}.`,
-          is_active: true,
+          status: "approved",
+          adminNotes: adminReviewNotes,
+          publishToCms,
+          editedData: {
+            serviceName: adminOcrName,
+            mode: adminOcrMode,
+            operator: adminOcrOperator,
+            origin: adminOcrOrigin,
+            destination: adminOcrDestination,
+            viaStoppages: adminOcrVia
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean),
+            fareRegular:
+              adminOcrFareReg !== "" ? Number(adminOcrFareReg) : null,
+            fareStudent:
+              adminOcrFareStudent !== "" ? Number(adminOcrFareStudent) : null,
+            boardingLandmark: adminOcrLandmark,
+          },
         }),
       });
 
       const data = await res.json();
       if (res.ok && data.success) {
         notifications.show({
-          title: "Import Approved & Merged",
-          message: `${extractedData.serviceName} details verified and merged into Transit Services CMS.`,
+          title: "Signboard Approved & Published",
+          message: `${adminOcrName} verified and merged into Transit CMS.`,
           color: "green",
         });
-        setExtractedData(null);
-        setUploadedFile(null);
-        setUploadedPreview(null);
+        closeOcrReview();
+        fetchOcrSubmissions();
         fetchServices();
       }
     } catch {
       notifications.show({
         title: "Error",
-        message: "Failed to persist digitized service to CMS.",
+        message: "Failed to approve OCR submission.",
         color: "red",
       });
     } finally {
-      setImportingToCms(false);
+      setProcessingOcr(false);
+    }
+  };
+
+  // Handle OCR Rejection
+  const handleRejectOcrSubmission = async () => {
+    if (!selectedOcrSub) return;
+    setProcessingOcr(true);
+
+    try {
+      const res = await fetch(`/api/ocr/submissions/${selectedOcrSub.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: "rejected",
+          adminNotes:
+            adminReviewNotes || "Unverifiable or unclear signboard photo.",
+          publishToCms: false,
+        }),
+      });
+
+      if (res.ok) {
+        notifications.show({
+          title: "Submission Rejected",
+          message: `Submission ${selectedOcrSub.receiptCode} marked as rejected.`,
+          color: "dark",
+        });
+        closeOcrReview();
+        fetchOcrSubmissions();
+      }
+    } catch {
+      notifications.show({
+        title: "Error",
+        message: "Failed to reject OCR submission.",
+        color: "red",
+      });
+    } finally {
+      setProcessingOcr(false);
+    }
+  };
+
+  // Handle Delete OCR Submission
+  const handleDeleteOcrSubmission = async (subId: string) => {
+    try {
+      const res = await fetch(`/api/ocr/submissions/${subId}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        notifications.show({
+          title: "Submission Deleted",
+          message: "OCR notice purged from system.",
+          color: "dark",
+        });
+        setOcrSubmissions((prev) => prev.filter((s) => s.id !== subId));
+      }
+    } catch {
+      notifications.show({
+        title: "Error",
+        message: "Failed to delete submission.",
+        color: "red",
+      });
+    }
+  };
+
+  // Admin Direct Scanner Execution
+  const handleAdminScannerRun = async () => {
+    setScannerRunning(true);
+    try {
+      let imageBase64: string | null = null;
+      let mimeType = "image/jpeg";
+
+      if (scannerFile) {
+        mimeType = scannerFile.type || "image/jpeg";
+        imageBase64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(scannerFile);
+        });
+      }
+
+      const res = await fetch("/api/ocr", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          imageBase64,
+          mimeType,
+          sampleKey: scannerFile ? undefined : scannerSample,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setScannerResult(data);
+        notifications.show({
+          title: "Notice Digitized",
+          message: `Identified ${data.extractedData.serviceName || "transit entity"}.`,
+          color: "dark",
+        });
+      }
+    } catch {
+      notifications.show({
+        title: "Scan Error",
+        message: "Failed to parse notice image.",
+        color: "red",
+      });
+    } finally {
+      setScannerRunning(false);
+    }
+  };
+
+  // Handle Direct Merge from Admin Scanner
+  const handleDirectMergeScanner = async () => {
+    if (!scannerResult?.extractedData) return;
+    const d = scannerResult.extractedData;
+    try {
+      const res = await fetch("/api/admin/services", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: d.serviceName || "New Digitized Line",
+          mode: d.mode || "bus",
+          operator: d.operator || "Transit Operator",
+          route_code: `${(d.mode || "bus").toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`,
+          description: `Directly digitized notice. Origin: ${d.origin}, Destination: ${d.destination}. Stoppages: ${d.viaStoppages?.join(", ")}.`,
+        }),
+      });
+
+      if (res.ok) {
+        notifications.show({
+          title: "Merged into CMS",
+          message: `${d.serviceName} is now active in transit database.`,
+          color: "green",
+        });
+        setScannerResult(null);
+        setScannerFile(null);
+        setScannerPreview(null);
+        fetchServices();
+      }
+    } catch {
+      notifications.show({
+        title: "Error",
+        message: "Failed to merge service into CMS.",
+        color: "red",
+      });
     }
   };
 
@@ -746,7 +925,6 @@ export default function AdminPortalPage() {
   const handleRunSimulation = async () => {
     setSimLoading(true);
     try {
-      // 1. Baseline Run (No Disruption Scenario)
       const baseRes = await fetch("/api/plan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -759,7 +937,6 @@ export default function AdminPortalPage() {
       });
       const baselineData = await baseRes.json();
 
-      // 2. Disrupted Run (With Selected Scenario)
       const disRes = await fetch("/api/plan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -864,7 +1041,15 @@ export default function AdminPortalPage() {
     );
   });
 
-  // KPI Counts for moderation
+  // Filtered OCR Submissions
+  const filteredOcrSubmissions = ocrSubmissions.filter((sub) => {
+    if (ocrFilter === "pending" && sub.status !== "pending") return false;
+    if (ocrFilter === "approved" && sub.status !== "approved") return false;
+    if (ocrFilter === "rejected" && sub.status !== "rejected") return false;
+    return true;
+  });
+
+  // Counts
   const pendingCount = alerts.filter((a) => a.status === "pending").length;
   const approvedCount = alerts.filter(
     (a) => a.status === "approved" && a.lifecycle_stage === "active",
@@ -873,6 +1058,9 @@ export default function AdminPortalPage() {
     (a) => a.lifecycle_stage === "resolved",
   ).length;
   const rejectedCount = alerts.filter((a) => a.status === "rejected").length;
+  const pendingOcrCount = ocrSubmissions.filter(
+    (s) => s.status === "pending",
+  ).length;
 
   if (authLoading) {
     return (
@@ -1009,9 +1197,7 @@ export default function AdminPortalPage() {
             value={activeTab}
             onChange={setActiveTab}
             styles={{
-              list: {
-                borderColor: "var(--border-subtle)",
-              },
+              list: { borderColor: "var(--border-subtle)" },
               tab: {
                 fontWeight: 600,
                 fontSize: "13px",
@@ -1038,7 +1224,11 @@ export default function AdminPortalPage() {
                 Statutory Fare Schedule ({fareRules.length})
               </Tabs.Tab>
               <Tabs.Tab value="digitizer" leftSection={<IconScan size={16} />}>
-                Signboard Digitizer
+                OCR Reviews & Digitizer (
+                {pendingOcrCount > 0
+                  ? `${pendingOcrCount} Pending`
+                  : ocrSubmissions.length}
+                )
               </Tabs.Tab>
               <Tabs.Tab
                 value="simulation"
@@ -1146,9 +1336,7 @@ export default function AdminPortalPage() {
                           background: "var(--bg-card-inner)",
                           border: "1px solid var(--border-subtle)",
                         },
-                        label: {
-                          fontWeight: 600,
-                        },
+                        label: { fontWeight: 600 },
                       }}
                     />
 
@@ -1352,6 +1540,7 @@ export default function AdminPortalPage() {
                                     size="sm"
                                     radius="xl"
                                     variant="filled"
+                                    loading={moderatingId === alert.id}
                                     onClick={() =>
                                       handleModeration(alert.id, "approve")
                                     }
@@ -1370,6 +1559,7 @@ export default function AdminPortalPage() {
                                     size="sm"
                                     radius="xl"
                                     variant="default"
+                                    loading={moderatingId === alert.id}
                                     onClick={() =>
                                       handleModeration(alert.id, "reject")
                                     }
@@ -1388,6 +1578,7 @@ export default function AdminPortalPage() {
                                     size="sm"
                                     radius="xl"
                                     variant="default"
+                                    loading={moderatingId === alert.id}
                                     onClick={() =>
                                       handleModeration(alert.id, "resolve")
                                     }
@@ -1795,57 +1986,11 @@ export default function AdminPortalPage() {
                       ))}
                     </Table.Tbody>
                   </Table>
-
-                  {/* Policy Summary Card */}
-                  <Paper
-                    p="sm"
-                    radius="md"
-                    style={{
-                      background: "var(--bg-card-inner)",
-                      border: "1px solid var(--border-subtle)",
-                    }}
-                  >
-                    <Group gap="xs" mb={4}>
-                      <IconCoins
-                        size={16}
-                        stroke={2}
-                        style={{ color: "var(--text-main)" }}
-                      />
-                      <Text
-                        size="xs"
-                        fw={700}
-                        style={{ color: "var(--text-main)" }}
-                      >
-                        Bangladesh BRTA Statutory Ordinance & Fare Computation
-                        Rules:
-                      </Text>
-                    </Group>
-                    <Text
-                      size="11px"
-                      style={{ color: "var(--text-muted)", lineHeight: 1.6 }}
-                    >
-                      • <strong>City Bus Ordinance (BRTA 2024):</strong> Regular
-                      bus fare is calculated at statutory rate of 2.45 BDT/km.
-                      Student concession is mandatory on all registered city
-                      buses at 50% discount with a strict statutory floor of 10
-                      BDT.
-                      <br />• <strong>MRT Line 6 (DMTCL):</strong>{" "}
-                      Distance-based fare matrix starting at 20 BDT up to 100
-                      BDT. Rapid Pass / MRT Pass holders receive a statutory 10%
-                      discount on every journey.
-                      <br />• <strong>Leguna & Human Hauler:</strong>{" "}
-                      Route-based flat fare regulated by local transport
-                      syndicates.
-                      <br />• <strong>Non-Motorized Rickshaw:</strong> Dynamic
-                      unmetered fare estimated per kilometer based on field
-                      surveys with rain surge multipliers.
-                    </Text>
-                  </Paper>
                 </Stack>
               </Paper>
             </Tabs.Panel>
 
-            {/* TAB 4: Signboard Digitizer */}
+            {/* TAB 4: OCR Reviews & Signboard Digitizer (Human-in-the-Loop) */}
             <Tabs.Panel value="digitizer" pt="md">
               <Paper
                 p="md"
@@ -1856,380 +2001,412 @@ export default function AdminPortalPage() {
                   boxShadow: "0 2px 10px rgba(0, 0, 0, 0.04)",
                 }}
               >
-                <Title
-                  order={4}
-                  mb="xs"
-                  style={{ color: "var(--text-main)", fontWeight: 700 }}
-                >
-                  Signboard & Physical Notice Optical Digitizer
-                </Title>
-                <Text
-                  size="xs"
-                  style={{ color: "var(--text-muted)", marginBottom: 16 }}
-                >
-                  Optical parsing of bus route placards, handwritten stoppage
-                  notices, and station tariff charts with human-in-the-loop
-                  review.
-                </Text>
-
-                <Grid gap="md">
-                  <Grid.Col span={{ base: 12, md: 5 }}>
-                    <Stack gap="sm">
-                      {/* File Upload Input */}
-                      <FileInput
-                        label="Upload Notice / Signboard Image"
-                        description="Upload a photo from street inspections or station boards"
-                        placeholder="Choose image file (.png, .jpg, .webp)"
-                        accept="image/*"
-                        leftSection={<IconUpload size={16} />}
-                        value={uploadedFile}
-                        onChange={handleFileUpload}
-                        clearable
-                        size="xs"
-                        styles={{
-                          label: {
-                            fontSize: "11px",
-                            fontWeight: 600,
-                            color: "var(--text-muted)",
-                          },
-                          input: {
-                            background: "var(--bg-card-inner)",
-                            borderColor: "var(--border-subtle)",
-                            color: "var(--text-main)",
-                          },
-                        }}
-                      />
-
-                      <Divider
-                        label="OR SELECT BENCHMARK SAMPLE"
-                        labelPosition="center"
-                      />
-
-                      <Select
-                        label="Preset Transit Notice Sample"
-                        data={[
-                          {
-                            value: "sample_bikolpo",
-                            label:
-                              "🚏 Bikolpo Paribahan Route Signboard (Mirpur 10)",
-                          },
-                          {
-                            value: "sample_mrt",
-                            label: "🚇 DMTCL Station Fare Schedule Notice",
-                          },
-                          {
-                            value: "sample_leguna",
-                            label:
-                              "🚐 Rampura Leguna Stand Handwritten Stoppage List",
-                          },
-                        ]}
-                        value={selectedSample}
-                        onChange={(v) =>
-                          setSelectedSample(v || "sample_bikolpo")
-                        }
-                        size="xs"
-                        comboboxProps={{ withinPortal: true, zIndex: 2000 }}
-                        styles={{
-                          label: {
-                            fontSize: "11px",
-                            fontWeight: 600,
-                            color: "var(--text-muted)",
-                          },
-                          input: {
-                            background: "var(--bg-card-inner)",
-                            borderColor: "var(--border-subtle)",
-                            color: "var(--text-main)",
-                          },
-                        }}
-                      />
-
-                      {/* Image Preview if available */}
-                      {uploadedPreview ? (
-                        <Box
-                          style={{
-                            borderRadius: 8,
-                            overflow: "hidden",
-                            border: "1px solid var(--border-subtle)",
-                            maxHeight: 180,
-                            display: "flex",
-                            justifyContent: "center",
-                            background: "var(--bg-card-inner)",
-                          }}
-                        >
-                          <img
-                            src={uploadedPreview}
-                            alt="Uploaded Notice Preview"
-                            style={{
-                              maxHeight: 180,
-                              width: "auto",
-                              objectFit: "contain",
-                            }}
-                          />
-                        </Box>
-                      ) : (
-                        <Paper
-                          p="sm"
-                          radius="md"
-                          style={{
-                            background: "var(--bg-card-inner)",
-                            border: "1px solid var(--border-subtle)",
-                          }}
-                        >
-                          <Text
-                            size="11px"
-                            fw={700}
-                            style={{ color: "var(--text-main)" }}
-                          >
-                            {selectedSample === "sample_bikolpo" &&
-                              "🚏 Mirpur 10 Circle Bus Signboard (Bengali)"}
-                            {selectedSample === "sample_mrt" &&
-                              "🚇 DMTCL Station Concourse Tariff (English & Bengali)"}
-                            {selectedSample === "sample_leguna" &&
-                              "🚐 Rampura Stand Handwritten Board (Bengali)"}
-                          </Text>
-                          <Text
-                            size="10px"
-                            style={{ color: "var(--text-muted)", marginTop: 4 }}
-                          >
-                            Ready for OCR layout analysis and structured entity
-                            extraction.
-                          </Text>
-                        </Paper>
-                      )}
-
-                      <Button
-                        size="sm"
-                        radius="xl"
-                        leftSection={
-                          scanning ? (
-                            <Loader size="xs" color="white" />
-                          ) : (
-                            <IconSparkles size={16} />
-                          )
-                        }
-                        onClick={handleScanSignboard}
-                        loading={scanning}
-                        styles={{
-                          root: {
-                            background: "var(--text-main)",
-                            color: "var(--bg-page)",
-                            fontWeight: 600,
-                          },
-                        }}
+                <Stack gap="md">
+                  <Group justify="space-between" wrap="wrap" gap="sm">
+                    <Box>
+                      <Title
+                        order={4}
+                        style={{ color: "var(--text-main)", fontWeight: 700 }}
                       >
-                        Extract Structured Transit Data
-                      </Button>
-                    </Stack>
-                  </Grid.Col>
+                        Signboard Digitizer & Crowdsourced OCR Reviews
+                      </Title>
+                      <Text size="xs" style={{ color: "var(--text-muted)" }}>
+                        Human-in-the-loop validation: Inspect user-submitted
+                        signboard photos, cross-reference against route
+                        geography, and approve into Transit CMS.
+                      </Text>
+                    </Box>
 
-                  <Grid.Col span={{ base: 12, md: 7 }}>
-                    {extractedData ? (
-                      <Card
-                        p="md"
-                        radius="md"
-                        style={{
+                    <SegmentedControl
+                      size="xs"
+                      radius="xl"
+                      value={ocrViewMode}
+                      onChange={setOcrViewMode}
+                      data={[
+                        {
+                          label: `Submissions Review Queue (${ocrSubmissions.length})`,
+                          value: "queue",
+                        },
+                        { label: "Direct Street Scanner", value: "scanner" },
+                      ]}
+                      styles={{
+                        root: {
                           background: "var(--bg-card-inner)",
                           border: "1px solid var(--border-subtle)",
-                        }}
-                      >
-                        <Stack gap="xs">
-                          <Group justify="space-between">
-                            <Title
-                              order={5}
+                        },
+                        label: { fontWeight: 600 },
+                      }}
+                    />
+                  </Group>
+
+                  {/* VIEW 1: Submissions Review Queue */}
+                  {ocrViewMode === "queue" && (
+                    <Stack gap="sm">
+                      <Group justify="space-between" wrap="wrap" gap="sm">
+                        <SegmentedControl
+                          size="xs"
+                          radius="xl"
+                          value={ocrFilter}
+                          onChange={setOcrFilter}
+                          data={[
+                            {
+                              label: `All (${ocrSubmissions.length})`,
+                              value: "all",
+                            },
+                            {
+                              label: `Pending Verification (${pendingOcrCount})`,
+                              value: "pending",
+                            },
+                            {
+                              label: "Approved & Published",
+                              value: "approved",
+                            },
+                            { label: "Rejected", value: "rejected" },
+                          ]}
+                          styles={{
+                            root: {
+                              background: "var(--bg-card-inner)",
+                              border: "1px solid var(--border-subtle)",
+                            },
+                            label: { fontWeight: 600 },
+                          }}
+                        />
+
+                        <Button
+                          size="xs"
+                          radius="xl"
+                          variant="default"
+                          leftSection={<IconRefresh size={14} />}
+                          onClick={fetchOcrSubmissions}
+                          loading={ocrLoading}
+                        >
+                          Refresh Queue
+                        </Button>
+                      </Group>
+
+                      <Table striped highlightOnHover verticalSpacing="sm">
+                        <Table.Thead>
+                          <Table.Tr>
+                            <Table.Th style={{ color: "var(--text-main)" }}>
+                              Receipt Code
+                            </Table.Th>
+                            <Table.Th style={{ color: "var(--text-main)" }}>
+                              Notice Service
+                            </Table.Th>
+                            <Table.Th style={{ color: "var(--text-main)" }}>
+                              Mode
+                            </Table.Th>
+                            <Table.Th style={{ color: "var(--text-main)" }}>
+                              Corridor
+                            </Table.Th>
+                            <Table.Th style={{ color: "var(--text-main)" }}>
+                              Observed Fare
+                            </Table.Th>
+                            <Table.Th style={{ color: "var(--text-main)" }}>
+                              DB Match Status
+                            </Table.Th>
+                            <Table.Th style={{ color: "var(--text-main)" }}>
+                              Status
+                            </Table.Th>
+                            <Table.Th
                               style={{
                                 color: "var(--text-main)",
-                                fontWeight: 700,
+                                textAlign: "right",
                               }}
                             >
-                              Extracted Structured Metadata
-                            </Title>
-                            <Badge
-                              size="xs"
-                              radius="sm"
-                              variant="filled"
-                              style={{
+                              Actions
+                            </Table.Th>
+                          </Table.Tr>
+                        </Table.Thead>
+                        <Table.Tbody>
+                          {filteredOcrSubmissions.length === 0 ? (
+                            <Table.Tr>
+                              <Table.Td
+                                colSpan={8}
+                                style={{ textAlign: "center", padding: "32px" }}
+                              >
+                                <Text
+                                  size="sm"
+                                  style={{ color: "var(--text-muted)" }}
+                                >
+                                  No signboard submissions matching this filter.
+                                </Text>
+                              </Table.Td>
+                            </Table.Tr>
+                          ) : (
+                            filteredOcrSubmissions.map((sub) => (
+                              <Table.Tr key={sub.id}>
+                                <Table.Td>
+                                  <Badge
+                                    size="xs"
+                                    variant="outline"
+                                    color="dark"
+                                  >
+                                    {sub.receiptCode}
+                                  </Badge>
+                                </Table.Td>
+                                <Table.Td
+                                  fw={700}
+                                  style={{ color: "var(--text-main)" }}
+                                >
+                                  {sub.extractedData.serviceName ||
+                                    "Unnamed Notice"}
+                                </Table.Td>
+                                <Table.Td>
+                                  <Badge
+                                    size="xs"
+                                    variant="filled"
+                                    color="dark"
+                                  >
+                                    {sub.extractedData.mode.toUpperCase()}
+                                  </Badge>
+                                </Table.Td>
+                                <Table.Td>
+                                  <Text
+                                    size="xs"
+                                    style={{ color: "var(--text-main)" }}
+                                  >
+                                    {sub.extractedData.origin || "?"} ➔{" "}
+                                    {sub.extractedData.destination || "?"}
+                                  </Text>
+                                </Table.Td>
+                                <Table.Td>
+                                  <Text
+                                    size="xs"
+                                    fw={700}
+                                    style={{ color: "var(--text-main)" }}
+                                  >
+                                    {sub.extractedData.fareRegular !== null
+                                      ? `${sub.extractedData.fareRegular} ৳`
+                                      : "N/A"}
+                                  </Text>
+                                </Table.Td>
+                                <Table.Td>
+                                  {sub.dbMatch?.originMatchedHub &&
+                                  sub.dbMatch?.destinationMatchedHub ? (
+                                    <Badge
+                                      size="xs"
+                                      color="green"
+                                      variant="light"
+                                    >
+                                      Corridor Matched
+                                    </Badge>
+                                  ) : (
+                                    <Badge
+                                      size="xs"
+                                      color="yellow"
+                                      variant="light"
+                                    >
+                                      New Outer Route
+                                    </Badge>
+                                  )}
+                                </Table.Td>
+                                <Table.Td>
+                                  <Badge
+                                    size="xs"
+                                    variant="filled"
+                                    style={{
+                                      background:
+                                        sub.status === "approved"
+                                          ? "#00aa66"
+                                          : sub.status === "rejected"
+                                            ? "#e11900"
+                                            : "var(--text-main)",
+                                      color: "var(--bg-page)",
+                                      fontWeight: 700,
+                                    }}
+                                  >
+                                    {sub.status === "approved"
+                                      ? "● Approved"
+                                      : sub.status === "rejected"
+                                        ? "○ Rejected"
+                                        : "⏳ Pending"}
+                                  </Badge>
+                                </Table.Td>
+                                <Table.Td style={{ textAlign: "right" }}>
+                                  <Group gap={6} justify="flex-end">
+                                    <Button
+                                      size="xs"
+                                      variant="light"
+                                      color="dark"
+                                      leftSection={<IconEye size={13} />}
+                                      onClick={() => handleOpenOcrReview(sub)}
+                                    >
+                                      Inspect & Verify
+                                    </Button>
+                                    <ActionIcon
+                                      size="sm"
+                                      variant="subtle"
+                                      color="red"
+                                      onClick={() =>
+                                        handleDeleteOcrSubmission(sub.id)
+                                      }
+                                    >
+                                      <IconTrash size={14} />
+                                    </ActionIcon>
+                                  </Group>
+                                </Table.Td>
+                              </Table.Tr>
+                            ))
+                          )}
+                        </Table.Tbody>
+                      </Table>
+                    </Stack>
+                  )}
+
+                  {/* VIEW 2: Direct Street Scanner */}
+                  {ocrViewMode === "scanner" && (
+                    <Grid gap="md">
+                      <Grid.Col span={{ base: 12, md: 5 }}>
+                        <Stack gap="sm">
+                          <FileInput
+                            label="Upload Street Notice Photo"
+                            placeholder="Choose file (.jpg, .png, .webp)"
+                            accept="image/*"
+                            leftSection={<IconUpload size={16} />}
+                            value={scannerFile}
+                            onChange={(file) => {
+                              setScannerFile(file);
+                              setScannerPreview(
+                                file ? URL.createObjectURL(file) : null,
+                              );
+                            }}
+                            clearable
+                            size="xs"
+                          />
+
+                          <Divider
+                            label="OR BENCHMARK SAMPLE"
+                            labelPosition="center"
+                          />
+
+                          <Select
+                            label="Benchmark Sample"
+                            data={[
+                              {
+                                value: "sample_bikolpo",
+                                label:
+                                  "🚏 Bikolpo Paribahan Placard (Mirpur 10)",
+                              },
+                              {
+                                value: "sample_mrt",
+                                label:
+                                  "🚇 DMTCL Station Concourse Tariff Notice",
+                              },
+                              {
+                                value: "sample_leguna",
+                                label: "🚐 Rampura Leguna Stand Notice",
+                              },
+                              {
+                                value: "sample_balaka",
+                                label: "🚌 Balaka Special Paribahan Board",
+                              },
+                            ]}
+                            value={scannerSample}
+                            onChange={(v) =>
+                              setScannerSample(v || "sample_bikolpo")
+                            }
+                            size="xs"
+                          />
+
+                          <Button
+                            size="xs"
+                            radius="xl"
+                            leftSection={
+                              scannerRunning ? (
+                                <Loader size="xs" color="white" />
+                              ) : (
+                                <IconSparkles size={14} />
+                              )
+                            }
+                            onClick={handleAdminScannerRun}
+                            loading={scannerRunning}
+                            styles={{
+                              root: {
                                 background: "var(--text-main)",
                                 color: "var(--bg-page)",
-                                fontWeight: 700,
-                              }}
-                            >
-                              {extractedData.confidence}
-                            </Badge>
-                          </Group>
-
-                          <SimpleGrid cols={2} spacing="xs">
-                            <TextInput
-                              size="xs"
-                              label="Service Name"
-                              value={extractedData.serviceName}
-                              onChange={(e) =>
-                                setExtractedData({
-                                  ...extractedData,
-                                  serviceName: e.currentTarget.value,
-                                })
-                              }
-                            />
-                            <Select
-                              size="xs"
-                              label="Mode"
-                              data={[
-                                { value: "bus", label: "City Bus" },
-                                { value: "metro", label: "Metro Rail" },
-                                { value: "leguna", label: "Feeder Leguna" },
-                                { value: "rickshaw", label: "Rickshaw" },
-                              ]}
-                              value={extractedData.mode}
-                              onChange={(v) =>
-                                setExtractedData({
-                                  ...extractedData,
-                                  mode: v || "bus",
-                                })
-                              }
-                            />
-                          </SimpleGrid>
-
-                          <TextInput
-                            size="xs"
-                            label="Operator / Syndicate"
-                            value={extractedData.operator}
-                            onChange={(e) =>
-                              setExtractedData({
-                                ...extractedData,
-                                operator: e.currentTarget.value,
-                              })
-                            }
-                          />
-
-                          <SimpleGrid cols={2} spacing="xs">
-                            <TextInput
-                              size="xs"
-                              label="Origin Terminus"
-                              value={extractedData.origin}
-                              onChange={(e) =>
-                                setExtractedData({
-                                  ...extractedData,
-                                  origin: e.currentTarget.value,
-                                })
-                              }
-                            />
-                            <TextInput
-                              size="xs"
-                              label="Destination Terminus"
-                              value={extractedData.destination}
-                              onChange={(e) =>
-                                setExtractedData({
-                                  ...extractedData,
-                                  destination: e.currentTarget.value,
-                                })
-                              }
-                            />
-                          </SimpleGrid>
-
-                          <TextInput
-                            size="xs"
-                            label="Intermediate Via Stoppages (Comma separated)"
-                            value={extractedData.via?.join(", ")}
-                            onChange={(e) =>
-                              setExtractedData({
-                                ...extractedData,
-                                via: e.currentTarget.value
-                                  .split(",")
-                                  .map((s) => s.trim()),
-                              })
-                            }
-                          />
-
-                          <SimpleGrid cols={2} spacing="xs">
-                            <NumberInput
-                              size="xs"
-                              label="Regular Fare (BDT)"
-                              value={extractedData.fareRegular}
-                              onChange={(v) =>
-                                setExtractedData({
-                                  ...extractedData,
-                                  fareRegular: Number(v) || 0,
-                                })
-                              }
-                            />
-                            <NumberInput
-                              size="xs"
-                              label="Student Fare (BDT)"
-                              value={extractedData.fareStudent}
-                              onChange={(v) =>
-                                setExtractedData({
-                                  ...extractedData,
-                                  fareStudent: Number(v) || 0,
-                                })
-                              }
-                            />
-                          </SimpleGrid>
-
-                          <TextInput
-                            size="xs"
-                            label="Boarding Landmark"
-                            value={extractedData.boardingLandmark}
-                            onChange={(e) =>
-                              setExtractedData({
-                                ...extractedData,
-                                boardingLandmark: e.currentTarget.value,
-                              })
-                            }
-                          />
-
-                          <Group justify="flex-end" mt="xs">
-                            <Button
-                              size="xs"
-                              variant="subtle"
-                              color="gray"
-                              onClick={() => setExtractedData(null)}
-                            >
-                              Discard
-                            </Button>
-                            <Button
-                              size="xs"
-                              radius="xl"
-                              onClick={handleApproveImport}
-                              loading={importingToCms}
-                              styles={{
-                                root: {
-                                  background: "var(--text-main)",
-                                  color: "var(--bg-page)",
-                                  fontWeight: 600,
-                                },
-                              }}
-                            >
-                              Approve & Merge into CMS
-                            </Button>
-                          </Group>
+                                fontWeight: 600,
+                              },
+                            }}
+                          >
+                            Extract Structured Transit Data
+                          </Button>
                         </Stack>
-                      </Card>
-                    ) : (
-                      <Box
-                        p="xl"
-                        style={{
-                          border: "1px dashed var(--border-subtle)",
-                          borderRadius: 8,
-                          textAlign: "center",
-                          color: "var(--text-muted)",
-                        }}
-                      >
-                        <IconScan
-                          size={32}
-                          style={{ marginBottom: 8, opacity: 0.6 }}
-                        />
-                        <Text size="sm">
-                          Upload a photo or select a notice sample, then click
-                          "Extract Structured Transit Data".
-                        </Text>
-                        <Text size="xs" style={{ color: "var(--text-muted)" }}>
-                          Optical Character Recognition parses Bengali & English
-                          stoppages, landmarks, and fare schedules with human
-                          verification.
-                        </Text>
-                      </Box>
-                    )}
-                  </Grid.Col>
-                </Grid>
+                      </Grid.Col>
+
+                      <Grid.Col span={{ base: 12, md: 7 }}>
+                        {scannerResult ? (
+                          <Card
+                            p="sm"
+                            radius="md"
+                            style={{ background: "var(--bg-card-inner)" }}
+                          >
+                            <Stack gap="xs">
+                              <Group justify="space-between">
+                                <Title
+                                  order={5}
+                                  style={{
+                                    color: "var(--text-main)",
+                                    fontWeight: 700,
+                                  }}
+                                >
+                                  Parsed:{" "}
+                                  {scannerResult.extractedData?.serviceName}
+                                </Title>
+                                <Badge size="xs" color="green">
+                                  {scannerResult.extractedData?.confidence}
+                                </Badge>
+                              </Group>
+                              <Text
+                                size="xs"
+                                style={{ color: "var(--text-muted)" }}
+                              >
+                                📍 {scannerResult.extractedData?.origin} ➔{" "}
+                                {scannerResult.extractedData?.destination}
+                              </Text>
+                              <Text size="xs" fw={700}>
+                                Regular Fare:{" "}
+                                {scannerResult.extractedData?.fareRegular} ৳ |
+                                Student:{" "}
+                                {scannerResult.extractedData?.fareStudent} ৳
+                              </Text>
+                              <Group justify="flex-end" mt="xs">
+                                <Button
+                                  size="xs"
+                                  radius="xl"
+                                  onClick={handleDirectMergeScanner}
+                                >
+                                  Publish Directly into CMS
+                                </Button>
+                              </Group>
+                            </Stack>
+                          </Card>
+                        ) : (
+                          <Box
+                            p="xl"
+                            style={{
+                              border: "1px dashed var(--border-subtle)",
+                              borderRadius: 8,
+                              textAlign: "center",
+                            }}
+                          >
+                            <IconScan
+                              size={28}
+                              style={{ opacity: 0.5, marginBottom: 8 }}
+                            />
+                            <Text
+                              size="xs"
+                              style={{ color: "var(--text-muted)" }}
+                            >
+                              Scan notice photo to view optical entity
+                              extraction.
+                            </Text>
+                          </Box>
+                        )}
+                      </Grid.Col>
+                    </Grid>
+                  )}
+                </Stack>
               </Paper>
             </Tabs.Panel>
 
@@ -2468,7 +2645,6 @@ export default function AdminPortalPage() {
 
                       {/* Side-by-side Comparative Routes */}
                       <Grid gap="md">
-                        {/* Baseline Route Card */}
                         <Grid.Col span={{ base: 12, md: 6 }}>
                           <Card
                             p="md"
@@ -2530,7 +2706,6 @@ export default function AdminPortalPage() {
                           </Card>
                         </Grid.Col>
 
-                        {/* Disrupted Detour Route Card */}
                         <Grid.Col span={{ base: 12, md: 6 }}>
                           <Card
                             p="md"
@@ -2653,17 +2828,7 @@ export default function AdminPortalPage() {
                     </Box>
 
                     <Group gap="xs">
-                      <Badge
-                        size="sm"
-                        radius="xl"
-                        variant="outline"
-                        style={{
-                          borderColor: "var(--border-subtle)",
-                          color: "var(--text-main)",
-                          background: "var(--bg-card-inner)",
-                          fontWeight: 600,
-                        }}
-                      >
+                      <Badge size="sm" radius="xl" variant="outline">
                         Model: {aiPoolData?.model || "gemini-3.5-flash"}
                       </Badge>
                       <Button
@@ -2679,14 +2844,6 @@ export default function AdminPortalPage() {
                         }
                         onClick={fetchAiPool}
                         disabled={aiPoolLoading}
-                        styles={{
-                          root: {
-                            background: "var(--bg-card-inner)",
-                            borderColor: "var(--border-subtle)",
-                            color: "var(--text-main)",
-                            fontWeight: 600,
-                          },
-                        }}
                       >
                         Refresh Pool Status
                       </Button>
@@ -2719,7 +2876,6 @@ export default function AdminPortalPage() {
                         </Text>
                       </Paper>
                     </Grid.Col>
-
                     <Grid.Col span={{ base: 6, sm: 3 }}>
                       <Paper
                         p="sm"
@@ -2744,7 +2900,6 @@ export default function AdminPortalPage() {
                         </Text>
                       </Paper>
                     </Grid.Col>
-
                     <Grid.Col span={{ base: 6, sm: 3 }}>
                       <Paper
                         p="sm"
@@ -2769,7 +2924,6 @@ export default function AdminPortalPage() {
                         </Text>
                       </Paper>
                     </Grid.Col>
-
                     <Grid.Col span={{ base: 6, sm: 3 }}>
                       <Paper
                         p="sm"
@@ -2785,17 +2939,7 @@ export default function AdminPortalPage() {
                         >
                           Failover Algorithm
                         </Text>
-                        <Badge
-                          size="xs"
-                          radius="xl"
-                          variant="filled"
-                          mt={4}
-                          style={{
-                            background: "var(--text-main)",
-                            color: "var(--bg-page)",
-                            fontWeight: 700,
-                          }}
-                        >
+                        <Badge size="xs" radius="xl" variant="filled" mt={4}>
                           Circuit Breaker Active
                         </Badge>
                       </Paper>
@@ -2882,16 +3026,7 @@ export default function AdminPortalPage() {
                           </Table.Td>
                           <Table.Td>
                             {item.lastStatusCode ? (
-                              <Badge
-                                size="xs"
-                                radius="sm"
-                                variant="outline"
-                                style={{
-                                  borderColor: "var(--border-subtle)",
-                                  color: "var(--text-main)",
-                                  fontWeight: 600,
-                                }}
-                              >
+                              <Badge size="xs" radius="sm" variant="outline">
                                 HTTP {item.lastStatusCode}
                               </Badge>
                             ) : (
@@ -2916,57 +3051,6 @@ export default function AdminPortalPage() {
                       ))}
                     </Table.Tbody>
                   </Table>
-
-                  {/* Switching Algorithm Description Card */}
-                  <Paper
-                    p="sm"
-                    radius="md"
-                    style={{
-                      background: "var(--bg-card-inner)",
-                      border: "1px solid var(--border-subtle)",
-                    }}
-                  >
-                    <Group gap="xs" mb={4}>
-                      <IconCpu
-                        size={16}
-                        stroke={2}
-                        style={{ color: "var(--text-main)" }}
-                      />
-                      <Text
-                        size="xs"
-                        fw={700}
-                        style={{ color: "var(--text-main)" }}
-                      >
-                        Adaptive Key Switching & Rate-Limit Circuit Breaker
-                        Mechanism:
-                      </Text>
-                    </Group>
-                    <Text
-                      size="11px"
-                      style={{ color: "var(--text-muted)", lineHeight: 1.6 }}
-                    >
-                      1. <strong>Balanced Load Distribution:</strong> The engine
-                      distributes incoming natural language transit prompts
-                      across healthy keys in the pool.
-                      <br />
-                      2. <strong>Instant Rate-Limit Failover:</strong> If any
-                      key encounters HTTP 429 (Resource Exhausted) or HTTP 503
-                      (Spike/Unavailable), it is isolated with an automatic
-                      45-second cooldown and the request immediately retries on
-                      the next available key without commuter disruption.
-                      <br />
-                      3. <strong>Automatic Recovery:</strong> Once a key's
-                      cooldown window expires, it automatically transitions back
-                      to Healthy status.
-                      <br />
-                      4. <strong>
-                        Zero-Downtime Deterministic Fallback:
-                      </strong>{" "}
-                      In the rare scenario that all 5 API keys reach Google
-                      limits simultaneously, the system seamlessly falls back to
-                      DhakaPath's deterministic local transit parsing engine.
-                    </Text>
-                  </Paper>
                 </Stack>
               </Paper>
             </Tabs.Panel>
@@ -3214,6 +3298,254 @@ export default function AdminPortalPage() {
             </Button>
           </Group>
         </Stack>
+      </Modal>
+
+      {/* MODAL 4: OCR Submission Review & Human-in-the-Loop Verification */}
+      <Modal
+        opened={ocrReviewOpened}
+        onClose={closeOcrReview}
+        size="xl"
+        title={
+          <Group gap="xs">
+            <IconScan size={18} />
+            <Text fw={700}>
+              Verify Signboard Notice: {selectedOcrSub?.receiptCode}
+            </Text>
+          </Group>
+        }
+        radius="lg"
+      >
+        {selectedOcrSub && (
+          <Stack gap="md">
+            <Grid gap="md">
+              {/* Left Column: Image / Raw OCR */}
+              <Grid.Col span={{ base: 12, md: 5 }}>
+                <Stack gap="xs">
+                  <Text
+                    size="xs"
+                    fw={700}
+                    style={{ color: "var(--text-muted)" }}
+                  >
+                    Original Captured Photo / Notice
+                  </Text>
+                  <Paper
+                    p="sm"
+                    radius="md"
+                    style={{
+                      background: "var(--bg-card-inner)",
+                      border: "1px solid var(--border-subtle)",
+                      textAlign: "center",
+                    }}
+                  >
+                    <IconFileText
+                      size={32}
+                      style={{ opacity: 0.5, marginBottom: 4 }}
+                    />
+                    <Text size="xs" fw={700}>
+                      {selectedOcrSub.imageName || "Signboard Upload"}
+                    </Text>
+                    <Text size="10px" style={{ color: "var(--text-muted)" }}>
+                      Submitted on{" "}
+                      {new Date(selectedOcrSub.submittedAt).toLocaleString()}
+                    </Text>
+                  </Paper>
+
+                  <Text
+                    size="xs"
+                    fw={700}
+                    style={{ color: "var(--text-muted)", marginTop: 6 }}
+                  >
+                    Raw Optical Transcribed Text
+                  </Text>
+                  <Box
+                    p="xs"
+                    style={{
+                      background: "var(--bg-card-inner)",
+                      borderRadius: 6,
+                      fontFamily: "monospace",
+                      fontSize: "11px",
+                      whiteSpace: "pre-wrap",
+                      maxHeight: 140,
+                      overflowY: "auto",
+                      border: "1px solid var(--border-subtle)",
+                    }}
+                  >
+                    {selectedOcrSub.rawText || "No text available"}
+                  </Box>
+
+                  {/* Commuter Submitted Notes */}
+                  {selectedOcrSub.userNotes && (
+                    <Alert color="blue" title="Commuter Field Notes" p="xs">
+                      <Text size="xs">{selectedOcrSub.userNotes}</Text>
+                    </Alert>
+                  )}
+                </Stack>
+              </Grid.Col>
+
+              {/* Right Column: Database Cross-Verification & Editable Fields */}
+              <Grid.Col span={{ base: 12, md: 7 }}>
+                <Stack gap="xs">
+                  {/* Database Cross-Validation Box */}
+                  <Paper
+                    p="xs"
+                    radius="md"
+                    style={{
+                      background: "var(--bg-card-inner)",
+                      border: "1px solid var(--border-subtle)",
+                    }}
+                  >
+                    <Group gap="xs" mb={2}>
+                      <IconMapPin
+                        size={15}
+                        style={{ color: "var(--text-main)" }}
+                      />
+                      <Text size="xs" fw={700}>
+                        Database Cross-Validation Audit:
+                      </Text>
+                    </Group>
+                    <Text
+                      size="11px"
+                      style={{ color: "var(--text-muted)", lineHeight: 1.4 }}
+                    >
+                      • <strong>Origin:</strong>{" "}
+                      {selectedOcrSub.dbMatch?.originMatchedHub
+                        ? `Matched ${selectedOcrSub.dbMatch.originMatchedHub.name_en}`
+                        : "Unmapped / External"}
+                      <br />• <strong>Destination:</strong>{" "}
+                      {selectedOcrSub.dbMatch?.destinationMatchedHub
+                        ? `Matched ${selectedOcrSub.dbMatch.destinationMatchedHub.name_en}`
+                        : "Unmapped / External"}
+                      <br />• <strong>Statutory Fare Analysis:</strong>{" "}
+                      {
+                        selectedOcrSub.dbMatch?.statutoryFareValidation
+                          ?.auditNote
+                      }
+                    </Text>
+                  </Paper>
+
+                  {/* Editable Fields by Admin */}
+                  <SimpleGrid cols={2} spacing="xs">
+                    <TextInput
+                      size="xs"
+                      label="Service Name"
+                      value={adminOcrName}
+                      onChange={(e) => setAdminOcrName(e.currentTarget.value)}
+                    />
+                    <Select
+                      size="xs"
+                      label="Transit Mode"
+                      data={[
+                        { value: "bus", label: "City Bus" },
+                        { value: "metro", label: "Metro Rail" },
+                        { value: "leguna", label: "Feeder Leguna" },
+                        { value: "rickshaw", label: "Rickshaw Syndicate" },
+                      ]}
+                      value={adminOcrMode}
+                      onChange={(v) => setAdminOcrMode(v || "bus")}
+                    />
+                  </SimpleGrid>
+
+                  <TextInput
+                    size="xs"
+                    label="Operator Syndicate"
+                    value={adminOcrOperator}
+                    onChange={(e) => setAdminOcrOperator(e.currentTarget.value)}
+                  />
+
+                  <SimpleGrid cols={2} spacing="xs">
+                    <TextInput
+                      size="xs"
+                      label="Origin Terminus"
+                      value={adminOcrOrigin}
+                      onChange={(e) => setAdminOcrOrigin(e.currentTarget.value)}
+                    />
+                    <TextInput
+                      size="xs"
+                      label="Destination Terminus"
+                      value={adminOcrDestination}
+                      onChange={(e) =>
+                        setAdminOcrDestination(e.currentTarget.value)
+                      }
+                    />
+                  </SimpleGrid>
+
+                  <TextInput
+                    size="xs"
+                    label="Via Stoppages (Comma separated)"
+                    value={adminOcrVia}
+                    onChange={(e) => setAdminOcrVia(e.currentTarget.value)}
+                  />
+
+                  <SimpleGrid cols={2} spacing="xs">
+                    <NumberInput
+                      size="xs"
+                      label="Regular Fare (BDT)"
+                      value={adminOcrFareReg}
+                      onChange={(v) =>
+                        setAdminOcrFareReg(v === "" ? "" : Number(v))
+                      }
+                    />
+                    <NumberInput
+                      size="xs"
+                      label="Student Concession (BDT)"
+                      value={adminOcrFareStudent}
+                      onChange={(v) =>
+                        setAdminOcrFareStudent(v === "" ? "" : Number(v))
+                      }
+                    />
+                  </SimpleGrid>
+
+                  <TextInput
+                    size="xs"
+                    label="Boarding Landmark"
+                    value={adminOcrLandmark}
+                    onChange={(e) => setAdminOcrLandmark(e.currentTarget.value)}
+                  />
+
+                  <Textarea
+                    size="xs"
+                    label="Admin Verification Notes"
+                    placeholder="Provide audit notes or reasons for approval/rejection..."
+                    rows={2}
+                    value={adminReviewNotes}
+                    onChange={(e) => setAdminReviewNotes(e.currentTarget.value)}
+                  />
+                </Stack>
+              </Grid.Col>
+            </Grid>
+
+            {/* Actions Bar */}
+            <Group justify="space-between" mt="md">
+              <Button
+                variant="subtle"
+                color="red"
+                onClick={handleRejectOcrSubmission}
+                loading={processingOcr}
+              >
+                Reject Notice
+              </Button>
+
+              <Group gap="xs">
+                <Button variant="default" onClick={closeOcrReview}>
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => handleApproveOcrSubmission(true)}
+                  loading={processingOcr}
+                  styles={{
+                    root: {
+                      background: "var(--text-main)",
+                      color: "var(--bg-page)",
+                      fontWeight: 600,
+                    },
+                  }}
+                >
+                  Approve & Publish to Transit CMS
+                </Button>
+              </Group>
+            </Group>
+          </Stack>
+        )}
       </Modal>
     </Box>
   );

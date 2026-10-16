@@ -25,9 +25,15 @@ export async function PATCH(
     const body = await request.json();
     const { status, adminNotes, editedData, publishToCms } = body;
 
-    if (!status || (status !== "approved" && status !== "rejected" && status !== "pending")) {
+    if (
+      !status ||
+      (status !== "approved" && status !== "rejected" && status !== "pending")
+    ) {
       return NextResponse.json(
-        { success: false, error: "Valid status ('approved', 'rejected', 'pending') required." },
+        {
+          success: false,
+          error: "Valid status ('approved', 'rejected', 'pending') required.",
+        },
         { status: 400 },
       );
     }

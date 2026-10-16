@@ -90,15 +90,125 @@ export function getNetworkSnapshot() {
   };
 }
 
-// In-memory queue for guest submissions during demo/development
-const dynamicAlerts: DisruptionAlert[] = [];
-const deletedAlertIds = new Set<string>();
+// -------------------------------------------------------------
+// Resilient Persistence Store for Alerts & Moderation
+// -------------------------------------------------------------
+const RUNTIME_ALERTS_FILE = path.join(
+  process.cwd(),
+  "data",
+  "runtime_alerts.json",
+);
+
+interface DemoStatusOverride {
+  status?: "pending" | "approved" | "rejected";
+  lifecycle_stage?: "active" | "disputed" | "resolved" | "expired";
+  upvotes?: number;
+  downvotes?: number;
+}
+
+interface RuntimeAlertsData {
+  dynamicAlerts: DisruptionAlert[];
+  demoStatusOverrides: Record<string, DemoStatusOverride>;
+  deletedAlertIds: string[];
+}
+
+interface GlobalAlertsStore {
+  dynamicAlerts: DisruptionAlert[];
+  demoStatusOverrides: Record<string, DemoStatusOverride>;
+  deletedAlertIds: Set<string>;
+}
+
+declare global {
+  // eslint-disable-next-line no-var
+  var __dhakapath_alerts_store__: GlobalAlertsStore | undefined;
+}
+
+function getAlertsStore(): GlobalAlertsStore {
+  if (!globalThis.__dhakapath_alerts_store__) {
+    let initialDynamic: DisruptionAlert[] = [];
+    let initialOverrides: Record<string, DemoStatusOverride> = {};
+    let initialDeleted: string[] = [];
+
+    if (fs.existsSync(RUNTIME_ALERTS_FILE)) {
+      try {
+        const raw = fs.readFileSync(RUNTIME_ALERTS_FILE, "utf-8");
+        const parsed: RuntimeAlertsData = JSON.parse(raw);
+        initialDynamic = parsed.dynamicAlerts || [];
+        initialOverrides = parsed.demoStatusOverrides || {};
+        initialDeleted = parsed.deletedAlertIds || [];
+      } catch (err) {
+        console.error("Error reading runtime_alerts.json:", err);
+      }
+    } else {
+      // Seed with initial pending commuter alert for realistic moderation testing
+      initialDynamic = [
+        {
+          id: "alt_usr_1792147369810",
+          title: "not fair price",
+          title_bn: "অতিরিক্ত ভাড়া দাবি",
+          description:
+            "Mohakhali to Farmgate bus conductors demanding 30 BDT instead of statutory 15 BDT.",
+          severity: "medium",
+          status: "pending",
+          lifecycle_stage: "active",
+          affected_modes: ["bus"],
+          affected_segment_ids: ["seg_bus_bikolpo_agargaon_farmgate"],
+          delay_minutes: 10,
+          is_closed: false,
+          reported_by_type: "guest",
+          observed_at: new Date(Date.now() - 3600000).toISOString(),
+          expires_at: new Date(Date.now() + 86400000).toISOString(),
+          upvotes: 2,
+          downvotes: 0,
+        },
+      ];
+    }
+
+    globalThis.__dhakapath_alerts_store__ = {
+      dynamicAlerts: initialDynamic,
+      demoStatusOverrides: initialOverrides,
+      deletedAlertIds: new Set(initialDeleted),
+    };
+  }
+  return globalThis.__dhakapath_alerts_store__;
+}
+
+function saveRuntimeAlertsStore() {
+  const store = getAlertsStore();
+  try {
+    const data: RuntimeAlertsData = {
+      dynamicAlerts: store.dynamicAlerts,
+      demoStatusOverrides: store.demoStatusOverrides,
+      deletedAlertIds: Array.from(store.deletedAlertIds),
+    };
+    fs.writeFileSync(
+      RUNTIME_ALERTS_FILE,
+      JSON.stringify(data, null, 2),
+      "utf-8",
+    );
+  } catch (err) {
+    console.error("Error persisting runtime_alerts.json:", err);
+  }
+}
+
+export function getAllAlertsForAdmin(): DisruptionAlert[] {
+  const store = getAlertsStore();
+  const demos = getDemoDisruptions().map((d) => {
+    const override = store.demoStatusOverrides[d.id];
+    if (override) {
+      return { ...d, ...override };
+    }
+    return { ...d };
+  });
+
+  return [...demos, ...store.dynamicAlerts].filter(
+    (a) => !store.deletedAlertIds.has(a.id),
+  );
+}
 
 export function getActiveAlerts(scenarioId?: string | null): DisruptionAlert[] {
-  const demos = getDemoDisruptions();
-  const all = [...demos, ...dynamicAlerts].filter(
-    (a) => !deletedAlertIds.has(a.id),
-  );
+  const store = getAlertsStore();
+  const all = getAllAlertsForAdmin();
 
   if (scenarioId) {
     return all.filter((a) => a.id === scenarioId || a.status === "approved");
@@ -114,17 +224,13 @@ export function getActiveAlerts(scenarioId?: string | null): DisruptionAlert[] {
   );
 }
 
-export function getAllAlertsForAdmin(): DisruptionAlert[] {
-  const demos = getDemoDisruptions();
-  return [...demos, ...dynamicAlerts].filter((a) => !deletedAlertIds.has(a.id));
-}
-
 export function addPendingReport(
   report: Omit<
     DisruptionAlert,
     "id" | "submitted_at" | "status" | "lifecycle_stage"
   >,
 ): DisruptionAlert {
+  const store = getAlertsStore();
   const newAlert: DisruptionAlert = {
     ...report,
     id: `alt_usr_${Date.now()}`,
@@ -134,13 +240,15 @@ export function addPendingReport(
     upvotes: 0,
     downvotes: 0,
   };
-  dynamicAlerts.push(newAlert);
+  store.dynamicAlerts.unshift(newAlert);
+  saveRuntimeAlertsStore();
   return newAlert;
 }
 
 export function createAdminAlert(
   data: Partial<DisruptionAlert>,
 ): DisruptionAlert {
+  const store = getAlertsStore();
   const newAlert: DisruptionAlert = {
     id: `alt_adm_${Date.now()}`,
     title: data.title || "Admin Incident Advisory",
@@ -161,7 +269,8 @@ export function createAdminAlert(
     upvotes: 1,
     downvotes: 0,
   };
-  dynamicAlerts.unshift(newAlert);
+  store.dynamicAlerts.unshift(newAlert);
+  saveRuntimeAlertsStore();
   return newAlert;
 }
 
@@ -170,22 +279,91 @@ export function updateAlertStatus(
   status: "pending" | "approved" | "rejected",
   lifecycleStage: "active" | "disputed" | "resolved" | "expired" = "active",
 ): DisruptionAlert | null {
-  const all = getAllAlertsForAdmin();
-  const alert = all.find((a) => a.id === alertId);
-  if (!alert) return null;
+  const store = getAlertsStore();
 
-  alert.status = status;
-  alert.lifecycle_stage = lifecycleStage;
-  return alert;
+  // 1. Dynamic alerts check
+  const dynAlert = store.dynamicAlerts.find((a) => a.id === alertId);
+  if (dynAlert) {
+    dynAlert.status = status;
+    dynAlert.lifecycle_stage = lifecycleStage;
+    saveRuntimeAlertsStore();
+    return { ...dynAlert };
+  }
+
+  // 2. Demo alerts check
+  const demos = getDemoDisruptions();
+  const demoAlert = demos.find((a) => a.id === alertId);
+  if (demoAlert) {
+    if (!store.demoStatusOverrides[alertId]) {
+      store.demoStatusOverrides[alertId] = {};
+    }
+    store.demoStatusOverrides[alertId].status = status;
+    store.demoStatusOverrides[alertId].lifecycle_stage = lifecycleStage;
+    saveRuntimeAlertsStore();
+    return {
+      ...demoAlert,
+      ...store.demoStatusOverrides[alertId],
+    };
+  }
+
+  return null;
 }
 
 export function deleteAlert(alertId: string): boolean {
-  deletedAlertIds.add(alertId);
-  const idx = dynamicAlerts.findIndex((a) => a.id === alertId);
+  const store = getAlertsStore();
+  store.deletedAlertIds.add(alertId);
+  const idx = store.dynamicAlerts.findIndex((a) => a.id === alertId);
   if (idx >= 0) {
-    dynamicAlerts.splice(idx, 1);
+    store.dynamicAlerts.splice(idx, 1);
   }
+  saveRuntimeAlertsStore();
   return true;
+}
+
+export function recordAlertFeedback(
+  alertId: string,
+  voteType: "confirm" | "dispute" | "resolved",
+): DisruptionAlert | null {
+  const store = getAlertsStore();
+
+  // 1. Dynamic alert check
+  const dynAlert = store.dynamicAlerts.find((a) => a.id === alertId);
+  if (dynAlert) {
+    if (voteType === "confirm") dynAlert.upvotes = (dynAlert.upvotes || 0) + 1;
+    else if (voteType === "dispute")
+      dynAlert.downvotes = (dynAlert.downvotes || 0) + 1;
+    else if (voteType === "resolved") dynAlert.lifecycle_stage = "resolved";
+    saveRuntimeAlertsStore();
+    return { ...dynAlert };
+  }
+
+  // 2. Demo alert check
+  const demos = getDemoDisruptions();
+  const demoAlert = demos.find((a) => a.id === alertId);
+  if (demoAlert) {
+    if (!store.demoStatusOverrides[alertId]) {
+      store.demoStatusOverrides[alertId] = {};
+    }
+    const current = {
+      ...demoAlert,
+      ...store.demoStatusOverrides[alertId],
+    };
+    if (voteType === "confirm") current.upvotes = (current.upvotes || 0) + 1;
+    else if (voteType === "dispute")
+      current.downvotes = (current.downvotes || 0) + 1;
+    else if (voteType === "resolved") current.lifecycle_stage = "resolved";
+
+    store.demoStatusOverrides[alertId] = {
+      ...store.demoStatusOverrides[alertId],
+      upvotes: current.upvotes,
+      downvotes: current.downvotes,
+      lifecycle_stage: current.lifecycle_stage,
+    };
+    saveRuntimeAlertsStore();
+    return current;
+  }
+
+  return null;
 }
 
 export function updateServiceStatus(

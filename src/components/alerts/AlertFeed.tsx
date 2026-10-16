@@ -192,7 +192,9 @@ export function AlertFeed({ alerts, hubs, onRefreshAlerts }: AlertFeedProps) {
               size="xs"
               style={{ color: "var(--text-muted)", marginTop: 4 }}
             >
-              শুধুমাত্র Admin দ্বারা যাচাইকৃত ও অনুমোদিত (Approved) রিপোর্টগুলোই এই পাবলিক নোটিশ বোর্ডে প্রদর্শিত হয় এবং স্বয়ংক্রিয়ভাবে ট্রানজিট রাউটিংকে প্রভাবিত করে।
+              শুধুমাত্র Admin দ্বারা যাচাইকৃত ও অনুমোদিত (Approved) রিপোর্টগুলোই
+              এই পাবলিক নোটিশ বোর্ডে প্রদর্শিত হয় এবং স্বয়ংক্রিয়ভাবে ট্রানজিট
+              রাউটিংকে প্রভাবিত করে।
             </Text>
           </Box>
 
@@ -485,7 +487,10 @@ export function AlertFeed({ alerts, hubs, onRefreshAlerts }: AlertFeedProps) {
       >
         <Stack gap="sm">
           <Text size="xs" style={{ color: "var(--text-muted)" }}>
-            ঢাকার যাত্রীদের যানজট এড়াতে সাহায্য করুন। আপনার রিপোর্টটি সরাসরি Admin Moderation Queue-তে জমা হবে। অ্যাডমিন অনুমোদন (Approve) করলেই এটি Public Notice Board-এ প্রকাশিত হবে এবং রাউট রি-প্ল্যানিংয়ে যুক্ত হবে।
+            ঢাকার যাত্রীদের যানজট এড়াতে সাহায্য করুন। আপনার রিপোর্টটি সরাসরি
+            Admin Moderation Queue-তে জমা হবে। অ্যাডমিন অনুমোদন (Approve) করলেই
+            এটি Public Notice Board-এ প্রকাশিত হবে এবং রাউট রি-প্ল্যানিংয়ে যুক্ত
+            হবে।
           </Text>
 
           <TextInput

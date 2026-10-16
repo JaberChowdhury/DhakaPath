@@ -95,7 +95,7 @@ function calculateDistanceKm(
 
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState<
-    "planner" | "alerts" | "network" | "admin"
+    "planner" | "alerts" | "network" | "digitizer" | "admin"
   >("planner");
   const [chatOpened, setChatOpened] = useState(false);
   const [rideShareOpen, setRideShareOpen] = useState(false);
@@ -415,10 +415,13 @@ export default function HomePage() {
         setActiveTab={(tab) => {
           if (tab === "admin") {
             window.location.href = "/admin";
+          } else if (tab === "digitizer") {
+            window.location.href = "/digitizer";
           } else {
             setActiveTab(tab);
           }
         }}
+
         activeAlertsCount={alerts.length}
       />
 

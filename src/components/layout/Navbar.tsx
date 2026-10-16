@@ -16,7 +16,9 @@ import { ThemeToggle } from "./ThemeToggle";
 
 interface NavbarProps {
   activeTab?: "planner" | "alerts" | "network" | "digitizer" | "admin";
-  setActiveTab?: (tab: "planner" | "alerts" | "network" | "digitizer" | "admin") => void;
+  setActiveTab?: (
+    tab: "planner" | "alerts" | "network" | "digitizer" | "admin",
+  ) => void;
   activeAlertsCount?: number;
 }
 
@@ -30,7 +32,8 @@ export function Navbar({
   const [adminUser, setAdminUser] = useState<any>(null);
 
   // Compute active tab from pathname or prop
-  let currentTab: "planner" | "alerts" | "network" | "digitizer" | "admin" = "planner";
+  let currentTab: "planner" | "alerts" | "network" | "digitizer" | "admin" =
+    "planner";
   if (pathname === "/transit-lines" || pathname?.startsWith("/transit")) {
     currentTab = "network";
   } else if (pathname === "/alerts" || pathname?.startsWith("/live-alerts")) {
@@ -42,7 +45,6 @@ export function Navbar({
   } else if (propActiveTab) {
     currentTab = propActiveTab;
   }
-
 
   // Check admin authentication session
   useEffect(() => {
@@ -242,7 +244,6 @@ export function Navbar({
             </Link>
           </Group>
         </Group>
-
 
         {/* Right Actions: Admin (Role Protected Only), Theme, Login/Signout */}
         <Group gap="sm" align="center">

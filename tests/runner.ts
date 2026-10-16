@@ -817,6 +817,105 @@ async function runTestSuite() {
     );
   });
 
+  // 21. Signboard & Physical Notice Optical Digitizer & Community Verification Lifecycle
+  test("Signboard Optical Digitizer (OCR Extraction, DB Validation, & Admin Approval)", () => {
+    const {
+      runHeuristicOcr,
+      validateAgainstTransitDatabase,
+      matchHub,
+    } = require("../src/lib/ai/visionOcr");
+    const {
+      getOcrSubmissions,
+      addOcrSubmission,
+      updateOcrSubmissionStatus,
+      getApprovedServices,
+      addOrUpdateService,
+    } = require("../src/lib/db/repository");
+
+    // 1. Hub Matcher testing (Bengali + English + Aliases)
+    const mirpurMatch = matchHub("মিরপুর ১০");
+    assert(
+      mirpurMatch && mirpurMatch.id === "hub_mirpur_10",
+      "Must match Mirpur 10 in Bengali",
+    );
+
+    const motijheelMatch = matchHub("Motijheel");
+    assert(
+      motijheelMatch && motijheelMatch.id === "hub_motijheel",
+      "Must match Motijheel in English",
+    );
+
+    // 2. OCR Optical Extraction from notice sample
+    const extracted = runHeuristicOcr(undefined, "sample_bikolpo");
+    assert.strictEqual(extracted.serviceName, "Bikolpo Auto Service");
+    assert.strictEqual(extracted.origin, "Mirpur 10");
+    assert.strictEqual(extracted.destination, "Motijheel");
+    assert.strictEqual(extracted.fareRegular, 25);
+    assert.strictEqual(extracted.fareStudent, 13);
+
+    // 3. Database Cross-Validation
+    const dbMatch = validateAgainstTransitDatabase(extracted);
+    assert.strictEqual(dbMatch.originMatchedHub?.id, "hub_mirpur_10");
+    assert.strictEqual(dbMatch.destinationMatchedHub?.id, "hub_motijheel");
+    assert(
+      dbMatch.matchedStopsCount >= 4,
+      "Should match arterial intermediate stops",
+    );
+    assert(
+      dbMatch.statutoryFareValidation.isWithinReasonableBounds,
+      "25 BDT regular fare must be within reasonable bounds",
+    );
+    assert(
+      dbMatch.statutoryFareValidation.statutoryBrtaTariff !== null,
+      "Must calculate statutory tariff based on distance",
+    );
+
+    // 4. Commuter Submission Lifecycle (Pending -> Review -> Approved -> Published)
+    const submission = addOcrSubmission({
+      sampleKey: "sample_bikolpo",
+      imageName: "test_signboard_mirpur10.jpg",
+      rawText: extracted.rawText,
+      extractedData: extracted,
+      userNotes: "Verified at Mirpur 10 counter.",
+      dbMatch,
+    });
+
+    assert.strictEqual(submission.status, "pending");
+    assert(
+      submission.receiptCode.startsWith("OCR-2026-"),
+      "Must assign official receipt code",
+    );
+
+    // Verify submission is in queue
+    const allSubs = getOcrSubmissions();
+    assert(allSubs.some((s: any) => s.id === submission.id));
+
+    // Admin verifies and approves notice into live CMS
+    const approved = updateOcrSubmissionStatus(
+      submission.id,
+      "approved",
+      "Field verified by BRTA inspector",
+      "admin@dhakapath.gov.bd",
+    );
+    assert.strictEqual(approved?.status, "approved");
+    assert.strictEqual(approved?.reviewedBy, "admin@dhakapath.gov.bd");
+
+    // Publish into CMS
+    const publishedService = addOrUpdateService({
+      id: "srv_bus_digitized_bikolpo",
+      name: "Bikolpo Auto Service (Digitized)",
+      mode: "bus",
+      route_code: "BIK-OCR",
+      operator: "Bikolpo Syndicate",
+      description: "Approved from physical notice board.",
+      is_active: true,
+      verification_status: "verified",
+    });
+    assert(
+      getApprovedServices().some((s: any) => s.id === publishedService.id),
+    );
+  });
+
   console.log(
     `\n================================================================`,
   );

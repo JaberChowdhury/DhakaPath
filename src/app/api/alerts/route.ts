@@ -1,9 +1,5 @@
 import { NextResponse } from "next/server";
-import {
-  getActiveAlerts,
-  getDemoDisruptions,
-  getAllAlertsForAdmin,
-} from "@/lib/db/repository";
+import { getActiveAlerts, getAllAlertsForAdmin } from "@/lib/db/repository";
 
 export async function GET(request: Request) {
   try {
@@ -12,22 +8,25 @@ export async function GET(request: Request) {
     const forAdmin = searchParams.get("forAdmin") === "true";
     const scenarioId = searchParams.get("scenarioId");
 
-    if (forAdmin || includeDemos) {
-      const all = getAllAlertsForAdmin();
-      return NextResponse.json({
-        success: true,
-        alerts: all,
-        timestamp: new Date().toISOString(),
-      });
-    }
+    const alerts =
+      forAdmin || includeDemos
+        ? getAllAlertsForAdmin()
+        : getActiveAlerts(scenarioId);
 
-    const active = getActiveAlerts(scenarioId);
-
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
-      alerts: active,
+      alerts,
       timestamp: new Date().toISOString(),
     });
+
+    response.headers.set(
+      "Cache-Control",
+      "no-store, no-cache, must-revalidate, proxy-revalidate",
+    );
+    response.headers.set("Pragma", "no-cache");
+    response.headers.set("Expires", "0");
+
+    return response;
   } catch (err: any) {
     return NextResponse.json(
       { success: false, error: err.message },

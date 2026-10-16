@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getActiveAlerts } from "@/lib/db/repository";
+import { recordAlertFeedback } from "@/lib/db/repository";
 
 export async function POST(
   request: Request,
@@ -10,28 +10,19 @@ export async function POST(
     const body = await request.json();
     const voteType = body.voteType; // 'confirm' | 'dispute' | 'resolved'
 
-    const alerts = getActiveAlerts();
-    const alert = alerts.find((a) => a.id === id);
+    const updated = recordAlertFeedback(id, voteType);
 
-    if (!alert) {
+    if (!updated) {
       return NextResponse.json(
         { success: false, error: "Alert not found" },
         { status: 404 },
       );
     }
 
-    if (voteType === "confirm") {
-      alert.upvotes = (alert.upvotes || 0) + 1;
-    } else if (voteType === "dispute") {
-      alert.downvotes = (alert.downvotes || 0) + 1;
-    } else if (voteType === "resolved") {
-      alert.lifecycle_stage = "resolved";
-    }
-
     return NextResponse.json({
       success: true,
       message: `Vote recorded for alert ${id}`,
-      alert,
+      alert: updated,
     });
   } catch (err: any) {
     return NextResponse.json(

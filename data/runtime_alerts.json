@@ -1,0 +1,72 @@
+{
+  "dynamicAlerts": [
+    {
+      "title": "Waterlogging at Kakrail",
+      "description": "Stagnant water on bus lane",
+      "severity": "medium",
+      "affected_modes": [
+        "bus"
+      ],
+      "affected_segment_ids": [],
+      "delay_minutes": 15,
+      "is_closed": false,
+      "reported_by_type": "guest",
+      "observed_at": "2026-10-16T11:10:46.088Z",
+      "expires_at": "2026-10-16T11:40:46.088Z",
+      "id": "alt_usr_1792149046088",
+      "submitted_at": "2026-10-16T11:10:46.088Z",
+      "status": "approved",
+      "lifecycle_stage": "resolved",
+      "upvotes": 0,
+      "downvotes": 0
+    },
+    {
+      "title": "Waterlogging at Kakrail",
+      "description": "Stagnant water on bus lane",
+      "severity": "medium",
+      "affected_modes": [
+        "bus"
+      ],
+      "affected_segment_ids": [],
+      "delay_minutes": 15,
+      "is_closed": false,
+      "reported_by_type": "guest",
+      "observed_at": "2026-10-16T11:08:15.894Z",
+      "expires_at": "2026-10-16T11:38:15.894Z",
+      "id": "alt_usr_1792148895894",
+      "submitted_at": "2026-10-16T11:08:15.894Z",
+      "status": "approved",
+      "lifecycle_stage": "resolved",
+      "upvotes": 0,
+      "downvotes": 0
+    },
+    {
+      "id": "alt_usr_1792147369810",
+      "title": "not fair price",
+      "title_bn": "অতিরিক্ত ভাড়া দাবি",
+      "description": "Mohakhali to Farmgate bus conductors demanding 30 BDT instead of statutory 15 BDT.",
+      "severity": "medium",
+      "status": "approved",
+      "lifecycle_stage": "resolved",
+      "affected_modes": [
+        "bus"
+      ],
+      "affected_segment_ids": [
+        "seg_bus_bikolpo_agargaon_farmgate"
+      ],
+      "delay_minutes": 10,
+      "is_closed": false,
+      "reported_by_type": "guest",
+      "observed_at": "2026-10-16T10:01:14.802Z",
+      "expires_at": "2026-10-17T11:01:14.802Z",
+      "upvotes": 2,
+      "downvotes": 0
+    }
+  ],
+  "demoStatusOverrides": {},
+  "deletedAlertIds": [
+    "alt_usr_1792148832762",
+    "alt_adm_1792148895938",
+    "alt_adm_1792149046142"
+  ]
+}

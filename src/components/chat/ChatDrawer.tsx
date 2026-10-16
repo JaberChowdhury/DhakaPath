@@ -782,7 +782,11 @@ export function ChatDrawer({
               variant={isListening ? "filled" : "default"}
               radius="xl"
               onClick={toggleVoiceInput}
-              title={isListening ? "Listening... (Tap to stop)" : "Voice Search (বাংলায় বলুন)"}
+              title={
+                isListening
+                  ? "Listening... (Tap to stop)"
+                  : "Voice Search (বাংলায় বলুন)"
+              }
               styles={{
                 root: {
                   background: isListening ? "#00aa66" : "var(--bg-card-inner)",
