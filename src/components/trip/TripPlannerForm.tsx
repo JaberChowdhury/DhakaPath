@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Paper,
   Select,
@@ -12,22 +12,18 @@ import {
   Text,
   Badge,
   ActionIcon,
-  Tooltip,
   Collapse,
   Loader,
   Box,
 } from "@mantine/core";
 import {
-  IconArrowRight,
   IconArrowsExchange,
   IconAdjustmentsHorizontal,
   IconSchool,
-  IconAlertCircle,
   IconTrain,
   IconBus,
   IconCar,
   IconCurrentLocation,
-  IconSparkles,
 } from "@tabler/icons-react";
 import { Hub, TransitMode } from "@/types/network";
 
@@ -74,7 +70,7 @@ export function TripPlannerForm({
   onRequestLocation,
   locationLoading,
 }: TripPlannerFormProps) {
-  const [showFilters, setShowFilters] = React.useState(false);
+  const [showPreferences, setShowPreferences] = useState(false);
 
   const hubOptions = hubs.map((h) => ({
     value: h.id,
@@ -97,7 +93,6 @@ export function TripPlannerForm({
     }
   };
 
-  // Popular dynamic corridors
   const popularCorridors = [
     {
       label: "Mirpur 10 ➔ Motijheel",
@@ -113,11 +108,6 @@ export function TripPlannerForm({
       label: "Banasree ➔ Gulshan 1",
       origin: "hub_banasree",
       dest: "hub_gulshan_1",
-    },
-    {
-      label: "Farmgate ➔ Kawran Bazar",
-      origin: "hub_farmgate",
-      dest: "hub_kawran_bazar",
     },
   ];
 
@@ -297,176 +287,34 @@ export function TripPlannerForm({
           </ActionIcon>
         </Box>
 
-        {/* Quick Popular Corridors Chips */}
-        <Group gap={6} align="center">
-          {popularCorridors.map((c, i) => (
-            <Badge
-              key={i}
-              size="sm"
-              variant="light"
-              color="gray"
-              radius="sm"
-              style={{
-                cursor: "pointer",
-                textTransform: "none",
-                fontWeight: 500,
-                background: "var(--bg-card-inner)",
-                color: "var(--text-sub)",
-                border: "1px solid var(--border-subtle)",
-              }}
-              onClick={() => {
-                setOriginHubId(c.origin);
-                setDestinationHubId(c.dest);
-              }}
-            >
-              {c.label}
-            </Badge>
-          ))}
-        </Group>
-
-        {/* Student Concession & Budget Options */}
+        {/* Clean, Subtle Suggestions & Preferences Bar */}
         <Group justify="space-between" align="center" wrap="wrap">
-          <Switch
-            checked={student}
-            onChange={(e) => setStudent(e.currentTarget.checked)}
-            color="dark"
-            size="sm"
-            label={
-              <Group gap={4}>
-                <IconSchool size={16} />
-                <Text size="sm" fw={600} style={{ color: "var(--text-main)" }}>
-                  Student Pass
-                </Text>
-                <Badge size="xs" color="gray" variant="filled">
-                  50% Off Bus
-                </Badge>
-              </Group>
-            }
-          />
-
-          <Group gap={6} align="center">
-            <Text size="xs" c="dimmed">
-              Budget:
+          <Group gap={8} align="center">
+            <Text
+              size="11px"
+              style={{ color: "var(--text-muted)", fontWeight: 600 }}
+            >
+              Popular:
             </Text>
-            {[30, 50, 100].map((amt) => (
-              <Badge
-                key={amt}
-                size="sm"
-                variant={budgetBdt === amt ? "filled" : "outline"}
-                color="dark"
-                radius="sm"
+            {popularCorridors.map((c, i) => (
+              <Text
+                key={i}
+                size="11px"
                 style={{
+                  color: "var(--text-sub)",
                   cursor: "pointer",
-                  background:
-                    budgetBdt === amt ? "var(--text-main)" : undefined,
-                  color:
-                    budgetBdt === amt ? "var(--bg-page)" : "var(--text-sub)",
+                  textDecoration: "underline",
+                  textUnderlineOffset: "3px",
+                  fontWeight: 500,
                 }}
-                onClick={() => setBudgetBdt(budgetBdt === amt ? null : amt)}
+                onClick={() => {
+                  setOriginHubId(c.origin);
+                  setDestinationHubId(c.dest);
+                }}
               >
-                ≤ {amt} ৳
-              </Badge>
+                {c.label}
+              </Text>
             ))}
-            {budgetBdt !== null && (
-              <Badge
-                size="sm"
-                variant="subtle"
-                color="gray"
-                style={{ cursor: "pointer" }}
-                onClick={() => setBudgetBdt(null)}
-              >
-                Clear
-              </Badge>
-            )}
-          </Group>
-        </Group>
-
-        {/* Mode Selector Chips */}
-        <Group justify="space-between" align="center">
-          <Group gap={6}>
-            <Button
-              size="compact-xs"
-              variant={allowedModes.includes("metro") ? "filled" : "default"}
-              color="dark"
-              radius="xl"
-              leftSection={<IconTrain size={13} />}
-              onClick={() => toggleMode("metro")}
-              styles={{
-                root: {
-                  background: allowedModes.includes("metro")
-                    ? "var(--text-main)"
-                    : "var(--bg-card-inner)",
-                  color: allowedModes.includes("metro")
-                    ? "var(--bg-page)"
-                    : "var(--text-main)",
-                  border: "1px solid var(--border-subtle)",
-                },
-              }}
-            >
-              Metro
-            </Button>
-            <Button
-              size="compact-xs"
-              variant={allowedModes.includes("bus") ? "filled" : "default"}
-              color="dark"
-              radius="xl"
-              leftSection={<IconBus size={13} />}
-              onClick={() => toggleMode("bus")}
-              styles={{
-                root: {
-                  background: allowedModes.includes("bus")
-                    ? "var(--text-main)"
-                    : "var(--bg-card-inner)",
-                  color: allowedModes.includes("bus")
-                    ? "var(--bg-page)"
-                    : "var(--text-main)",
-                  border: "1px solid var(--border-subtle)",
-                },
-              }}
-            >
-              Bus
-            </Button>
-            <Button
-              size="compact-xs"
-              variant={allowedModes.includes("leguna") ? "filled" : "default"}
-              color="dark"
-              radius="xl"
-              leftSection={<IconCar size={13} />}
-              onClick={() => toggleMode("leguna")}
-              styles={{
-                root: {
-                  background: allowedModes.includes("leguna")
-                    ? "var(--text-main)"
-                    : "var(--bg-card-inner)",
-                  color: allowedModes.includes("leguna")
-                    ? "var(--bg-page)"
-                    : "var(--text-main)",
-                  border: "1px solid var(--border-subtle)",
-                },
-              }}
-            >
-              Leguna
-            </Button>
-            <Button
-              size="compact-xs"
-              variant={allowedModes.includes("rickshaw") ? "filled" : "default"}
-              color="dark"
-              radius="xl"
-              onClick={() => toggleMode("rickshaw")}
-              styles={{
-                root: {
-                  background: allowedModes.includes("rickshaw")
-                    ? "var(--text-main)"
-                    : "var(--bg-card-inner)",
-                  color: allowedModes.includes("rickshaw")
-                    ? "var(--bg-page)"
-                    : "var(--text-main)",
-                  border: "1px solid var(--border-subtle)",
-                },
-              }}
-            >
-              Rickshaw
-            </Button>
           </Group>
 
           <Button
@@ -474,88 +322,258 @@ export function TripPlannerForm({
             variant="subtle"
             color="gray"
             leftSection={<IconAdjustmentsHorizontal size={14} />}
-            onClick={() => setShowFilters(!showFilters)}
+            onClick={() => setShowPreferences(!showPreferences)}
             radius="xl"
+            styles={{
+              root: {
+                fontSize: "11px",
+                fontWeight: 600,
+                color: "var(--text-muted)",
+              },
+            }}
           >
-            {showFilters ? "Hide" : "Disruptions"}
+            {showPreferences ? "Hide Options" : "Options & Concessions"}
           </Button>
         </Group>
 
-        {/* Advanced Simulation Collapsible */}
-        <Collapse expanded={showFilters}>
-          <Stack
-            gap="xs"
-            pt="xs"
-            style={{ borderTop: "1px solid var(--border-subtle)" }}
+        {/* Expandable Preferences & Concessions Panel (Keeps main UI pristine for non-students) */}
+        {showPreferences && (
+          <Paper
+            p="sm"
+            radius="md"
+            style={{
+              background: "var(--bg-card-inner)",
+              border: "1px solid var(--border-subtle)",
+            }}
           >
-            <MultiSelect
-              label="Avoid Corridors / Hubs"
-              placeholder="Select hubs to route around..."
-              data={hubOptions}
-              value={avoidHubIds}
-              onChange={setAvoidHubIds}
-              clearable
-              comboboxProps={{
-                withinPortal: true,
-                zIndex: 2000,
-              }}
-              styles={{
-                input: {
-                  background: "var(--input-bg)",
-                  borderColor: "var(--input-border)",
-                  color: "var(--text-main)",
-                },
-              }}
-            />
+            <Stack gap="xs">
+              <Group justify="space-between" align="center" wrap="wrap">
+                <Switch
+                  checked={student}
+                  onChange={(e) => setStudent(e.currentTarget.checked)}
+                  color="dark"
+                  size="xs"
+                  label={
+                    <Group gap={4}>
+                      <IconSchool size={15} />
+                      <Text
+                        size="xs"
+                        fw={600}
+                        style={{ color: "var(--text-main)" }}
+                      >
+                        Student Pass (50% Off Bus)
+                      </Text>
+                    </Group>
+                  }
+                />
 
-            <Select
-              label="Inject Synthetic Disruption Scenario"
-              placeholder="Live Conditions (No Simulation)"
-              data={[
-                {
-                  value: "",
-                  label: "🟢 Live Conditions (No Injected Simulation)",
-                },
-                {
-                  value: "disrupt_malibagh_waterlogging",
-                  label: "🌊 Malibagh Waterlogging (Closed to buses/rickshaws)",
-                },
-                {
-                  value: "disrupt_farmgate_vip_movement",
-                  label: "🚔 Farmgate VIP Movement (+20m bus delay)",
-                },
-                {
-                  value: "disrupt_mrt_shewrapara_delay",
-                  label: "🚇 MRT-6 Signaling Calibration (+10m metro delay)",
-                },
-                {
-                  value: "disrupt_rampura_blockade",
-                  label: "🚫 Rampura Canal Blockade (Simulates No Valid Route)",
-                },
-              ]}
-              value={scenarioId || ""}
-              onChange={(val) => setScenarioId(val || null)}
-              comboboxProps={{
-                withinPortal: true,
-                zIndex: 2000,
-              }}
-              styles={{
-                input: {
-                  background: "var(--input-bg)",
-                  borderColor: "var(--input-border)",
-                  color: "var(--text-main)",
-                },
-              }}
-            />
-          </Stack>
-        </Collapse>
+                <Group gap={6} align="center">
+                  <Text size="11px" style={{ color: "var(--text-muted)" }}>
+                    Max Budget:
+                  </Text>
+                  {[30, 50, 100].map((amt) => (
+                    <Badge
+                      key={amt}
+                      size="xs"
+                      variant={budgetBdt === amt ? "filled" : "outline"}
+                      color="dark"
+                      radius="sm"
+                      style={{
+                        cursor: "pointer",
+                        background:
+                          budgetBdt === amt ? "var(--text-main)" : undefined,
+                        color:
+                          budgetBdt === amt
+                            ? "var(--bg-page)"
+                            : "var(--text-sub)",
+                      }}
+                      onClick={() =>
+                        setBudgetBdt(budgetBdt === amt ? null : amt)
+                      }
+                    >
+                      ≤ {amt} ৳
+                    </Badge>
+                  ))}
+                  {budgetBdt !== null && (
+                    <Badge
+                      size="xs"
+                      variant="subtle"
+                      color="gray"
+                      style={{ cursor: "pointer" }}
+                      onClick={() => setBudgetBdt(null)}
+                    >
+                      Clear
+                    </Badge>
+                  )}
+                </Group>
+              </Group>
+
+              {/* Mode Filters */}
+              <Group gap={6} mt={2}>
+                <Text size="11px" style={{ color: "var(--text-muted)" }}>
+                  Modes:
+                </Text>
+                <Button
+                  size="compact-xs"
+                  variant={
+                    allowedModes.includes("metro") ? "filled" : "default"
+                  }
+                  radius="xl"
+                  leftSection={<IconTrain size={12} />}
+                  onClick={() => toggleMode("metro")}
+                  styles={{
+                    root: {
+                      fontSize: "11px",
+                      background: allowedModes.includes("metro")
+                        ? "var(--text-main)"
+                        : "var(--bg-card)",
+                      color: allowedModes.includes("metro")
+                        ? "var(--bg-page)"
+                        : "var(--text-main)",
+                    },
+                  }}
+                >
+                  Metro
+                </Button>
+                <Button
+                  size="compact-xs"
+                  variant={allowedModes.includes("bus") ? "filled" : "default"}
+                  radius="xl"
+                  leftSection={<IconBus size={12} />}
+                  onClick={() => toggleMode("bus")}
+                  styles={{
+                    root: {
+                      fontSize: "11px",
+                      background: allowedModes.includes("bus")
+                        ? "var(--text-main)"
+                        : "var(--bg-card)",
+                      color: allowedModes.includes("bus")
+                        ? "var(--bg-page)"
+                        : "var(--text-main)",
+                    },
+                  }}
+                >
+                  Bus
+                </Button>
+                <Button
+                  size="compact-xs"
+                  variant={
+                    allowedModes.includes("leguna") ? "filled" : "default"
+                  }
+                  radius="xl"
+                  leftSection={<IconCar size={12} />}
+                  onClick={() => toggleMode("leguna")}
+                  styles={{
+                    root: {
+                      fontSize: "11px",
+                      background: allowedModes.includes("leguna")
+                        ? "var(--text-main)"
+                        : "var(--bg-card)",
+                      color: allowedModes.includes("leguna")
+                        ? "var(--bg-page)"
+                        : "var(--text-main)",
+                    },
+                  }}
+                >
+                  Leguna
+                </Button>
+                <Button
+                  size="compact-xs"
+                  variant={
+                    allowedModes.includes("rickshaw") ? "filled" : "default"
+                  }
+                  radius="xl"
+                  onClick={() => toggleMode("rickshaw")}
+                  styles={{
+                    root: {
+                      fontSize: "11px",
+                      background: allowedModes.includes("rickshaw")
+                        ? "var(--text-main)"
+                        : "var(--bg-card)",
+                      color: allowedModes.includes("rickshaw")
+                        ? "var(--bg-page)"
+                        : "var(--text-main)",
+                    },
+                  }}
+                >
+                  Rickshaw
+                </Button>
+              </Group>
+
+              <MultiSelect
+                label="Avoid Corridors / Hubs"
+                placeholder="Select hubs to avoid..."
+                data={hubOptions}
+                value={avoidHubIds}
+                onChange={setAvoidHubIds}
+                clearable
+                size="xs"
+                comboboxProps={{ withinPortal: true, zIndex: 2000 }}
+                styles={{
+                  label: {
+                    fontSize: "10px",
+                    fontWeight: 600,
+                    color: "var(--text-muted)",
+                  },
+                  input: {
+                    background: "var(--bg-card)",
+                    borderColor: "var(--border-subtle)",
+                    color: "var(--text-main)",
+                  },
+                }}
+              />
+
+              <Select
+                label="Simulation Scenario"
+                placeholder="Live Conditions (No Simulation)"
+                data={[
+                  {
+                    value: "",
+                    label: "🟢 Live Conditions (No Simulation)",
+                  },
+                  {
+                    value: "disrupt_malibagh_waterlogging",
+                    label: "🌊 Malibagh Waterlogging (Detour via Mohakhali)",
+                  },
+                  {
+                    value: "disrupt_farmgate_vip_movement",
+                    label: "🚔 Farmgate VIP Movement (+20m bus delay)",
+                  },
+                  {
+                    value: "disrupt_mrt_shewrapara_delay",
+                    label: "🚇 MRT-6 Signaling Calibration (+10m delay)",
+                  },
+                  {
+                    value: "disrupt_rampura_blockade",
+                    label: "🚫 Rampura Canal Blockade (Simulates No Route)",
+                  },
+                ]}
+                value={scenarioId || ""}
+                onChange={(val) => setScenarioId(val || null)}
+                size="xs"
+                comboboxProps={{ withinPortal: true, zIndex: 2000 }}
+                styles={{
+                  label: {
+                    fontSize: "10px",
+                    fontWeight: 600,
+                    color: "var(--text-muted)",
+                  },
+                  input: {
+                    background: "var(--bg-card)",
+                    borderColor: "var(--border-subtle)",
+                    color: "var(--text-main)",
+                  },
+                }}
+              />
+            </Stack>
+          </Paper>
+        )}
 
         {/* Uber Primary Solid Black Search CTA */}
         <Button
           fullWidth
           size="lg"
           variant="filled"
-          color="dark"
           onClick={onSearch}
           loading={loading}
           disabled={!originHubId || !destinationHubId}

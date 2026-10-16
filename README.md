@@ -1,84 +1,250 @@
 # DhakaPath (ঢাকা-পাথ)
 
-> **Next-Generation Multimodal Transit Navigation & Dynamic Disruption Awareness for Greater Dhaka**
+> **Next-Generation Multimodal Transit Navigation, Statutory Fare Intelligence & Dynamic Disruption Awareness for Greater Dhaka**
 
-DhakaPath is an accessible, mobile-first transit planning platform engineered specifically for Dhaka's transit realities. It integrates elevated Metro Rail (MRT Line 6), scheduled city buses, high-headway human haulers (legunas), and non-motorized feeder rickshaws into a single **deterministic routing and tariff engine** with conversational Bengali/Banglish AI discovery and community incident validation.
-
----
-
-## 🌟 Key Capabilities
-
-1. **Zero-Barrier Public Access:**
-   - Public route discovery, fare comparisons, interactive Leaflet/schematic maps, active street alerts, and conversational chat require **no login or account creation**.
-2. **Statutory Student Concession Engine:**
-   - Implements the official 50% bus student discount policy with statutory 10 BDT floor:
-     $$\text{student\_fare} = \max(10 \text{ BDT}, \lceil \text{regular\_fare} \times 0.5 \rceil)$$
-   - Evaluates fares on continuous **boarding-to-alighting rides** rather than penalizing passengers with duplicate minimum-fare charges per graph segment.
-3. **Hardened Multi-Modal Graph Routing:**
-   - Multi-criteria Dijkstra / Pareto search finding **Fastest**, **Cheapest**, and **Balanced** travel itineraries.
-   - Real-world transfer penalty accounting (passing intermediate stops on the same vehicle is 0 transfers).
-   - **Honest No-Route Reporting:** When critical links or corridors are blocked, the engine clearly states `NO_VALID_ROUTE` rather than hallucinating phantom detours.
-4. **Street Alert Moderation & Aging:**
-   - Dual-state incident management: Moderation (`pending`, `approved`, `rejected`) and Lifecycle (`active`, `disputed`, `resolved`, `expired`).
-   - 30-minute auto-expiry for uncorroborated crowd alerts; additive delay penalties with maximum delay deduplication.
-5. **Strict AI Boundary & Conversational Assistant:**
-   - The LLM (Google Gemini Flash / Free-tier adapter) **extracts intent and explains results**; it **never invents routes, calculates fares, or touches permissions**.
-   - Offline, failure-proof regex parser fallback guarantees 100% availability even during network drops or API quota exhaustion.
-   - First-class support for English, Bangla (বাংলা), and phonetic Banglish (`"Banasree theke Motijheel jabo, budget 40 taka, ami student"`).
+[![Tests](https://img.shields.io/badge/tests-18%2F18%20passing-10b981.svg)](tests/runner.ts)
+[![Next.js](<https://img.shields.io/badge/Next.js-16.4.2%20(Turbopack)-000000.svg>)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
+[![Theme](https://img.shields.io/badge/UI%20Design-Uber%20Monochrome%20Aesthetic-black.svg)](<>)
 
 ---
 
-## 🗺️ Pilot Network Coverage
+## 1. Project Overview
 
-The authoritative pilot network covers **14 major hubs** and **26 directional boarding points**:
-- **Hubs:** Uttara North, Mirpur 10, Agargaon, Farmgate, Kawran Bazar, Shahbagh, Motijheel, Mohakhali, Gulshan 1, Gulshan 2, Badda, Banasree, Malibagh, Airport.
-- **Transit Services:**
-  - `MRT Line 6`: Uttara North ↔ Motijheel (DMTCL single-journey tariff matrix).
-  - `Bikolpo Auto Service`: Mirpur 10 ↔ Motijheel via Farmgate & Shahbagh (Bus with student concession).
-  - `Prochesta Paribahan`: Airport ↔ Motijheel via Mohakhali & Malibagh.
-  - `Banasree Leguna`: Banasree Block C ↔ Badda Link Road ↔ Gulshan 1.
-  - Feeder Rickshaw & Walking Connectors between major transfer concourses.
+**DhakaPath** is a production-grade multimodal public transit routing and dynamic disruption awareness platform specifically architected for the complex mobility landscape of Greater Dhaka.
+
+Unlike traditional navigation apps that treat travel as private automobile trips or provide static point-to-point lines, DhakaPath models the true everyday reality of a Dhaka commuter: seamlessly chaining elevated **MRT Line 6 Metro Rail**, licensed **arterial city buses** (e.g., Bikolpo, Prochesta), high-headway **Hatirjheel & Banasree Legunas** (human haulers), and non-motorized **last-mile feeder Rickshaws** into realistic intermodal itineraries.
+
+The platform couples a high-speed deterministic transit graph with statutory fare rules (including Bangladesh government student concession formulas), real-time citizen-verified street disruption rerouting, and a bilingual conversational transit AI assistant (fluent in English, বাংলা, and Banglish).
 
 ---
 
-## 🚀 Quickstart & Setup
+## 2. Problem Statement
+
+Dhaka is one of the densest megacities in the world, home to over 20 million residents experiencing catastrophic traffic congestion and fragmented transit infrastructure:
+
+1. **Information Silos & Informal Modes:** No single source models how rapid rail (MRT Line 6) integrates with arterial buses, informal legunas, and local rickshaws. Commuters frequently make unnecessary transfers or overpay.
+2. **Statutory Fare Opacity & Student Extortion:** The BRTA statutory bus tariff rules and 50% student concession regulations (with mandatory minimum 10 BDT floors) are notoriously opaque, resulting in daily disputes between conductors and commuters.
+3. **Unpredictable Micro-Disruptions:** Flash waterlogging (e.g., Malibagh Railgate, Kazipara), VIP motorcade diversions, protests, or localized water pipe repairs instantly break traditional travel routes without live rerouting alternatives.
+4. **Language & Interface Friction:** Existing global transit apps fail to understand colloquial Bangladeshi commute terminology such as _"Shahbagh theke Badda jabo, budget 50 taka, ami student"_ or _"Malibagh block, alternative ache?"_.
+
+---
+
+## 3. Our Solution
+
+DhakaPath solves these critical urban challenges through four unified pillars:
+
+1. **Multimodal Graph Routing Engine:** Deterministic Dijkstra search across verified Dhaka transit corridors that honors physical inter-hub connections, walking transfers, and realistic mode switching.
+2. **Statutory Fare & Concession Engine:** Strict statutory fare calculations that apply distance-graduated MRT rules, flat bus tariffs, 50% student discounts with government 10 BDT minimum floor guarantees, and non-metered negotiated rickshaw ranges.
+3. **Honest Routing & Dynamic Rerouting:** When links are severed (e.g., flash waterlogging or blockades), the engine either computes an audited detour bypassing the affected corridor or honestly informs the user that no valid route exists without inventing phantom connections.
+4. **Bilingual AI Transit Assistant with Multi-Key Failover:** A conversational interface powered by Google Gemini with an automatic 5-key circuit breaker and deterministic fallback, extracting origin, destination, student status, and budget constraints from English and Banglish queries.
+
+---
+
+## 4. Key Features
+
+### 🚇 Core Multimodal Route Planning
+
+- Multi-tier transit routing supporting **Metro Rail (MRT-6)**, **Bikolpo Bus**, **Prochesta Bus**, **Banasree-Gulshan Leguna**, and **Feeder Rickshaws**.
+- Realistic transfer waypoints with designated boarding landmarks (e.g., _"Elevated Concourse Gate 1"_, _"Police Box Counter East Side"_).
+- Interactive Leaflet vector map displaying authentic road-aligned polylines and turn points derived from official road geometry.
+
+### 💰 Smart Fare Calculation & Concession Rules
+
+- **Full Fare Breakdown:** View exact per-leg costs and cumulative journey tariffs.
+- **Student Concession Guarantee:** Enforces statutory $\lceil \text{Regular Fare} \times 0.5 \rceil$ with an unyielding 10 BDT floor on city buses.
+- **Budget Categorization:** Automatically flags routes as `WITHIN_BUDGET`, `MAY_EXCEED_BUDGET`, or `EXCEEDS_BUDGET`.
+- **Single-Ride Charging:** Continuous bus travel is charged as a single fare without charging duplicate minimum-fare penalties across intermediate graph stops.
+
+### ⚠️ Dynamic Rerouting & Simulation Benchmarks
+
+- Real-time road and hub alerts for waterlogging, construction, and congestion.
+- Before-and-after simulation switcher demonstrating detours (e.g., Malibagh waterlogging detour via Gulshan & Mohakhali).
+- Honest route reporting: Guarantees zero phantom routes when corridors are impassable (e.g., Rampura Feeder Blockade).
+
+### 🤖 AI Commute Assistant (English & Banglish)
+
+- Built-in interactive questionnaire: Prompts user for **Student Status** (Yes/No) and **Target Budget** ($\le$ 30, 50, 80, 100 ৳).
+- Natural language intent extraction supporting colloquial Banglish phrases (_"Uttara theke Motijheel jabo ami student budget 50"_).
+- Instant map synchronization: Direct polyline plotting when AI returns route recommendations.
+
+### 🛺 Shared Commute & Fare Splitter Bot (Uber Pool Style)
+
+- Community board for carpooling and splitting CNG auto-rickshaw (up to 4 seats) and feeder rickshaw (up to 2 seats) fares.
+- Mathematical per-person split formula ($\lceil \text{Total Fare} \div \text{Commuters} \rceil$) with live savings calculations (save up to 75% vs solo trips).
+
+### 🛡️ Protected Transit Administration CMS
+
+- Role-based protected portal (`/admin`) visible exclusively to authenticated administrative users.
+- Live Incident Moderation Queue: One-click Approve, Reject, or Resolve actions directly altering live graph weights.
+- Multi-Key AI Pool Telemetry: Real-time circuit breaker monitor tracking quota windows, HTTP 429 cooldowns, and automatic failover.
+
+---
+
+## 5. Technology Stack
+
+| Layer                       | Technology                                               | Rationale                                                                                                      |
+| --------------------------- | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| **Frontend Framework**      | **Next.js 16.4.2 (App Router & Turbopack)**              | Sub-second cold compilation, streaming server components, and production performance.                          |
+| **UI Design System**        | **Mantine UI v7 / v9 + Tabler Icons**                    | Bespoke Uber website monochrome aesthetic (`#000000`, `#FFFFFF`, `#F3F3F3`, `#E2E2E2` borders).                |
+| **Mapping Engine**          | **Leaflet.js + OpenStreetMap (CartoDB Positron / Dark)** | Lightweight vector mapping with dynamic multi-color leg polylines, custom hub icons, and zero license lock-in. |
+| **Backend & Routing**       | **TypeScript + Next.js Server Route Handlers**           | Fully deterministic graph traversal, in-memory repository caches, and sub-millisecond Dijkstra execution.      |
+| **Database & Auth**         | **PostgreSQL (Supabase) + HMAC SHA-256 Tokens**          | Canonical transit datasets, tamper-proof signed session cookies, and declarative RLS security schemas.         |
+| **Artificial Intelligence** | **Google Gemini 2.5/Flash API + Key Pool Failover**      | High-speed multi-lingual intent parsing with 5-key adaptive circuit breaker and deterministic local fallback.  |
+| **Code Optimization**       | **Rust Token Killer (RTK)**                              | Optimized terminal and shell output streaming during high-speed development.                                   |
+
+---
+
+## 6. System Architecture
+
+```mermaid
+flowchart TD
+    subgraph Client ["Client Layer (Uber Website Design System)"]
+        UI["Next.js Web Client<br/>(Desktop & Mobile Responsive)"]
+        Map["Leaflet GIS Map<br/>(Road Alignments & Hub Vectors)"]
+        Chat["AI Assistant Drawer<br/>(Student & Budget Questionnaire)"]
+        AdminUI["Admin CMS Portal<br/>(Role-Protected Dashboard)"]
+    end
+
+    subgraph Server ["Next.js Server & Routing Core"]
+        API["Route Handlers<br/>(/api/plan, /api/chat, /api/network, /api/reports)"]
+        Planner["Deterministic Multimodal Planner<br/>(Dijkstra Search & Edge Weighting)"]
+        FareEng["Statutory Fare Engine<br/>(Student Rules & 10 BDT Floor)"]
+        AlertEng["Dynamic Alert & Aging Engine<br/>(Deduplication & Simulation Fixtures)"]
+        AIPool["AI Key Pool & Circuit Breaker<br/>(5-Key Auto-Failover Monitor)"]
+        AuthEng["Session Verification<br/>(HMAC SHA-256 Signed Tokens)"]
+    end
+
+    subgraph Data ["Database & Official Datasets"]
+        Supabase[("Supabase PostgreSQL DB<br/>12 Canonical Schema Tables")]
+        LocalStore[("In-Memory Repository<br/>(14 Hubs, 25 Stops, 38 Segments)")]
+        RawData[("Official Transport Artifacts<br/>Roadmap CSVs & Transit JSON")]
+    end
+
+    UI --> API
+    Map --> API
+    Chat --> API
+    AdminUI --> AuthEng
+
+    API --> Planner
+    API --> FareEng
+    API --> AlertEng
+    API --> AIPool
+    API --> AuthEng
+
+    Planner --> LocalStore
+    AlertEng --> LocalStore
+    LocalStore -.-> Supabase
+    RawData -.-> LocalStore
+```
+
+---
+
+## 7. Routing Algorithm & Multimodal Logic
+
+The routing engine executes an audited deterministic graph search across Dhaka's transit network:
+
+$$\text{User Query} \longrightarrow \text{Transit Graph} \longrightarrow \text{Constraint Filtering} \longrightarrow \text{Alert Injection} \longrightarrow \text{Dijkstra Search} \longrightarrow \text{Fare Breakdown} \longrightarrow \text{Ranked Routes}$$
+
+1. **Transit Graph Modeling:** The network is represented as a directed graph $G = (V, E)$, where vertices $V$ represent transit stops and intermodal hubs, and edges $E$ represent transit segments (metro, bus, leguna, rickshaw, and pedestrian transfers).
+2. **Dynamic Weighting & Disruption Penalty:**
+   $$\text{Weight}(e) = \text{Baseline Duration}(e) + \text{Disruption Delay}(e) + \text{Transfer Penalty}(e)$$
+   If an edge is marked `is_closed: true` (e.g., complete waterlogging or canal blockade), its edge weight becomes $\infty$, pruning it from the search space.
+3. **Multimodal Transfers:** Walking connectors between bus counters and elevated metro concourses (e.g., Farmgate, Shahbagh, Karwan Bazar) are explicitly modeled with realistic 2–3 minute walking penalties.
+4. **Alternative Route Ranking:** Returns multiple ranked travel options (Fastest, Lowest Cost, Minimal Transfers, and Metro Priority).
+5. **Honest Routing Guarantee:** If no path exists connecting origin to destination (e.g., during severe canal blockades or unsupported outer districts), the engine returns an honest `NO_ROUTE_FOUND` status rather than fabricating non-existent transit links.
+
+---
+
+## 8. AI Integration & Grounding
+
+The conversational transit assistant is built with strict architectural grounding to prevent AI hallucinations:
+
+1. **Intent Extraction:** Natural language input is parsed to extract:
+   - `originHubId` & `destinationHubId` (resolved via fuzzy alias matching against Dhaka's 14 hubs)
+   - `student` (boolean status for concession calculations)
+   - `budgetBdt` (maximum allowable fare threshold)
+   - `avoidHubIds` (corridors to route around, e.g., _"avoid Malibagh"_)
+2. **Contextual Memory:** Multi-turn session persistence allows users to refine existing journeys (_"Ami student"_ or _"Budget 30 taka"_ updates previous origin-destination context).
+3. **Graph Grounding:** The AI never invents routes or fares. All recommendations are directly computed by `planTrip()` and validated against official tariff schedules before being presented to the commuter.
+4. **Key Pool Circuit Breaker:** Connects 5 Google Gemini API keys in an automated pool. If Key #1 encounters HTTP 429 rate-limiting, the system isolates it for a 45-second cooldown and automatically routes the prompt to the next healthy key with zero user disruption. If all keys are exhausted, it seamlessly falls back to local deterministic rule-based parsing.
+
+---
+
+## 9. Data Sources & Official Artifacts
+
+DhakaPath's network geometry and service schedules are grounded in official data artifacts provided for the hackathon:
+
+| File Name                     | Source / Nature             | Role in DhakaPath                                                 |
+| ----------------------------- | --------------------------- | ----------------------------------------------------------------- |
+| `Roadmap-Dhaka.csv`           | Official Road Network GIS   | Road segment geometries and arterial corridor connectivity.       |
+| `Routemap-DhakaMetroRail.csv` | DMTCL Official Data         | Stations, alignments, and distance metrics for MRT Line 6.        |
+| `Routemap-BikolpoBus.csv`     | City Bus Syndicate Map      | Mirpur 10 to Motijheel bus stoppages and corridor alignments.     |
+| `Routemap-UttaraBus.csv`      | Regional Bus Corridor Map   | Uttara to Central Dhaka arterial bus alignments via Airport Road. |
+| `transit-data.json`           | Hackathon Canonical Dataset | Base stops, multimodal hubs, and service frequencies.             |
+
+> **Data Limitation Disclosure:** While official CSVs provide authentic physical road waypoints and station coordinates, live traffic speeds and real-time bus arrivals are simulated based on empirical Dhaka peak-hour observations. Negotiated rickshaw tariffs are computed within verified empirical ranges.
+
+---
+
+## 10. Installation & Configuration
 
 ### Prerequisites
-- Node.js `20.9+` (tested on Node.js `24.22.0`)
-- npm `10+`
 
-### 1. Clone & Install Dependencies
+- **Node.js:** v18.17.0 or higher (v20+ recommended)
+- **Package Manager:** `npm` (v9+)
+
+### 1. Clone the Repository
+
 ```bash
-git clone https://github.com/your-org/dhakapath.git
-cd dhakapath
-npm install
+git clone https://github.com/jaber-hossain1/DhakaPath.git
+cd DhakaPath
 ```
 
 ### 2. Configure Environment Variables
-Copy the template configuration:
+
+Copy the template or create `.env.local`:
+
 ```bash
 cp .env.example .env.local
 ```
-The application comes preconfigured with local mock AI and in-memory test databases so it runs **100% out of the box**. To enable real Google Gemini Flash AI, add your free-tier key in `.env.local`:
-```dotenv
-LLM_PROVIDER=gemini
-LLM_MODEL=gemini-1.5-flash
-LLM_API_KEY=your_gemini_api_key
+
+Configure your keys in `.env.local`:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://hhjqokrevdwbcrhyigwz.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_key
+ADMIN_AUTH_SECRET=dhakapath_admin_secret_key_2026_pilot_secure
+ADMIN_EMAIL=admin@dhakapath.gov.bd
+ADMIN_PASSWORD=dhakapath@admin2026
+GEMINI_API_KEY_1=your_gemini_api_key
 ```
 
-### 3. Run the Development Server
+### 3. Install Dependencies
+
+```bash
+npm install
+```
+
+### 4. Run Development Server
+
 ```bash
 npm run dev
 ```
-Open [http://localhost:3000](http://localhost:3000) on your mobile or desktop browser.
 
-### 4. Run Automated Test Suite
-Assert all 12 core acceptance criteria and benchmark journeys:
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### 5. Run Automated Verification Test Suite
+
+Execute the 18 comprehensive regression tests (routing, student fares, disruption detours, session crypto, and AI failover):
+
 ```bash
 npm test
 ```
 
-### 5. Build for Production
+### 6. Build for Production
+
 ```bash
 npm run build
 npm run start
@@ -86,72 +252,48 @@ npm run start
 
 ---
 
-## 🗄️ Database & Migrations
+## 11. Official Admin Account Details
 
-DhakaPath is designed for Supabase PostgreSQL. 
-- Schema migration: [`supabase/migrations/20260301000000_initial_schema.sql`](file:///home/jaber/Downloads/DhakaPath/supabase/migrations/20260301000000_initial_schema.sql)
-  - Tables: `sources`, `hubs`, `stops`, `services`, `service_stops`, `segments`, `fare_rules`, `alerts`, `alert_impacts`, `alert_votes`, `admin_roles`, `audit_log`.
-  - Row Level Security (RLS) policies for anonymous read, moderated community submissions, and admin authorization.
-- Canonical seed data: [`supabase/seed.sql`](file:///home/jaber/Downloads/DhakaPath/supabase/seed.sql)
+Authorized transit administrators have elevated access to the protected Operations CMS:
 
----
-
-## 🧪 Acceptance Test Verification (18 / 18 Passing — 100%)
-
-| # | Test Scenario | Verified System Invariant |
-|---|---|---|
-| **1** | Normal Multimodal Trip | Validated MRT Line 6 & bus integration with explicit transfer links. |
-| **2** | Statutory Student Bus Fare | Correct evaluation of $\max(10, \lceil \text{regular} \times 0.5 \rceil)$ across all fare ranges. |
-| **3** | Single Ride Charging | Traversal of 4 consecutive bus segments charges a single ride (13 BDT), not 4 minimum fares. |
-| **4** | Budget Categorization | Robust assignment of `WITHIN_BUDGET`, `MAY_EXCEED_BUDGET`, and `EXCEEDS_BUDGET`. |
-| **5** | Disruption Detour | Waterlogging at Malibagh Railgate automatically triggers bypass via Gulshan 1 and Mohakhali. |
-| **6** | Honest No-Route Outcome | Rampura canal blockage returns explicit `NO_VALID_ROUTE` rather than an invented path. |
-| **7** | Selective Mode Filtering | Road incidents targeting buses do not erroneously close elevated Metro Rail. |
-| **8** | Avoided Hub Constraint | Avoided intermediate hubs are strictly bypassed throughout the entire journey. |
-| **9** | Alert Aging & Expiry | Resolved or expired alerts immediately cease impacting edge travel times. |
-| **10** | Maximum Delay Deduplication | Overlapping incidents on the same segment take $\max(\text{delay})$ rather than compounding. |
-| **11** | Banglish Intent Extraction | Deterministic regex correctly extracts origin, destination, budget, and avoid corridors. |
-| **12** | Benchmark Journeys | All 4 demonstration scenarios execute deterministically. |
-| **13** | Network Snapshot Integrity | Authoritative verification of 14 hubs, 25 directional stops, 4 transit modes, and fare rules. |
-| **14** | Report Moderation Lifecycle | Community submission, crowd confirmation, and admin transition (`pending` ➔ `approved` ➔ `resolved`). |
-| **15** | Simulation Comparative Delta | Exact before-and-after computation of travel time delays and fare surge deltas. |
-| **16** | Admin Authentication Guard | Cryptographic session tokens, Next.js 16 proxy protection, and secure login verification. |
-| **17** | AI Multi-Key Pool & Failover | Circuit-breaker auto-switching across 5 Google AI Studio API keys on HTTP 429 rate-limits. |
-| **18** | Chat Road Directions on Map | Natural language chat intent extraction generates real-world road direction polylines on Leaflet. |
+- **Login URL:** [`http://localhost:3000/login`](http://localhost:3000/login)
+- **Protected CMS Route:** [`http://localhost:3000/admin`](http://localhost:3000/admin) (Automatically hidden from public navbar; accessible only upon authentication)
+- **Email:** `admin@dhakapath.gov.bd`
+- **Password:** `dhakapath@admin2026`
+- **Capabilities:** Moderate crowd reports, approve/reject street alerts, calibrate delays, and monitor AI key failover health.
 
 ---
 
-## 🎬 4–5 Minute Hackathon Live Demonstration Flow
+## 12. Screenshots & User Experience
 
-1. **[0:00–0:40] Public Transit Browser & Live GPS:**
-   - Open [http://localhost:3000](http://localhost:3000) on a mobile device or responsive desktop split-screen.
-   - Show 14 pilot hubs, 25 boarding points with specific landmarks (e.g. BSMMU Gate, Concourse Level), and click **"📍 Detect Nearest Station"** for browser geolocation.
-2. **[0:40–1:30] Multimodal Planning & Student Fare Engine:**
-   - Search *Mirpur 10 ➔ Motijheel*.
-   - Toggle **Student Concession** to demonstrate statutory 50% discount savings on bus (25 ৳ $\to$ 13 ৳) while preserving MRT-6 flat distance tariff.
-   - Show ranking options: **Fastest** (Metro, 25m), **Cheapest** (Bus, 13 ৳), and **Balanced** (Metro + Bus transfer).
-3. **[1:30–2:30] Interactive Disruption Simulation & Automatic Rerouting:**
-   - In Disruption Simulation, activate *Malibagh Waterlogging* (+25 min delay).
-   - Watch the routing engine automatically compute a detour via Leguna to Gulshan 1 and bus to Kawran Bazar.
-   - Show the **Simulation Comparison Banner** highlighting the exact travel time increase and cost difference.
-   - Activate *Rampura Feeder Blockade* to prove the **Honest No-Route Guarantee** (`NO_VALID_ROUTE`).
-4. **[2:30–3:15] Street Alerts & Admin Authentication:**
-   - Browse the **Street Alerts** tab with real-time crowd verification ("Confirm" & "Resolved" voting).
-   - Navigate to `/admin`. Demonstrate that unauthenticated users are redirected to `/login`.
-   - Log in as admin (`admin` / `dhakapath2026`). Show the Admin Moderation panel, live alerts review, and the **AI Key Pool & Quota Monitor** tracking all 5 API keys.
-5. **[3:15–4:20] Conversational AI Assistant & Map Direction Sync:**
-   - Click the floating AI button in the bottom right corner.
-   - Type in Banglish: `"Banasree theke Motijheel jabo, budget 40, ami student"`.
-   - Show multi-turn context memory: follow up with `"Malibagh avoid koro"`.
-   - Click **"🗺️ View Road Directions on Map"** on the chat route card: show how it smoothly animates and plots the color-coded road polyline on the Leaflet map with origin and destination pins.
-6. **[4:20–5:00] Architectural Highlights & Q&A:**
-   - Explain zero paid APIs (Leaflet + OpenStreetMap + Free-tier Gemini).
-   - Deterministic tariff calculation prevents AI hallucination.
-   - 18 / 18 automated tests passing (100%).
+| Multimodal Route Planner                                           | AI Commute Assistant (Questionnaire Flow)                          |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------ |
+| ![Route Planner](public/screenshots/route_search.png)              | ![AI Assistant](public/screenshots/ai_chat.png)                    |
+| _Streamlined Uber-style trip planner with interactive Leaflet map_ | _Bilingual AI with student status and target budget questionnaire_ |
+
+| Shared Commute & Fare Splitter Bot                              | Protected Operations CMS                                        |
+| --------------------------------------------------------------- | --------------------------------------------------------------- |
+| ![Ride Splitter Board](public/screenshots/ride_share_board.png) | ![Admin Dashboard](public/screenshots/admin_dashboard.png)      |
+| _Uber Pool style fare splitting & community ride sharing_       | _Disruption moderation queue, services CMS, & AI key telemetry_ |
 
 ---
 
-## 📄 License & Attribution
-- OpenStreetMap Map Tiles & Geodata &copy; OpenStreetMap contributors under ODbL 1.0.
-- Dhaka Bus Stop Sequence references based on research in `dhaka-bus-access-heatmap` under MIT License.
-- DMTCL Fare references derived from official publications by Dhaka Mass Transit Company Limited.
+## 13. Limitations & Future Scope
+
+### Current Pilot Limitations
+
+- **Pilot Geographic Coverage:** Focuses on 14 major multimodal hubs across North, Central, and East Dhaka (Uttara North to Motijheel, Mirpur 10 to Banasree/Badda).
+- **Static Sensor Hardware:** Disruption reports rely on citizen crowd-sourcing and official simulation feeds rather than automated IoT road sensors.
+
+### Future Roadmap
+
+1. **GTFS Realtime Integration:** Ingest live GPS feeds from participating Dhaka bus operators.
+2. **Digital NFC Ticketing:** Direct top-up integration with Rapid Pass and MRT Pass.
+3. **Voice Audio Directions:** Audio guidance in colloquial Bengali for low-literacy commuters.
+4. **Predictive Monsoon AI:** Historical machine learning models forecasting waterlogging based on BMD rainfall telemetry.
+
+---
+
+## 14. License
+
+This project was built for the **Dhaka Transit Hackathon 2026**. Licensed under the [MIT License](LICENSE).

@@ -14,7 +14,6 @@ import {
   TextInput,
   Tabs,
   Table,
-  ThemeIcon,
   Box,
   SimpleGrid,
 } from "@mantine/core";
@@ -29,9 +28,8 @@ import {
   IconAlertTriangle,
   IconCheck,
   IconArrowRight,
-  IconInfoCircle,
 } from "@tabler/icons-react";
-import { Hub, Stop, Service, ServiceStop, TransitMode } from "@/types/network";
+import { Hub, Stop, TransitMode } from "@/types/network";
 import { DisruptionAlert } from "@/types/alerts";
 
 interface TransitNetworkBrowserProps {
@@ -149,110 +147,126 @@ export function TransitNetworkBrowser({
       description:
         "High-frequency feeder connector bridging East Dhaka residential areas to Gulshan Diplomatic Zone.",
       regularFare: "15 - 25 ৳",
-      studentFare: "Not Applicable (Exempt commercial feeder tariff)",
+      studentFare: "Not Applicable (feeder hauler fixed tariff)",
       minFloor: "15 ৳",
-      stopsSequence: ["Rampura", "Banasree", "Gulshan 1"],
+      stopsSequence: [
+        "Banasree Block C",
+        "Rampura Bridge",
+        "Hatirjheel Circular Road",
+        "Police Plaza Concord",
+        "Gulshan 1 Circle",
+      ],
     },
   ];
 
-  // Helper to determine active disruption status for a hub
   const getHubAlertStatus = (hub: Hub) => {
-    const hubStops = stops.filter((s) => s.hub_id === hub.id);
-    const stopIds = new Set(hubStops.map((s) => s.id));
-
-    // Check if any active alert affects this hub
-    const activeDisruptions = alerts.filter((a) => {
-      // Direct title match or affected segment involvement
-      const titleMatch =
-        a.title.toLowerCase().includes(hub.name_en.toLowerCase()) ||
-        (hub.name_bn && a.title.includes(hub.name_bn));
-      return titleMatch;
-    });
-
-    if (activeDisruptions.length > 0) {
+    const hubAlerts = alerts.filter(
+      (a) =>
+        ((a as any).hub_id === hub.id || (a as any).hubId === hub.id) &&
+        a.lifecycle_stage === "active",
+    );
+    if (hubAlerts.length > 0) {
       return {
         hasAlert: true,
-        message: activeDisruptions[0].title,
-        severity: activeDisruptions[0].severity,
+        message: hubAlerts[0].title,
+        severity: hubAlerts[0].severity,
       };
     }
-
     return {
       hasAlert: false,
-      message: "No active disruptions reported",
+      message: "Normal Operations",
       severity: "none",
     };
-  };
-
-  const getModeColor = (mode: TransitMode) => {
-    switch (mode) {
-      case "metro":
-        return "teal";
-      case "bus":
-        return "blue";
-      case "leguna":
-        return "orange";
-      case "rickshaw":
-        return "grape";
-      default:
-        return "gray";
-    }
   };
 
   const getModeIcon = (mode: TransitMode) => {
     switch (mode) {
       case "metro":
-        return <IconTrain size={16} />;
+        return <IconTrain size={14} />;
       case "bus":
-        return <IconBus size={16} />;
+        return <IconBus size={14} />;
       case "leguna":
-        return <IconCar size={16} />;
+        return <IconCar size={14} />;
       default:
-        return <IconMapPin size={16} />;
+        return <IconMapPin size={14} />;
     }
   };
 
   return (
-    <Stack gap="md">
-      {/* Top Banner */}
+    <Stack gap="lg">
+      {/* Top Banner - Uber Style */}
       <Paper
-        p="md"
-        radius="md"
+        p="lg"
+        radius="lg"
         style={{
           background: "var(--bg-card)",
-          backdropFilter: "blur(12px)",
           border: "1px solid var(--border-subtle)",
-          boxShadow: "var(--shadow-card)",
+          boxShadow: "0 4px 20px rgba(0, 0, 0, 0.04)",
         }}
       >
-        <Group justify="space-between" align="center" wrap="wrap">
+        <Group justify="space-between" align="center" wrap="wrap" gap="md">
           <Box>
-            <Group gap="xs">
-              <IconRoute size={24} color="#2dd4bf" />
-              <Title order={3} style={{ color: "var(--text-main)" }}>
-                Dhaka Transit Network (ঢাকা ট্রানজিট নেটওয়ার্ক)
+            <Group gap="xs" align="center">
+              <Box
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: "50%",
+                  background: "var(--text-main)",
+                  color: "var(--bg-page)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <IconRoute size={18} stroke={2.2} />
+              </Box>
+              <Title
+                order={2}
+                style={{
+                  color: "var(--text-main)",
+                  fontSize: "1.35rem",
+                  fontWeight: 700,
+                  letterSpacing: "-0.02em",
+                }}
+              >
+                Dhaka Transit Network
               </Title>
-              <Badge color="teal" variant="light">
-                14 Hubs • 4 Services
+              <Badge
+                variant="outline"
+                size="sm"
+                radius="sm"
+                style={{
+                  borderColor: "var(--border-subtle)",
+                  color: "var(--text-main)",
+                  background: "var(--bg-card-inner)",
+                  fontWeight: 600,
+                }}
+              >
+                14 HUBS • 4 LINES
               </Badge>
             </Group>
-            <Text size="xs" c="dimmed" mt={4}>
-              Official multimodal corridor catalog covering Rapid Transit
-              (MRT-6), City Buses, Feeder Haulers, and Rickshaw links.
+            <Text
+              size="xs"
+              style={{ color: "var(--text-muted)", marginTop: 4 }}
+            >
+              Official multimodal corridor catalog covering MRT-6 Metro Rail,
+              City Buses, and Feeder routes.
             </Text>
           </Box>
 
           <TextInput
-            placeholder="Search hub or service..."
+            placeholder="Search hub or line..."
             leftSection={<IconSearch size={14} />}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             size="xs"
+            radius="xl"
             style={{ width: 260 }}
             styles={{
               input: {
-                background: "var(--input-bg)",
-                borderColor: "var(--input-border)",
+                background: "var(--bg-card-inner)",
+                borderColor: "var(--border-subtle)",
                 color: "var(--text-main)",
               },
             }}
@@ -260,11 +274,22 @@ export function TransitNetworkBrowser({
         </Group>
       </Paper>
 
-      {/* Tabs */}
+      {/* Tabs - Uber Monochrome Style */}
       <Tabs
         value={activeTab}
         onChange={(val) => setActiveTab(val || "hubs")}
-        color="teal"
+        color="dark"
+        styles={{
+          tab: {
+            fontWeight: 600,
+            fontSize: 13,
+            color: "var(--text-muted)",
+            "&[data-active]": {
+              color: "var(--text-main)",
+              borderColor: "var(--text-main)",
+            },
+          },
+        }}
       >
         <Tabs.List>
           <Tabs.Tab value="hubs" leftSection={<IconMapPin size={16} />}>
@@ -293,11 +318,9 @@ export function TransitNetworkBrowser({
                   radius="md"
                   style={{
                     background: "var(--bg-card)",
-                    border: status.hasAlert
-                      ? "1px solid #f59e0b"
-                      : "1px solid var(--border-subtle)",
-                    boxShadow: "var(--shadow-card)",
-                    transition: "transform 0.15s ease",
+                    border: "1px solid var(--border-subtle)",
+                    boxShadow: "0 2px 10px rgba(0, 0, 0, 0.04)",
+                    transition: "transform 0.15s ease, border-color 0.15s ease",
                   }}
                 >
                   <Stack
@@ -315,15 +338,28 @@ export function TransitNetworkBrowser({
                           >
                             {hub.name_en}
                           </Text>
-                          <Text size="xs" c="dimmed">
+                          <Text
+                            size="xs"
+                            style={{ color: "var(--text-muted)" }}
+                          >
                             {hub.name_bn}
                           </Text>
                         </Box>
 
                         <Badge
                           size="xs"
-                          color={status.hasAlert ? "yellow" : "teal"}
-                          variant="light"
+                          radius="xl"
+                          variant="outline"
+                          style={{
+                            borderColor: status.hasAlert
+                              ? "var(--accent-amber)"
+                              : "var(--border-subtle)",
+                            color: status.hasAlert
+                              ? "var(--accent-amber)"
+                              : "var(--text-muted)",
+                            background: "var(--bg-card-inner)",
+                            fontWeight: 600,
+                          }}
                           leftSection={
                             status.hasAlert ? (
                               <IconAlertTriangle size={10} />
@@ -333,40 +369,51 @@ export function TransitNetworkBrowser({
                           }
                         >
                           {status.hasAlert
-                            ? "Alert Reported"
+                            ? "Alert Active"
                             : "Normal Operations"}
                         </Badge>
                       </Group>
 
                       {/* Modes Badges */}
-                      <Group gap={4} mt="xs">
+                      <Group gap={6} mt="xs">
                         {modes.map((m) => (
                           <Badge
                             key={m}
                             size="xs"
-                            variant="outline"
-                            color={getModeColor(m)}
+                            radius="sm"
+                            variant="filled"
+                            style={{
+                              background: "var(--text-main)",
+                              color: "var(--bg-page)",
+                              fontWeight: 700,
+                              textTransform: "uppercase",
+                            }}
                             leftSection={getModeIcon(m)}
                           >
-                            {m.toUpperCase()}
+                            {m}
                           </Badge>
                         ))}
                       </Group>
 
                       {/* Landmarks */}
                       {hubStops.length > 0 && hubStops[0].boarding_landmark && (
-                        <Text size="xs" c="gray.3" mt="xs">
-                          📍{" "}
-                          <Text span c="dimmed">
-                            Boarding:
-                          </Text>{" "}
-                          {hubStops[0].boarding_landmark}
+                        <Text
+                          size="xs"
+                          mt="xs"
+                          style={{ color: "var(--text-muted)" }}
+                        >
+                          📍 {hubStops[0].boarding_landmark}
                         </Text>
                       )}
 
                       {/* Active Alert Note */}
                       {status.hasAlert && (
-                        <Text size="xs" c="yellow" mt={4} fw={500}>
+                        <Text
+                          size="xs"
+                          mt={4}
+                          fw={600}
+                          style={{ color: "var(--accent-amber)" }}
+                        >
                           ⚠️ {status.message}
                         </Text>
                       )}
@@ -376,11 +423,23 @@ export function TransitNetworkBrowser({
                     <Button
                       fullWidth
                       size="xs"
-                      variant="light"
-                      color="teal"
+                      radius="xl"
+                      variant="default"
                       rightSection={<IconArrowRight size={14} />}
                       onClick={() => onSelectHubForPlan(hub.id)}
                       mt="xs"
+                      styles={{
+                        root: {
+                          background: "var(--bg-card-inner)",
+                          color: "var(--text-main)",
+                          border: "1px solid var(--border-subtle)",
+                          fontWeight: 600,
+                          "&:hover": {
+                            background: "var(--text-main)",
+                            color: "var(--bg-page)",
+                          },
+                        },
+                      }}
                     >
                       Plan Trip from Here
                     </Button>
@@ -402,20 +461,27 @@ export function TransitNetworkBrowser({
                 style={{
                   background: "var(--bg-card)",
                   border: "1px solid var(--border-subtle)",
-                  boxShadow: "var(--shadow-card)",
+                  boxShadow: "0 2px 10px rgba(0, 0, 0, 0.04)",
                 }}
               >
                 <Stack gap="sm">
                   <Group justify="space-between" align="flex-start">
                     <Box>
-                      <Group gap="xs">
-                        <ThemeIcon
-                          size="md"
-                          color={getModeColor(srv.mode)}
-                          variant="light"
+                      <Group gap="xs" align="center">
+                        <Box
+                          style={{
+                            width: 28,
+                            height: 28,
+                            borderRadius: "50%",
+                            background: "var(--text-main)",
+                            color: "var(--bg-page)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
                         >
                           {getModeIcon(srv.mode)}
-                        </ThemeIcon>
+                        </Box>
                         <Box>
                           <Text
                             fw={700}
@@ -424,8 +490,11 @@ export function TransitNetworkBrowser({
                           >
                             {srv.name}
                           </Text>
-                          <Text size="xs" c="dimmed">
-                            {srv.operator} • Route Code: {srv.routeCode}
+                          <Text
+                            size="xs"
+                            style={{ color: "var(--text-muted)" }}
+                          >
+                            {srv.operator} • Code: {srv.routeCode}
                           </Text>
                         </Box>
                       </Group>
@@ -433,30 +502,57 @@ export function TransitNetworkBrowser({
 
                     <Badge
                       size="sm"
-                      color={getModeColor(srv.mode)}
+                      radius="sm"
                       variant="filled"
+                      style={{
+                        background: "var(--text-main)",
+                        color: "var(--bg-page)",
+                        fontWeight: 700,
+                      }}
                     >
                       {srv.mode.toUpperCase()}
                     </Badge>
                   </Group>
 
-                  <Text size="sm" c="gray.3">
+                  <Text size="xs" style={{ color: "var(--text-muted)" }}>
                     {srv.description}
                   </Text>
 
-                  {/* Route Sequence Pills */}
+                  {/* Stops Sequence Progression */}
                   <Box>
-                    <Text size="xs" fw={600} c="dimmed" mb={4}>
-                      STOP SEQUENCE (স্টপেজ তালিকা):
+                    <Text
+                      size="10px"
+                      fw={700}
+                      mb={4}
+                      style={{
+                        letterSpacing: "0.06em",
+                        color: "var(--text-muted)",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      STOP SEQUENCE
                     </Text>
-                    <Group gap={4} wrap="wrap">
+                    <Group gap={6} wrap="wrap">
                       {srv.stopsSequence.map((stopName, idx) => (
                         <React.Fragment key={idx}>
-                          <Badge size="xs" variant="light" color="gray">
+                          <Badge
+                            size="xs"
+                            radius="sm"
+                            variant="outline"
+                            style={{
+                              borderColor: "var(--border-subtle)",
+                              color: "var(--text-main)",
+                              background: "var(--bg-card-inner)",
+                              fontWeight: 600,
+                            }}
+                          >
                             {stopName}
                           </Badge>
                           {idx < srv.stopsSequence.length - 1 && (
-                            <Text size="xs" c="dimmed">
+                            <Text
+                              size="xs"
+                              style={{ color: "var(--text-muted)" }}
+                            >
                               ➔
                             </Text>
                           )}
@@ -470,16 +566,23 @@ export function TransitNetworkBrowser({
                     <Grid.Col span={{ base: 12, sm: 4 }}>
                       <Paper
                         p="xs"
-                        radius="sm"
+                        radius="md"
                         style={{
                           background: "var(--bg-card-inner)",
                           border: "1px solid var(--border-subtle)",
                         }}
                       >
-                        <Text size="xs" c="dimmed">
+                        <Text
+                          size="11px"
+                          style={{ color: "var(--text-muted)" }}
+                        >
                           Regular Tariff:
                         </Text>
-                        <Text size="sm" fw={600} style={{ color: "#2dd4bf" }}>
+                        <Text
+                          size="sm"
+                          fw={700}
+                          style={{ color: "var(--text-main)" }}
+                        >
                           {srv.regularFare}
                         </Text>
                       </Paper>
@@ -487,16 +590,23 @@ export function TransitNetworkBrowser({
                     <Grid.Col span={{ base: 12, sm: 4 }}>
                       <Paper
                         p="xs"
-                        radius="sm"
+                        radius="md"
                         style={{
                           background: "var(--bg-card-inner)",
                           border: "1px solid var(--border-subtle)",
                         }}
                       >
-                        <Text size="xs" c="dimmed">
+                        <Text
+                          size="11px"
+                          style={{ color: "var(--text-muted)" }}
+                        >
                           Student Concession:
                         </Text>
-                        <Text size="sm" fw={600} style={{ color: "#38bdf8" }}>
+                        <Text
+                          size="sm"
+                          fw={700}
+                          style={{ color: "var(--text-main)" }}
+                        >
                           {srv.studentFare}
                         </Text>
                       </Paper>
@@ -504,18 +614,21 @@ export function TransitNetworkBrowser({
                     <Grid.Col span={{ base: 12, sm: 4 }}>
                       <Paper
                         p="xs"
-                        radius="sm"
+                        radius="md"
                         style={{
                           background: "var(--bg-card-inner)",
                           border: "1px solid var(--border-subtle)",
                         }}
                       >
-                        <Text size="xs" c="dimmed">
+                        <Text
+                          size="11px"
+                          style={{ color: "var(--text-muted)" }}
+                        >
                           Statutory Floor:
                         </Text>
                         <Text
                           size="sm"
-                          fw={600}
+                          fw={700}
                           style={{ color: "var(--text-main)" }}
                         >
                           {srv.minFloor}
@@ -537,16 +650,26 @@ export function TransitNetworkBrowser({
             style={{
               background: "var(--bg-card)",
               border: "1px solid var(--border-subtle)",
-              boxShadow: "var(--shadow-card)",
+              boxShadow: "0 2px 10px rgba(0, 0, 0, 0.04)",
             }}
           >
             <Group gap="xs" mb="xs">
-              <IconCoins size={20} color="#2dd4bf" />
-              <Title order={4} style={{ color: "var(--text-main)" }}>
-                Statutory Fare Schedule & Student Discount Policies
+              <IconCoins
+                size={20}
+                stroke={2}
+                style={{ color: "var(--text-main)" }}
+              />
+              <Title
+                order={4}
+                style={{ color: "var(--text-main)", fontWeight: 700 }}
+              >
+                Statutory Fare Schedule & Student Concession
               </Title>
             </Group>
-            <Text size="xs" c="dimmed" mb="md">
+            <Text
+              size="xs"
+              style={{ color: "var(--text-muted)", marginBottom: 16 }}
+            >
               Evaluated per continuous vehicle ride (not per graph segment).
               Buses apply: max(10 BDT, ceil(regular × 0.5)).
             </Text>
@@ -554,16 +677,26 @@ export function TransitNetworkBrowser({
             <Table striped verticalSpacing="sm">
               <Table.Thead>
                 <Table.Tr>
-                  <Table.Th>Mode / Corridor</Table.Th>
-                  <Table.Th>Calculation Basis</Table.Th>
-                  <Table.Th>Regular Fare</Table.Th>
-                  <Table.Th>Student Concession</Table.Th>
-                  <Table.Th>Statutory Floor</Table.Th>
+                  <Table.Th style={{ color: "var(--text-main)" }}>
+                    Mode / Corridor
+                  </Table.Th>
+                  <Table.Th style={{ color: "var(--text-main)" }}>
+                    Calculation Basis
+                  </Table.Th>
+                  <Table.Th style={{ color: "var(--text-main)" }}>
+                    Regular Fare
+                  </Table.Th>
+                  <Table.Th style={{ color: "var(--text-main)" }}>
+                    Student Concession
+                  </Table.Th>
+                  <Table.Th style={{ color: "var(--text-main)" }}>
+                    Statutory Floor
+                  </Table.Th>
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
                 <Table.Tr>
-                  <Table.Td fw={600} style={{ color: "#2dd4bf" }}>
+                  <Table.Td fw={700} style={{ color: "var(--text-main)" }}>
                     🚇 MRT Line 6
                   </Table.Td>
                   <Table.Td>Distance graduated (Elevated rail)</Table.Td>
@@ -572,7 +705,7 @@ export function TransitNetworkBrowser({
                   <Table.Td>20 ৳</Table.Td>
                 </Table.Tr>
                 <Table.Tr>
-                  <Table.Td fw={600} style={{ color: "#38bdf8" }}>
+                  <Table.Td fw={700} style={{ color: "var(--text-main)" }}>
                     🚌 Bikolpo Auto Service
                   </Table.Td>
                   <Table.Td>Per continuous ride</Table.Td>
@@ -581,7 +714,7 @@ export function TransitNetworkBrowser({
                   <Table.Td>10 ৳</Table.Td>
                 </Table.Tr>
                 <Table.Tr>
-                  <Table.Td fw={600} style={{ color: "#38bdf8" }}>
+                  <Table.Td fw={700} style={{ color: "var(--text-main)" }}>
                     🚌 Prochesta Paribahan
                   </Table.Td>
                   <Table.Td>Per continuous ride</Table.Td>
@@ -590,7 +723,7 @@ export function TransitNetworkBrowser({
                   <Table.Td>10 ৳</Table.Td>
                 </Table.Tr>
                 <Table.Tr>
-                  <Table.Td fw={600} style={{ color: "#f59e0b" }}>
+                  <Table.Td fw={700} style={{ color: "var(--text-main)" }}>
                     🚐 Banasree Leguna
                   </Table.Td>
                   <Table.Td>Fixed corridor tariff</Table.Td>
@@ -599,7 +732,7 @@ export function TransitNetworkBrowser({
                   <Table.Td>15 ৳</Table.Td>
                 </Table.Tr>
                 <Table.Tr>
-                  <Table.Td fw={600} style={{ color: "#a855f7" }}>
+                  <Table.Td fw={700} style={{ color: "var(--text-main)" }}>
                     🛺 Feeder Rickshaw
                   </Table.Td>
                   <Table.Td>Non-metered negotiated range</Table.Td>

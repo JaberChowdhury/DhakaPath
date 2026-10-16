@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, Suspense } from "react";
 import {
   Container,
   Paper,
@@ -11,18 +11,13 @@ import {
   Button,
   Group,
   Stack,
-  Divider,
-  Badge,
   Alert,
   Box,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import {
-  IconShieldLock,
-  IconUser,
   IconArrowLeft,
   IconAlertTriangle,
-  IconKey,
   IconCheck,
 } from "@tabler/icons-react";
 import Link from "next/link";
@@ -38,87 +33,74 @@ function LoginForm() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isAdminMode, setIsAdminMode] = useState(true);
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    // If redirected to login with redirect param pointing to /admin, default to admin mode
-    if (redirectUrl.startsWith("/admin")) {
-      setIsAdminMode(true);
-    }
-  }, [redirectUrl]);
-
-  // Quick fill default official credentials
-  const handleFillDemoAdmin = () => {
-    setEmail("admin@dhakapath.gov.bd");
-    setPassword("dhakapath@admin2026");
-  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    if (isAdminMode) {
-      try {
-        const res = await fetch("/api/auth/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        });
-
-        const data = await res.json();
-
-        if (res.ok && data.success) {
-          notifications.show({
-            title: "Admin Session Authenticated",
-            message: `Welcome, ${data.user?.displayName || "Transit Admin"}! Elevated privileges active.`,
-            color: "teal",
-            icon: <IconCheck size={18} />,
-          });
-
-          router.push(redirectUrl);
-          router.refresh();
-        } else {
-          notifications.show({
-            title: "Authentication Denied",
-            message: data.message || "Invalid administrative credentials.",
-            color: "red",
-            icon: <IconAlertTriangle size={18} />,
-          });
-        }
-      } catch {
-        notifications.show({
-          title: "Connection Error",
-          message: "Unable to reach authentication server.",
-          color: "red",
-        });
-      } finally {
-        setLoading(false);
-      }
-    } else {
-      // Commuter optional sign-in
-      notifications.show({
-        title: "Commuter Sign-In",
-        message: "Signed in. Saved favorite journeys will now sync.",
-        color: "cyan",
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       });
-      router.push("/");
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        notifications.show({
+          title: "Admin Authenticated",
+          message: `Welcome, ${data.user?.displayName || "Transit Admin"}! Session verified.`,
+          color: "dark",
+          icon: <IconCheck size={18} />,
+        });
+
+        router.push(redirectUrl);
+        router.refresh();
+      } else {
+        notifications.show({
+          title: "Authentication Denied",
+          message: data.message || "Invalid administrative credentials.",
+          color: "red",
+          icon: <IconAlertTriangle size={18} />,
+        });
+      }
+    } catch {
+      notifications.show({
+        title: "Connection Error",
+        message: "Unable to reach authentication server.",
+        color: "red",
+      });
+    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Container size="xs" py={60}>
-      <Stack gap="md">
+    <Container size="xs" py={80}>
+      <Stack gap="xl">
+        {/* Top Bar Navigation & Theme Toggle */}
         <Group justify="space-between" align="center">
-          <Link href="/">
+          <Link href="/" style={{ textDecoration: "none" }}>
             <Button
               size="xs"
               variant="subtle"
-              color="gray"
+              radius="md"
               leftSection={<IconArrowLeft size={16} />}
+              styles={{
+                root: {
+                  fontWeight: 600,
+                  color: "var(--text-main)",
+                  paddingLeft: 0,
+                  "&:hover": {
+                    background: "transparent",
+                    textDecoration: "underline",
+                  },
+                },
+              }}
             >
-              Back to Public Commuter App
+              Back to DhakaPath
             </Button>
           </Link>
           <ThemeToggle />
@@ -128,111 +110,72 @@ function LoginForm() {
           <Alert
             color="red"
             variant="light"
-            title="Authentication Required"
+            title="Administrative Access Restricted"
             icon={<IconAlertTriangle size={18} />}
+            radius="md"
           >
-            Access to the DhakaPath Admin CMS requires verified administrative
-            credentials. Please log in below.
+            The page you requested requires verified administrative credentials.
+            Please sign in below.
           </Alert>
         )}
 
-        {errorParam === "session_expired" && (
-          <Alert
-            color="orange"
-            variant="light"
-            title="Session Expired"
-            icon={<IconAlertTriangle size={18} />}
-          >
-            Your administrative session has timed out. Please authenticate again
-            to continue.
-          </Alert>
-        )}
-
+        {/* Uber-Inspired Minimalist Login Card */}
         <Paper
-          p="xl"
+          p={{ base: "xl", sm: 40 }}
           radius="md"
           style={{
             background: "var(--bg-card)",
-            backdropFilter: "blur(16px)",
             border: "1px solid var(--border-subtle)",
-            boxShadow: "var(--shadow-card)",
+            boxShadow: "0 4px 24px rgba(0, 0, 0, 0.06)",
           }}
         >
-          <Stack gap="md">
-            <Group justify="space-between" align="center">
-              <Group gap="xs">
-                {isAdminMode ? (
-                  <IconShieldLock size={26} color="#e11d48" />
-                ) : (
-                  <IconUser size={26} color="#0d9488" />
-                )}
-                <Title
-                  order={3}
-                  style={{ color: "var(--text-main)", fontSize: "1.25rem" }}
-                >
-                  {isAdminMode ? "Transit Authority Admin" : "Commuter Account"}
-                </Title>
-              </Group>
-
-              <Badge color={isAdminMode ? "red" : "teal"} variant="light">
-                {isAdminMode ? "Elevated CMS" : "Optional"}
-              </Badge>
-            </Group>
-
-            <Text size="xs" c="dimmed">
-              {isAdminMode
-                ? "Authorized transit officials: verify user disruption reports, calibrate delays, and inspect network telemetry."
-                : "Commuters can save favorite multimodal corridors across devices."}
-            </Text>
-
-            {isAdminMode && (
-              <Paper
-                p="xs"
-                radius="sm"
+          <Stack gap="lg">
+            {/* Header */}
+            <Box>
+              <Title
+                order={2}
                 style={{
-                  background: "var(--bg-card-inner)",
-                  border: "1px solid var(--border-subtle)",
+                  color: "var(--text-main)",
+                  fontSize: "1.75rem",
+                  fontWeight: 800,
+                  letterSpacing: "-0.03em",
                 }}
               >
-                <Group justify="space-between" align="center">
-                  <Box>
-                    <Text size="11px" fw={600} c="dimmed">
-                      Official Admin Credentials:
-                    </Text>
-                    <Text size="11px" style={{ fontFamily: "monospace" }}>
-                      admin@dhakapath.gov.bd / dhakapath@admin2026
-                    </Text>
-                  </Box>
-                  <Button
-                    size="compact-xs"
-                    variant="light"
-                    color="teal"
-                    leftSection={<IconKey size={12} />}
-                    onClick={handleFillDemoAdmin}
-                  >
-                    Auto-Fill
-                  </Button>
-                </Group>
-              </Paper>
-            )}
+                Sign in to DhakaPath
+              </Title>
+              <Text
+                size="sm"
+                mt={4}
+                style={{ color: "var(--text-muted)", lineHeight: 1.5 }}
+              >
+                Transit Authority Administrative Portal
+              </Text>
+            </Box>
 
+            {/* Form */}
             <form onSubmit={handleLogin}>
-              <Stack gap="sm">
+              <Stack gap="md">
                 <TextInput
                   label="Official Email"
-                  placeholder={
-                    isAdminMode
-                      ? "admin@dhakapath.gov.bd"
-                      : "commuter@gmail.com"
-                  }
+                  placeholder="admin@dhakapath.gov.bd"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  size="md"
                   styles={{
+                    label: {
+                      fontSize: "12px",
+                      fontWeight: 600,
+                      color: "var(--text-sub)",
+                      marginBottom: 6,
+                    },
                     input: {
                       background: "var(--input-bg)",
-                      borderColor: "var(--input-border)",
+                      border: "1px solid var(--border-subtle)",
                       color: "var(--text-main)",
+                      borderRadius: 8,
+                      height: 48,
+                      fontSize: "14px",
                     },
                   }}
                 />
@@ -243,44 +186,47 @@ function LoginForm() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  size="md"
                   styles={{
+                    label: {
+                      fontSize: "12px",
+                      fontWeight: 600,
+                      color: "var(--text-sub)",
+                      marginBottom: 6,
+                    },
                     input: {
                       background: "var(--input-bg)",
-                      borderColor: "var(--input-border)",
+                      border: "1px solid var(--border-subtle)",
                       color: "var(--text-main)",
+                      borderRadius: 8,
+                      height: 48,
+                      fontSize: "14px",
                     },
                   }}
                 />
 
                 <Button
                   fullWidth
-                  mt="md"
+                  mt="sm"
                   type="submit"
-                  variant="gradient"
-                  gradient={
-                    isAdminMode
-                      ? { from: "teal", to: "cyan" }
-                      : { from: "cyan", to: "blue" }
-                  }
+                  size="md"
                   loading={loading}
+                  styles={{
+                    root: {
+                      background: "#000000",
+                      color: "#FFFFFF",
+                      fontWeight: 700,
+                      height: 48,
+                      borderRadius: 8,
+                      fontSize: "15px",
+                      border: "none",
+                    },
+                  }}
                 >
-                  {isAdminMode ? "Authenticate Admin Session" : "Sign In"}
+                  Sign In
                 </Button>
               </Stack>
             </form>
-
-            <Divider my="xs" color="var(--border-subtle)" />
-
-            <Button
-              variant="subtle"
-              size="xs"
-              color="gray"
-              onClick={() => setIsAdminMode(!isAdminMode)}
-            >
-              {isAdminMode
-                ? "Switch to Public Commuter Account"
-                : "Switch to Transit Authority Admin Portal"}
-            </Button>
           </Stack>
         </Paper>
       </Stack>

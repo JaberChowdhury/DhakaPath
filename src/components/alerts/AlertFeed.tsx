@@ -27,11 +27,8 @@ import {
   IconPlus,
   IconThumbUp,
   IconThumbDown,
-  IconCheck,
   IconClock,
-  IconTrain,
-  IconBus,
-  IconCar,
+  IconCheck,
 } from "@tabler/icons-react";
 import { DisruptionAlert } from "@/types/alerts";
 import { Hub } from "@/types/network";
@@ -74,7 +71,7 @@ export function AlertFeed({ alerts, hubs, onRefreshAlerts }: AlertFeedProps) {
         notifications.show({
           title: "Feedback Recorded",
           message: `Your ${voteType} observation was registered.`,
-          color: "teal",
+          color: "dark",
         });
         onRefreshAlerts();
       }
@@ -119,7 +116,7 @@ export function AlertFeed({ alerts, hubs, onRefreshAlerts }: AlertFeedProps) {
           title: "Report Submitted",
           message:
             "Your incident was queued for moderation and community validation.",
-          color: "teal",
+          color: "dark",
         });
         setReportModalOpen(false);
         setTitle("");
@@ -137,55 +134,83 @@ export function AlertFeed({ alerts, hubs, onRefreshAlerts }: AlertFeedProps) {
     }
   };
 
-  const getSeverityBadgeColor = (sev: string) => {
-    switch (sev) {
-      case "critical":
-        return "red";
-      case "high":
-        return "orange";
-      case "medium":
-        return "yellow";
-      default:
-        return "blue";
-    }
-  };
-
   return (
-    <Stack gap="md">
-      {/* Top Banner & Report CTA */}
+    <Stack gap="lg">
+      {/* Top Banner & Report CTA - Uber Theme */}
       <Paper
-        p="md"
-        radius="md"
+        p="lg"
+        radius="lg"
         style={{
           background: "var(--bg-card)",
-          backdropFilter: "blur(12px)",
           border: "1px solid var(--border-subtle)",
-          boxShadow: "var(--shadow-card)",
+          boxShadow: "0 4px 20px rgba(0, 0, 0, 0.04)",
         }}
       >
-        <Group justify="space-between" align="center">
+        <Group justify="space-between" align="center" wrap="wrap" gap="md">
           <Box>
-            <Group gap="xs">
-              <IconAlertTriangle size={24} color="#f59e0b" />
-              <Title order={3} style={{ color: "var(--text-main)" }}>
-                Live Street Alerts
+            <Group gap="xs" align="center">
+              <Box
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: "50%",
+                  background: "var(--text-main)",
+                  color: "var(--bg-page)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <IconAlertTriangle size={18} stroke={2.2} />
+              </Box>
+              <Title
+                order={2}
+                style={{
+                  color: "var(--text-main)",
+                  fontSize: "1.35rem",
+                  fontWeight: 700,
+                  letterSpacing: "-0.02em",
+                }}
+              >
+                Live Transit Alerts & Disruptions
               </Title>
-              <Badge color="orange" variant="light">
-                {alerts.length} Active
+              <Badge
+                variant="outline"
+                size="sm"
+                radius="sm"
+                style={{
+                  borderColor: "var(--border-subtle)",
+                  color: "var(--text-main)",
+                  background: "var(--bg-card-inner)",
+                  fontWeight: 600,
+                }}
+              >
+                {alerts.length} ACTIVE
               </Badge>
             </Group>
-            <Text size="xs" c="dimmed" mt={4}>
-              Real-time crowd and verified alerts impacting Dhaka transit
-              corridors.
+            <Text
+              size="xs"
+              style={{ color: "var(--text-muted)", marginTop: 4 }}
+            >
+              Real-time crowd-sourced and verified disruptions automatically
+              affecting routing algorithms.
             </Text>
           </Box>
 
           <Button
             size="sm"
-            variant="gradient"
-            gradient={{ from: "orange", to: "red" }}
+            radius="xl"
             leftSection={<IconPlus size={16} />}
             onClick={() => setReportModalOpen(true)}
+            styles={{
+              root: {
+                background: "var(--text-main)",
+                color: "var(--bg-page)",
+                fontWeight: 600,
+                height: 38,
+                padding: "0 18px",
+              },
+            }}
           >
             Report Incident
           </Button>
@@ -196,225 +221,443 @@ export function AlertFeed({ alerts, hubs, onRefreshAlerts }: AlertFeedProps) {
       {alerts.length === 0 ? (
         <Paper
           p="xl"
-          radius="md"
+          radius="lg"
           style={{
             textAlign: "center",
             background: "var(--bg-card)",
             border: "1px solid var(--border-subtle)",
           }}
         >
-          <Text c="dimmed">
-            No active street disruptions currently reported on the pilot
-            corridor.
+          <Text size="sm" style={{ color: "var(--text-muted)" }}>
+            No active street disruptions currently reported on Dhaka transit
+            corridors.
           </Text>
         </Paper>
       ) : (
-        alerts.map((alert) => (
-          <Card
-            key={alert.id}
-            p="md"
-            radius="md"
-            style={{
-              background: "var(--bg-card)",
-              border:
-                alert.severity === "critical"
-                  ? "1px solid #ef4444"
-                  : "1px solid var(--border-subtle)",
-              boxShadow: "var(--shadow-card)",
-            }}
-          >
-            <Stack gap="xs">
-              <Group justify="space-between">
-                <Group gap="xs">
-                  <Badge
-                    color={getSeverityBadgeColor(alert.severity)}
-                    variant="filled"
+        <Stack gap="sm">
+          {alerts.map((alert) => (
+            <Card
+              key={alert.id}
+              p="md"
+              radius="md"
+              style={{
+                background: "var(--bg-card)",
+                border: "1px solid var(--border-subtle)",
+                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
+              }}
+            >
+              <Stack gap="xs">
+                <Group justify="space-between" align="center">
+                  <Group gap={8}>
+                    <Badge
+                      radius="sm"
+                      size="xs"
+                      variant="filled"
+                      style={{
+                        background:
+                          alert.severity === "critical"
+                            ? "#e11900"
+                            : "var(--text-main)",
+                        color: "var(--bg-page)",
+                        fontWeight: 700,
+                      }}
+                    >
+                      {alert.severity.toUpperCase()}
+                    </Badge>
+                    {alert.is_closed && (
+                      <Badge
+                        radius="sm"
+                        size="xs"
+                        variant="outline"
+                        style={{
+                          borderColor: "#e11900",
+                          color: "#e11900",
+                          fontWeight: 600,
+                        }}
+                      >
+                        ROAD CLOSED
+                      </Badge>
+                    )}
+                    {alert.reported_by_type === "simulation" && (
+                      <Badge
+                        radius="sm"
+                        size="xs"
+                        variant="outline"
+                        style={{
+                          borderColor: "var(--border-subtle)",
+                          color: "var(--text-muted)",
+                          background: "var(--bg-card-inner)",
+                          fontWeight: 600,
+                        }}
+                      >
+                        SIMULATION FIXTURE
+                      </Badge>
+                    )}
+                  </Group>
+
+                  <Group gap={4} align="center">
+                    <IconClock
+                      size={13}
+                      style={{ color: "var(--text-muted)" }}
+                    />
+                    <Text size="11px" style={{ color: "var(--text-muted)" }}>
+                      {new Date(alert.observed_at).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </Text>
+                  </Group>
+                </Group>
+
+                <Box>
+                  <Text
+                    fw={700}
                     size="sm"
+                    style={{ color: "var(--text-main)" }}
                   >
-                    {alert.severity.toUpperCase()}
-                  </Badge>
-                  {alert.is_closed && (
-                    <Badge color="red" variant="outline" size="sm">
-                      Road Closed
-                    </Badge>
-                  )}
-                  {alert.reported_by_type === "simulation" && (
-                    <Badge color="grape" variant="light" size="xs">
-                      Simulation Fixture
-                    </Badge>
-                  )}
-                </Group>
-
-                <Group gap={4} align="center">
-                  <IconClock size={14} color="#94a3b8" />
-                  <Text size="xs" c="dimmed">
-                    {new Date(alert.observed_at).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                    {alert.title}
                   </Text>
-                </Group>
-              </Group>
+                  {alert.title_bn && (
+                    <Text size="xs" style={{ color: "var(--text-muted)" }}>
+                      {alert.title_bn}
+                    </Text>
+                  )}
+                </Box>
 
-              <Text fw={700} size="md" style={{ color: "var(--text-main)" }}>
-                {alert.title}
-              </Text>
-
-              {alert.title_bn && (
-                <Text size="sm" c="dimmed">
-                  {alert.title_bn}
+                <Text
+                  size="xs"
+                  style={{ color: "var(--text-sub)", lineHeight: 1.5 }}
+                >
+                  {alert.description}
                 </Text>
-              )}
 
-              <Text size="sm" c="gray.3">
-                {alert.description}
-              </Text>
+                {/* Modes affected and Delay */}
+                <Group
+                  justify="space-between"
+                  mt="xs"
+                  align="center"
+                  wrap="wrap"
+                >
+                  <Group gap={6}>
+                    <Text size="11px" style={{ color: "var(--text-muted)" }}>
+                      Affected:
+                    </Text>
+                    {alert.affected_modes.map((mode) => (
+                      <Badge
+                        key={mode}
+                        size="xs"
+                        radius="sm"
+                        variant="outline"
+                        style={{
+                          borderColor: "var(--border-subtle)",
+                          color: "var(--text-main)",
+                          background: "var(--bg-card-inner)",
+                          fontWeight: 600,
+                        }}
+                      >
+                        {mode.toUpperCase()}
+                      </Badge>
+                    ))}
+                    {alert.delay_minutes > 0 && (
+                      <Badge
+                        size="xs"
+                        radius="sm"
+                        variant="filled"
+                        style={{
+                          background: "var(--bg-card-inner)",
+                          color: "var(--text-main)",
+                          border: "1px solid var(--border-subtle)",
+                          fontWeight: 700,
+                        }}
+                      >
+                        +{alert.delay_minutes} MIN DELAY
+                      </Badge>
+                    )}
+                  </Group>
 
-              {/* Modes affected and Delay */}
-              <Group justify="space-between" mt="xs" align="center">
-                <Group gap={6}>
-                  <Text size="xs" c="dimmed">
-                    Affected:
-                  </Text>
-                  {alert.affected_modes.map((mode) => (
-                    <Badge key={mode} size="xs" variant="outline" color="gray">
-                      {mode}
-                    </Badge>
-                  ))}
-                  {alert.delay_minutes > 0 && (
-                    <Badge size="xs" color="yellow" variant="light">
-                      +{alert.delay_minutes} min delay
-                    </Badge>
-                  )}
+                  {/* Corroboration Actions */}
+                  <Group gap={6}>
+                    <Tooltip label="Confirm this incident is active">
+                      <Button
+                        size="compact-xs"
+                        radius="xl"
+                        variant="default"
+                        leftSection={<IconThumbUp size={12} />}
+                        onClick={() => handleVote(alert.id, "confirm")}
+                        styles={{
+                          root: {
+                            background: "var(--bg-card-inner)",
+                            color: "var(--text-main)",
+                            border: "1px solid var(--border-subtle)",
+                            fontSize: "11px",
+                            fontWeight: 600,
+                          },
+                        }}
+                      >
+                        Confirm ({alert.upvotes ?? 0})
+                      </Button>
+                    </Tooltip>
+
+                    <Tooltip label="Dispute or report cleared">
+                      <Button
+                        size="compact-xs"
+                        radius="xl"
+                        variant="default"
+                        leftSection={<IconThumbDown size={12} />}
+                        onClick={() => handleVote(alert.id, "dispute")}
+                        styles={{
+                          root: {
+                            background: "var(--bg-card-inner)",
+                            color: "var(--text-muted)",
+                            border: "1px solid var(--border-subtle)",
+                            fontSize: "11px",
+                            fontWeight: 600,
+                          },
+                        }}
+                      >
+                        Dispute ({alert.downvotes ?? 0})
+                      </Button>
+                    </Tooltip>
+                  </Group>
                 </Group>
-
-                {/* Corroboration Actions */}
-                <Group gap={6}>
-                  <Tooltip label="Confirm this incident is active">
-                    <Button
-                      size="compact-xs"
-                      variant="light"
-                      color="teal"
-                      leftSection={<IconThumbUp size={12} />}
-                      onClick={() => handleVote(alert.id, "confirm")}
-                    >
-                      {alert.upvotes || 0}
-                    </Button>
-                  </Tooltip>
-
-                  <Tooltip label="Dispute: road is clear or report is false">
-                    <Button
-                      size="compact-xs"
-                      variant="subtle"
-                      color="red"
-                      leftSection={<IconThumbDown size={12} />}
-                      onClick={() => handleVote(alert.id, "dispute")}
-                    >
-                      {alert.downvotes || 0}
-                    </Button>
-                  </Tooltip>
-
-                  <Tooltip label="Mark as resolved">
-                    <ActionIcon
-                      size="sm"
-                      variant="subtle"
-                      color="green"
-                      onClick={() => handleVote(alert.id, "resolved")}
-                    >
-                      <IconCheck size={14} />
-                    </ActionIcon>
-                  </Tooltip>
-                </Group>
-              </Group>
-            </Stack>
-          </Card>
-        ))
+              </Stack>
+            </Card>
+          ))}
+        </Stack>
       )}
 
-      {/* Report Modal */}
+      {/* Modal: Report Incident - Uber Clean Style */}
       <Modal
         opened={reportModalOpen}
         onClose={() => setReportModalOpen(false)}
-        title="Submit Street Disruption Report"
-        centered
+        size="md"
+        radius="lg"
+        title={
+          <Group gap="xs">
+            <Box
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: "50%",
+                background: "var(--text-main)",
+                color: "var(--bg-page)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <IconAlertTriangle size={16} stroke={2.2} />
+            </Box>
+            <Title
+              order={4}
+              style={{ color: "var(--text-main)", fontWeight: 700 }}
+            >
+              Report Street Disruption
+            </Title>
+          </Group>
+        }
         styles={{
           content: {
             background: "var(--bg-card)",
             color: "var(--text-main)",
             border: "1px solid var(--border-subtle)",
+            boxShadow: "0 24px 48px rgba(0, 0, 0, 0.2)",
           },
-          header: { background: "var(--bg-card)", color: "var(--text-main)" },
+          header: {
+            background: "var(--bg-card)",
+            color: "var(--text-main)",
+            borderBottom: "1px solid var(--border-subtle)",
+          },
         }}
       >
         <Stack gap="sm">
-          <Select
-            label="Location Hub"
-            placeholder="Select nearest hub..."
-            data={hubOptions}
-            value={selectedHubId}
-            onChange={setSelectedHubId}
-            searchable
-            clearable
-            comboboxProps={{ withinPortal: true, zIndex: 3000 }}
-          />
+          <Text size="xs" style={{ color: "var(--text-muted)" }}>
+            Help Dhaka commuters avoid gridlock. Submitted reports undergo
+            verification and directly reroute transit plans.
+          </Text>
 
           <TextInput
             label="Incident Title"
-            placeholder="e.g. Waterlogging at Malibagh Railgate"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            placeholder="e.g. Waterlogging near Rampura Bridge"
             required
+            size="xs"
+            value={title}
+            onChange={(e) => setTitle(e.currentTarget.value)}
+            styles={{
+              label: {
+                fontSize: "11px",
+                fontWeight: 600,
+                color: "var(--text-muted)",
+              },
+              input: {
+                background: "var(--bg-card-inner)",
+                borderColor: "var(--border-subtle)",
+                color: "var(--text-main)",
+              },
+            }}
           />
 
-          <Textarea
-            label="Observation Details"
-            placeholder="Knee-deep water, buses unable to pass..."
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={3}
+          <Select
+            label="Corridor / Hub Impacted"
+            placeholder="Select hub (optional)"
+            data={hubOptions}
+            value={selectedHubId}
+            onChange={setSelectedHubId}
+            clearable
+            searchable
+            size="xs"
+            comboboxProps={{ withinPortal: true, zIndex: 3000 }}
+            styles={{
+              label: {
+                fontSize: "11px",
+                fontWeight: 600,
+                color: "var(--text-muted)",
+              },
+              input: {
+                background: "var(--bg-card-inner)",
+                borderColor: "var(--border-subtle)",
+                color: "var(--text-main)",
+              },
+            }}
           />
 
           <MultiSelect
-            label="Affected Transport Modes"
-            data={["bus", "leguna", "rickshaw", "metro", "walk"]}
+            label="Affected Transit Modes"
+            placeholder="Select modes"
+            data={[
+              { value: "bus", label: "Bus" },
+              { value: "metro", label: "MRT Line 6 (Metro)" },
+              { value: "leguna", label: "Leguna (Human Hauler)" },
+              { value: "rickshaw", label: "Rickshaw" },
+            ]}
             value={affectedModes}
             onChange={setAffectedModes}
+            size="xs"
             comboboxProps={{ withinPortal: true, zIndex: 3000 }}
+            styles={{
+              label: {
+                fontSize: "11px",
+                fontWeight: 600,
+                color: "var(--text-muted)",
+              },
+              input: {
+                background: "var(--bg-card-inner)",
+                borderColor: "var(--border-subtle)",
+                color: "var(--text-main)",
+              },
+            }}
           />
 
           <Group grow>
-            <Select
-              label="Severity"
-              data={["low", "medium", "high", "critical"]}
-              value={severity}
-              onChange={(val) => setSeverity(val || "medium")}
-              comboboxProps={{ withinPortal: true, zIndex: 3000 }}
-            />
             <NumberInput
-              label="Estimated Delay (minutes)"
+              label="Expected Delay (mins)"
               value={delayMinutes}
-              onChange={(val) => setDelayMinutes(Number(val) || 0)}
+              onChange={(v) => setDelayMinutes(Number(v) || 0)}
               min={0}
               max={180}
+              size="xs"
+              styles={{
+                label: {
+                  fontSize: "11px",
+                  fontWeight: 600,
+                  color: "var(--text-muted)",
+                },
+                input: {
+                  background: "var(--bg-card-inner)",
+                  borderColor: "var(--border-subtle)",
+                  color: "var(--text-main)",
+                },
+              }}
+            />
+
+            <Select
+              label="Severity Level"
+              data={[
+                { value: "low", label: "Low (Minor slowdown)" },
+                { value: "medium", label: "Medium (15-30 min delay)" },
+                { value: "high", label: "High (Severe gridlock)" },
+                { value: "critical", label: "Critical (Complete standstill)" },
+              ]}
+              value={severity}
+              onChange={(v) => setSeverity(v || "medium")}
+              size="xs"
+              comboboxProps={{ withinPortal: true, zIndex: 3000 }}
+              styles={{
+                label: {
+                  fontSize: "11px",
+                  fontWeight: 600,
+                  color: "var(--text-muted)",
+                },
+                input: {
+                  background: "var(--bg-card-inner)",
+                  borderColor: "var(--border-subtle)",
+                  color: "var(--text-main)",
+                },
+              }}
             />
           </Group>
 
           <Checkbox
-            label="Road is completely blocked / closed"
+            label="Road Completely Impassable / Closed"
             checked={isClosed}
             onChange={(e) => setIsClosed(e.currentTarget.checked)}
-            color="red"
+            size="xs"
+            color="dark"
+            styles={{
+              label: {
+                fontSize: "12px",
+                color: "var(--text-main)",
+                fontWeight: 500,
+              },
+            }}
           />
 
-          <Button
-            fullWidth
-            mt="md"
-            color="teal"
-            onClick={handleReportSubmit}
-            loading={submitting}
-          >
-            Submit for Moderation
-          </Button>
+          <Textarea
+            label="Additional Details (Optional)"
+            placeholder="Describe landmark, bottleneck cause, or advisory..."
+            value={description}
+            onChange={(e) => setDescription(e.currentTarget.value)}
+            rows={2}
+            size="xs"
+            styles={{
+              label: {
+                fontSize: "11px",
+                fontWeight: 600,
+                color: "var(--text-muted)",
+              },
+              input: {
+                background: "var(--bg-card-inner)",
+                borderColor: "var(--border-subtle)",
+                color: "var(--text-main)",
+              },
+            }}
+          />
+
+          <Group justify="flex-end" gap="xs" mt="sm">
+            <Button
+              size="xs"
+              variant="subtle"
+              color="gray"
+              onClick={() => setReportModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              size="xs"
+              radius="xl"
+              onClick={handleReportSubmit}
+              loading={submitting}
+              styles={{
+                root: {
+                  background: "var(--text-main)",
+                  color: "var(--bg-page)",
+                  fontWeight: 600,
+                },
+              }}
+            >
+              Submit Report
+            </Button>
+          </Group>
         </Stack>
       </Modal>
     </Stack>

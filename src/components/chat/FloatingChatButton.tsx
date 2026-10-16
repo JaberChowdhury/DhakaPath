@@ -13,6 +13,8 @@ export function FloatingChatButton({
   onClick,
   opened,
 }: FloatingChatButtonProps) {
+  if (opened) return null;
+
   return (
     <Box
       style={{

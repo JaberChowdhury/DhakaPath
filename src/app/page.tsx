@@ -137,6 +137,17 @@ export default function HomePage() {
   const [locationLoading, setLocationLoading] = useState<boolean>(false);
   const watchIdRef = useRef<number | null>(null);
 
+  // Check for ?origin= in URL search params (e.g. from /transit-lines)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const originParam = params.get("origin");
+      if (originParam) {
+        setOriginHubId(originParam);
+      }
+    }
+  }, []);
+
   // Fetch Network Data
   const fetchNetworkData = async () => {
     try {

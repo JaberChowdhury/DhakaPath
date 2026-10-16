@@ -606,6 +606,217 @@ async function runTestSuite() {
     });
   });
 
+  // 19. Chatbot Multilingual Mirroring (Banglish, Bangla, English Response Synthesis)
+  test("Chatbot Multilingual Mirroring (Banglish, Bangla, English)", () => {
+    const {
+      extractIntentDeterministic,
+      formatRouteExplanation,
+      handleSpecializedQuery,
+      detectLanguage,
+    } = require("../src/lib/ai/provider");
+
+    // A. Detect Language Check
+    assert.strictEqual(
+      detectLanguage("Shahbagh theke Badda jabo koto lagbe?"),
+      "banglish",
+    );
+    assert.strictEqual(
+      detectLanguage("ফার্মগেট থেকে মতিঝিল যাব ভাড়া কত?"),
+      "bangla",
+    );
+    assert.strictEqual(
+      detectLanguage("How do I go from Mirpur 10 to Motijheel?"),
+      "english",
+    );
+
+    // B. Banglish Route Explanation Mirroring
+    const banglishIntent = extractIntentDeterministic(
+      "Shahbagh theke Badda jabo student",
+    );
+    assert.strictEqual(banglishIntent.language, "banglish");
+    const routePlan = planTrip({
+      originHubId: banglishIntent.originHubId!,
+      destinationHubId: banglishIntent.destinationHubId!,
+      student: banglishIntent.student,
+    });
+    assert(
+      routePlan.routes.length > 0,
+      "Must calculate route from Shahbagh to Badda",
+    );
+    const banglishResp = formatRouteExplanation(
+      banglishIntent,
+      routePlan.routes[0],
+    );
+    assert(
+      banglishResp.includes("Apnar jonno") &&
+        banglishResp.includes("Mot shomoy"),
+      "Response must be synthesized in Banglish",
+    );
+
+    // C. Bangla Route Explanation Mirroring
+    const banglaIntent = extractIntentDeterministic("ফার্মগেট থেকে মতিঝিল যাব");
+    assert.strictEqual(banglaIntent.language, "bangla");
+    const banglaPlan = planTrip({
+      originHubId: banglaIntent.originHubId!,
+      destinationHubId: banglaIntent.destinationHubId!,
+    });
+    const banglaResp = formatRouteExplanation(
+      banglaIntent,
+      banglaPlan.routes[0],
+    );
+    assert(
+      banglaResp.includes("আপনার জন্য") && banglaResp.includes("মোট সময়"),
+      "Response must be synthesized in Bangla",
+    );
+
+    // D. Specialized Queries in matching languages
+    const fareBanglish = handleSpecializedQuery({
+      intentType: "explain_fare",
+      language: "banglish",
+    } as any);
+    assert(
+      fareBanglish.includes("Dhaka Transit Vara Structure"),
+      "Fare response must be in Banglish",
+    );
+
+    const fareBangla = handleSpecializedQuery({
+      intentType: "explain_fare",
+      language: "bangla",
+    } as any);
+    assert(
+      fareBangla.includes("ঢাকা গণপরিবহন ভাড়ার কাঠামো"),
+      "Fare response must be in Bangla",
+    );
+
+    const fareEnglish = handleSpecializedQuery({
+      intentType: "explain_fare",
+      language: "english",
+    } as any);
+    assert(
+      fareEnglish.includes("Official Dhaka Transit Fare Structure"),
+      "Fare response must be in English",
+    );
+
+    // E. ChatGPT-Style General Conversational Queries
+    const chatBanglish = extractIntentDeterministic("kemon acho bhai");
+    assert.strictEqual(chatBanglish.intentType, "general_chat");
+    assert.strictEqual(chatBanglish.language, "banglish");
+    assert(
+      chatBanglish.conversationalReply?.includes("bhalo achi"),
+      "Must reply conversationally in Banglish",
+    );
+
+    const chatBangla = extractIntentDeterministic("কেমন আছেন?");
+    assert.strictEqual(chatBangla.intentType, "general_chat");
+    assert.strictEqual(chatBangla.language, "bangla");
+    assert(
+      chatBangla.conversationalReply?.includes("ভালো আছি"),
+      "Must reply conversationally in Bangla",
+    );
+
+    const chatEnglish = extractIntentDeterministic("How are you today?");
+    assert.strictEqual(chatEnglish.intentType, "general_chat");
+    assert.strictEqual(chatEnglish.language, "english");
+    assert(
+      chatEnglish.conversationalReply?.includes("well"),
+      "Must reply conversationally in English",
+    );
+  });
+
+  // 20. Admin Operations: CMS Status Toggling, Service Registration, Fare Rule Updates, & Purging
+  test("Admin Operations (CMS Service Toggling, Registration, Fare Updates, Purge)", () => {
+    const {
+      getApprovedServices,
+      updateServiceStatus,
+      addOrUpdateService,
+      getApprovedFareRules,
+      updateFareRule,
+      createAdminAlert,
+      deleteAlert,
+      getAllAlertsForAdmin,
+    } = require("../src/lib/db/repository");
+
+    // 1. Toggle operational status of a service
+    const initialService = getApprovedServices().find(
+      (s: any) => s.id === "srv_mrt_line_6",
+    );
+    assert(initialService, "MRT Line 6 must exist");
+    const wasActive = initialService.is_active;
+
+    const toggled = updateServiceStatus("srv_mrt_line_6", !wasActive);
+    assert.strictEqual(
+      toggled?.is_active,
+      !wasActive,
+      "Service status must be updated",
+    );
+    // Restore
+    updateServiceStatus("srv_mrt_line_6", wasActive);
+
+    // 2. Register new service (e.g. from Signboard Digitizer)
+    const newService = addOrUpdateService({
+      id: "srv_test_balaka",
+      name: "Balaka Express",
+      mode: "bus",
+      route_code: "BAL-99",
+      operator: "Balaka Transport Syndicate",
+      description: "Test arterial service",
+      is_active: true,
+      verification_status: "verified",
+    });
+    assert.strictEqual(newService.name, "Balaka Express");
+    const foundNew = getApprovedServices().find(
+      (s: any) => s.id === "srv_test_balaka",
+    );
+    assert(
+      foundNew,
+      "Newly registered service must appear in approved services",
+    );
+
+    // 3. Update statutory fare rule
+    const rules = getApprovedFareRules();
+    const busRule = rules.find((r: any) => r.id === "fare_bus_bikolpo_rules");
+    assert(busRule, "Bikolpo fare rule must exist");
+    const originalFare = busRule.fare_regular;
+
+    const updatedFare = updateFareRule({
+      id: "fare_bus_bikolpo_rules",
+      fare_regular: 28,
+    });
+    assert.strictEqual(
+      updatedFare?.fare_regular,
+      28,
+      "Fare regular must be updated to 28",
+    );
+    // Restore
+    updateFareRule({
+      id: "fare_bus_bikolpo_rules",
+      fare_regular: originalFare,
+    });
+
+    // 4. Create and Purge official admin alert
+    const adminAlert = createAdminAlert({
+      title: "Test Administrative Roadblock",
+      severity: "high",
+      affected_modes: ["bus"],
+      delay_minutes: 20,
+      is_closed: true,
+    });
+    assert.strictEqual(adminAlert.status, "approved");
+    assert.strictEqual(adminAlert.reported_by_type, "admin");
+
+    const allBeforePurge = getAllAlertsForAdmin();
+    assert(allBeforePurge.some((a: any) => a.id === adminAlert.id));
+
+    // Delete alert
+    const deleted = deleteAlert(adminAlert.id);
+    assert.strictEqual(deleted, true);
+    const allAfterPurge = getAllAlertsForAdmin();
+    assert(
+      !allAfterPurge.some((a: any) => a.id === adminAlert.id),
+      "Purged alert must not appear in alerts list",
+    );
+  });
+
   console.log(
     `\n================================================================`,
   );

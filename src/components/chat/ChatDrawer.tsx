@@ -13,6 +13,7 @@ import {
   Badge,
   ScrollArea,
   Button,
+  UnstyledButton,
 } from "@mantine/core";
 import {
   IconSend,
@@ -20,15 +21,21 @@ import {
   IconSparkles,
   IconUser,
   IconNavigation,
-  IconMapPin,
+  IconSchool,
+  IconCoins,
+  IconCheck,
 } from "@tabler/icons-react";
 import { RouteCard } from "@/components/trip/RouteCard";
 import { PlannedRoute } from "@/types/api";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface Message {
   id: string;
   sender: "user" | "assistant";
   text: string;
+  isStudent?: boolean | null;
+  targetBudget?: number | null;
   routeResult?: PlannedRoute | null;
   extractedIntent?: any;
   timestamp: string;
@@ -47,11 +54,15 @@ export function ChatDrawer({
   onSelectRouteFromChat,
   onAutoSyncRoute,
 }: ChatDrawerProps) {
+  // Questionnaire State
+  const [isStudent, setIsStudent] = useState<boolean | null>(true);
+  const [targetBudget, setTargetBudget] = useState<number | null>(50);
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "msg_welcome",
       sender: "assistant",
-      text: 'আসসালামু আলাইকুম! I am DhakaPath AI. You can ask me transit queries in English, Bangla, or Banglish.\n\nTry: "Banasree theke Motijheel jabo, budget 80", "Ami student", or "Malibagh avoid koro".',
+      text: '**আসসালামু আলাইকুম! Welcome to DhakaPath Transit AI.** 🚇\n\nযেকোনো প্রশ্ন **বাংলা (Bangla)**, **Banglish**, বা **English**-এ করুন — আমি আপনাকে সরাসরি রুট, ছাত্র হাফ ভাড়া, এবং লাইভ ট্রাফিক অবস্থা জানাব।\n\n*উদ্ধৃতি:* `"ফার্মগেট থেকে মতিঝিল যাব"`, `"Banasree theke Badda koto lagbe"`, কিংবা `"How to go from Mirpur to Motijheel"`।',
       timestamp: "10:00 AM",
     },
   ]);
@@ -66,18 +77,44 @@ export function ChatDrawer({
         behavior: "smooth",
       });
     }
-  }, [messages]);
+  }, [messages, loading]);
 
   const [conversationContext, setConversationContext] = useState<any>(null);
 
   const handleSend = async (messageText?: string) => {
-    const textToSend = messageText || input;
-    if (!textToSend.trim() || loading) return;
+    const rawText = (messageText || input).trim();
+    if (!rawText || loading) return;
+
+    // Synthesize user prompt with active questionnaire preferences
+    const constraints: string[] = [];
+    if (isStudent === true && !rawText.toLowerCase().includes("student")) {
+      constraints.push("student");
+    } else if (
+      isStudent === false &&
+      !rawText.toLowerCase().includes("student")
+    ) {
+      constraints.push("regular non-student");
+    }
+
+    if (
+      targetBudget !== null &&
+      targetBudget > 0 &&
+      !rawText.toLowerCase().includes("budget")
+    ) {
+      constraints.push(`budget ${targetBudget}`);
+    }
+
+    const payloadText =
+      constraints.length > 0
+        ? `${rawText} (${constraints.join(", ")})`
+        : rawText;
 
     const userMsg: Message = {
       id: `user_${Date.now()}`,
       sender: "user",
-      text: textToSend,
+      text: rawText,
+      isStudent,
+      targetBudget,
       timestamp: new Date().toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
@@ -93,7 +130,7 @@ export function ChatDrawer({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          message: textToSend,
+          message: payloadText,
           currentContext: conversationContext,
         }),
       });
@@ -142,33 +179,197 @@ export function ChatDrawer({
     <Drawer
       opened={opened}
       onClose={onClose}
+      position="right"
+      size="md"
+      withCloseButton={true}
+      closeOnClickOutside={true}
+      closeOnEscape={true}
+      closeButtonProps={{
+        "aria-label": "Close Transit AI Chat",
+        size: "md",
+      }}
+      overlayProps={{ backgroundOpacity: 0.4, blur: 2 }}
       title={
-        <Group gap="xs">
-          <IconMessageChatbot size={22} color="#0d9488" />
-          <Text fw={700} style={{ color: "var(--text-main)" }}>
-            DhakaPath Transit Assistant
-          </Text>
+        <Group gap="xs" align="center">
+          <Box
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: "50%",
+              background: "var(--text-main)",
+              color: "var(--bg-page)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <IconMessageChatbot size={18} stroke={2.2} />
+          </Box>
+          <Box>
+            <Text fw={700} size="sm" style={{ color: "var(--text-main)" }}>
+              DhakaPath Transit AI
+            </Text>
+            <Text size="11px" style={{ color: "var(--text-muted)" }}>
+              Bangla, English & Banglish
+            </Text>
+          </Box>
           <Badge
             size="xs"
-            variant="gradient"
-            gradient={{ from: "teal", to: "cyan" }}
+            radius="sm"
+            variant="outline"
+            style={{
+              borderColor: "var(--border-subtle)",
+              color: "var(--text-main)",
+              background: "var(--bg-card-inner)",
+              fontWeight: 600,
+            }}
           >
-            Bilingual
+            SMART ASSISTANT
           </Badge>
         </Group>
       }
-      position="right"
-      size="md"
       styles={{
-        content: { background: "var(--bg-page)", color: "var(--text-main)" },
-        header: {
+        content: {
           background: "var(--bg-page)",
+          color: "var(--text-main)",
+        },
+        header: {
+          background: "var(--bg-card)",
           borderBottom: "1px solid var(--border-subtle)",
           color: "var(--text-main)",
+          padding: "16px 20px",
+        },
+        close: {
+          color: "var(--text-main)",
+          background: "var(--bg-card-inner)",
+          border: "1px solid var(--border-subtle)",
+          borderRadius: 8,
+          width: 32,
+          height: 32,
+          transition: "all 0.15s ease",
+          cursor: "pointer",
         },
       }}
     >
-      <Stack justify="space-between" style={{ height: "calc(100vh - 80px)" }}>
+      <Stack justify="space-between" style={{ height: "calc(100vh - 84px)" }}>
+        {/* Interactive Questionnaire Prompter at Top */}
+        <Paper
+          p="xs"
+          radius="md"
+          m="xs"
+          style={{
+            background: "var(--bg-card)",
+            border: "1px solid var(--border-subtle)",
+            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
+          }}
+        >
+          <Stack gap={8}>
+            {/* Question 1: Are you a student? */}
+            <Box>
+              <Group gap={6} mb={4} align="center">
+                <IconSchool size={14} style={{ color: "var(--text-main)" }} />
+                <Text
+                  size="11px"
+                  fw={700}
+                  style={{ color: "var(--text-main)" }}
+                >
+                  Are you a student?
+                </Text>
+              </Group>
+              <Group gap={6}>
+                <UnstyledButton
+                  onClick={() => setIsStudent(true)}
+                  style={{
+                    padding: "4px 10px",
+                    borderRadius: 9999,
+                    fontSize: "11px",
+                    fontWeight: 600,
+                    background:
+                      isStudent === true
+                        ? "var(--text-main)"
+                        : "var(--bg-card-inner)",
+                    color:
+                      isStudent === true
+                        ? "var(--bg-page)"
+                        : "var(--text-main)",
+                    border: "1px solid var(--border-subtle)",
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  🎓 Yes (50% Bus Discount)
+                </UnstyledButton>
+                <UnstyledButton
+                  onClick={() => setIsStudent(false)}
+                  style={{
+                    padding: "4px 10px",
+                    borderRadius: 9999,
+                    fontSize: "11px",
+                    fontWeight: 600,
+                    background:
+                      isStudent === false
+                        ? "var(--text-main)"
+                        : "var(--bg-card-inner)",
+                    color:
+                      isStudent === false
+                        ? "var(--bg-page)"
+                        : "var(--text-main)",
+                    border: "1px solid var(--border-subtle)",
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  👤 Regular Commuter
+                </UnstyledButton>
+              </Group>
+            </Box>
+
+            {/* Question 2: Target money / budget */}
+            <Box>
+              <Group gap={6} mb={4} align="center">
+                <IconCoins size={14} style={{ color: "var(--text-main)" }} />
+                <Text
+                  size="11px"
+                  fw={700}
+                  style={{ color: "var(--text-main)" }}
+                >
+                  Target budget to reach destination:
+                </Text>
+              </Group>
+              <Group gap={4} wrap="wrap">
+                {[
+                  { label: "Flexible", val: null },
+                  { label: "≤ 30 ৳", val: 30 },
+                  { label: "≤ 50 ৳", val: 50 },
+                  { label: "≤ 80 ৳", val: 80 },
+                  { label: "≤ 100 ৳", val: 100 },
+                ].map((b, i) => (
+                  <UnstyledButton
+                    key={i}
+                    onClick={() => setTargetBudget(b.val)}
+                    style={{
+                      padding: "3px 8px",
+                      borderRadius: 6,
+                      fontSize: "11px",
+                      fontWeight: 600,
+                      background:
+                        targetBudget === b.val
+                          ? "var(--text-main)"
+                          : "var(--bg-card-inner)",
+                      color:
+                        targetBudget === b.val
+                          ? "var(--bg-page)"
+                          : "var(--text-main)",
+                      border: "1px solid var(--border-subtle)",
+                      transition: "all 0.15s ease",
+                    }}
+                  >
+                    {b.label}
+                  </UnstyledButton>
+                ))}
+              </Group>
+            </Box>
+          </Stack>
+        </Paper>
+
         {/* Message Log */}
         <ScrollArea viewportRef={scrollViewportRef} style={{ flex: 1 }} p="xs">
           <Stack gap="md">
@@ -177,39 +378,87 @@ export function ChatDrawer({
                 key={msg.id}
                 style={{
                   alignSelf: msg.sender === "user" ? "flex-end" : "flex-start",
-                  maxWidth: "90%",
+                  maxWidth: "88%",
                 }}
               >
                 <Paper
                   p="sm"
-                  radius="md"
+                  radius="lg"
                   style={{
                     background:
                       msg.sender === "user"
-                        ? "linear-gradient(135deg, #0284c7 0%, #0369a1 100%)"
+                        ? "var(--text-main)"
                         : "var(--bg-card)",
                     border: "1px solid var(--border-subtle)",
-                    color: msg.sender === "user" ? "#fff" : "var(--text-main)",
-                    boxShadow: "var(--shadow-card)",
+                    color:
+                      msg.sender === "user"
+                        ? "var(--bg-page)"
+                        : "var(--text-main)",
+                    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
                   }}
                 >
                   <Group gap={6} mb={4} align="center">
                     {msg.sender === "user" ? (
-                      <IconUser size={14} />
+                      <IconUser size={13} />
                     ) : (
-                      <IconSparkles size={14} />
+                      <IconSparkles size={13} />
                     )}
-                    <Text size="xs" fw={700} style={{ color: "inherit" }}>
-                      {msg.sender === "user" ? "You" : "DhakaPath Assistant"}
+                    <Text size="11px" fw={700} style={{ color: "inherit" }}>
+                      {msg.sender === "user" ? "You" : "DhakaPath AI"}
                     </Text>
-                    <Text size="xs" style={{ opacity: 0.7 }}>
+                    <Text size="10px" style={{ opacity: 0.6 }}>
                       {msg.timestamp}
                     </Text>
                   </Group>
 
-                  <Text size="sm" style={{ whiteSpace: "pre-line" }}>
-                    {msg.text}
-                  </Text>
+                  {/* If user sent message, show applied constraints */}
+                  {msg.sender === "user" && (
+                    <Group gap={4} mb={6}>
+                      <Badge
+                        size="xs"
+                        radius="xl"
+                        variant="filled"
+                        style={{
+                          background: "var(--bg-page)",
+                          color: "var(--text-main)",
+                          fontSize: "10px",
+                          fontWeight: 700,
+                        }}
+                      >
+                        {msg.isStudent ? "🎓 Student" : "👤 Regular"}
+                      </Badge>
+                      {msg.targetBudget && (
+                        <Badge
+                          size="xs"
+                          radius="xl"
+                          variant="filled"
+                          style={{
+                            background: "var(--bg-page)",
+                            color: "var(--text-main)",
+                            fontSize: "10px",
+                            fontWeight: 700,
+                          }}
+                        >
+                          💰 ≤ {msg.targetBudget} ৳
+                        </Badge>
+                      )}
+                    </Group>
+                  )}
+
+                  {msg.sender === "user" ? (
+                    <Text
+                      size="xs"
+                      style={{ whiteSpace: "pre-line", lineHeight: 1.5 }}
+                    >
+                      {msg.text}
+                    </Text>
+                  ) : (
+                    <div className="ai-markdown-content">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {msg.text}
+                      </ReactMarkdown>
+                    </div>
+                  )}
 
                   {/* Grounded Route Preview inside chat */}
                   {msg.routeResult && (
@@ -230,12 +479,11 @@ export function ChatDrawer({
                       />
                       <Button
                         fullWidth
-                        size="sm"
+                        size="xs"
                         mt={8}
                         variant="filled"
-                        color="dark"
-                        radius="md"
-                        leftSection={<IconNavigation size={15} />}
+                        radius="xl"
+                        leftSection={<IconNavigation size={14} />}
                         onClick={() => {
                           if (onSelectRouteFromChat && msg.routeResult) {
                             onSelectRouteFromChat(
@@ -260,79 +508,149 @@ export function ChatDrawer({
                 </Paper>
               </Box>
             ))}
+
+            {/* ChatGPT-Style Live Thinking/Loading Indicator Animation */}
+            {loading && (
+              <Box
+                style={{
+                  alignSelf: "flex-start",
+                  maxWidth: "88%",
+                }}
+              >
+                <Paper
+                  p="sm"
+                  radius="lg"
+                  style={{
+                    background: "var(--bg-card)",
+                    border: "1px solid var(--border-subtle)",
+                    color: "var(--text-main)",
+                    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
+                  }}
+                >
+                  <Group gap={6} mb={6} align="center">
+                    <IconSparkles
+                      size={13}
+                      style={{ color: "var(--text-main)" }}
+                    />
+                    <Text
+                      size="11px"
+                      fw={700}
+                      style={{ color: "var(--text-main)" }}
+                    >
+                      DhakaPath AI
+                    </Text>
+                    <Text size="10px" style={{ opacity: 0.6 }}>
+                      Thinking...
+                    </Text>
+                  </Group>
+                  <Group gap={6} py={6} px={4} align="center">
+                    <span className="typing-dot" />
+                    <span className="typing-dot" />
+                    <span className="typing-dot" />
+                  </Group>
+                </Paper>
+              </Box>
+            )}
           </Stack>
         </ScrollArea>
 
-        {/* Quick Suggestion Pills */}
-        <Box px="xs">
-          <Group gap={6} mb="xs">
+        {/* Quick Suggestion Pills & Chat Composer */}
+        <Box px="xs" pb="xs">
+          <Group gap={6} mb="xs" wrap="wrap">
             <Button
               size="compact-xs"
               variant="default"
-              radius="sm"
-              onClick={() =>
-                handleSend(
-                  "Banasree theke Motijheel jabo, budget 40, ami student",
-                )
-              }
+              radius="xl"
+              onClick={() => handleSend("Banasree theke Motijheel jabo")}
+              styles={{
+                root: {
+                  fontSize: "11px",
+                  background: "var(--bg-card)",
+                  borderColor: "var(--border-subtle)",
+                  color: "var(--text-main)",
+                },
+              }}
             >
-              Banasree ➔ Motijheel (Student)
+              Banasree ➔ Motijheel
             </Button>
             <Button
               size="compact-xs"
               variant="default"
-              radius="sm"
+              radius="xl"
               onClick={() =>
-                handleSend("Mirpur 10 theke Shahbagh under 20 taka")
+                handleSend("Shahbagh theke Badda student vara koto")
               }
+              styles={{
+                root: {
+                  fontSize: "11px",
+                  background: "var(--bg-card)",
+                  borderColor: "var(--border-subtle)",
+                  color: "var(--text-main)",
+                },
+              }}
             >
-              Mirpur ➔ Shahbagh (≤ 20৳)
+              Shahbagh ➔ Badda
             </Button>
             <Button
               size="compact-xs"
               variant="default"
-              radius="sm"
-              onClick={() =>
-                handleSend("Farmgate to Gulshan 1, avoid Malibagh")
-              }
+              radius="xl"
+              onClick={() => handleSend("ফার্মগেট থেকে মতিঝিল যাব")}
+              styles={{
+                root: {
+                  fontSize: "11px",
+                  background: "var(--bg-card)",
+                  borderColor: "var(--border-subtle)",
+                  color: "var(--text-main)",
+                },
+              }}
             >
-              Avoid Malibagh
+              ফার্মগেট ➔ মতিঝিল
             </Button>
             <Button
               size="compact-xs"
               variant="default"
-              radius="sm"
+              radius="xl"
               onClick={() =>
-                handleSend("Gulshan 1 theke Mohakhali CNG share korbo")
+                handleSend("How to go from Mirpur 10 to Motijheel?")
               }
+              styles={{
+                root: {
+                  fontSize: "11px",
+                  background: "var(--bg-card)",
+                  borderColor: "var(--border-subtle)",
+                  color: "var(--text-main)",
+                },
+              }}
             >
-              🛺 CNG Share Bot
+              Mirpur ➔ Motijheel
             </Button>
           </Group>
 
           {/* Chat Composer */}
           <Group gap="xs">
             <TextInput
-              placeholder="Type in Bangla, English or Banglish..."
+              placeholder="Ask route in Bangla, English or Banglish..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
               style={{ flex: 1 }}
               styles={{
                 input: {
-                  background: "var(--input-bg)",
-                  borderColor: "var(--input-border)",
+                  background: "var(--bg-card-inner)",
+                  borderColor: "var(--border-subtle)",
                   color: "var(--text-main)",
-                  borderRadius: 8,
+                  borderRadius: 9999,
                   height: 44,
+                  fontSize: "13px",
+                  paddingLeft: 16,
                 },
               }}
             />
             <ActionIcon
-              size="xl"
+              size="lg"
               variant="filled"
-              color="dark"
-              radius="md"
+              radius="xl"
               onClick={() => handleSend()}
               loading={loading}
               disabled={!input.trim()}

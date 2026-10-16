@@ -19,6 +19,18 @@ export async function POST(request: Request) {
 
     const intent = await extractTransitIntent(message, currentContext);
 
+    // 0. Handle general conversational / ChatGPT smalltalk queries
+    if (intent.intentType === "general_chat") {
+      return NextResponse.json({
+        success: true,
+        extractedIntent: intent,
+        explanation:
+          intent.conversationalReply ||
+          "Hello! I am DhakaPath Transit AI. How can I help with your journey today?",
+        planResponse: null,
+      });
+    }
+
     // 1. Handle specialized knowledge queries (Fares, Disruption alerts, Reliability)
     if (
       intent.intentType === "explain_fare" ||
@@ -56,7 +68,15 @@ export async function POST(request: Request) {
         planResponse.message,
       );
     } else {
-      explanation = `I understand your request. Please specify your origin and destination from our supported hubs (e.g. "Banasree theke Motijheel jabo", "Mirpur 10 to Shahbagh", "Farmgate to Airport").`;
+      if (intent.conversationalReply) {
+        explanation = intent.conversationalReply;
+      } else if (intent.language === "banglish") {
+        explanation = `Apnar query bujhte perechi. Doyakore kothay theke kothay jaben janan (jemon: "Banasree theke Motijheel jabo", "Shahbagh theke Badda student", "Mirpur 10 to Motijheel").`;
+      } else if (intent.language === "bangla") {
+        explanation = `আপনার অনুরোধ বুঝতে পেরেছি। দয়া করে কোথা থেকে কোথায় যেতে চান তা জানান (যেমন: "ফার্মগেট থেকে মতিঝিল যাব", "বনশ্রী থেকে বাড্ডা", "উত্তরা থেকে শাহবাগ")।`;
+      } else {
+        explanation = `I understand your request. Please specify your origin and destination from our supported hubs (e.g. "Banasree theke Motijheel jabo", "Mirpur 10 to Shahbagh", "Farmgate to Airport").`;
+      }
     }
 
     return NextResponse.json({

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { updateAlertStatus } from "@/lib/db/repository";
+import { updateAlertStatus, deleteAlert } from "@/lib/db/repository";
 
 export async function PATCH(
   request: Request,
@@ -34,6 +34,25 @@ export async function PATCH(
       success: true,
       message: `Alert ${id} updated to ${status} (${lifecycleStage})`,
       alert: updated,
+    });
+  } catch (err: any) {
+    return NextResponse.json(
+      { success: false, error: err.message },
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    const { id } = await params;
+    const deleted = deleteAlert(id);
+    return NextResponse.json({
+      success: deleted,
+      message: `Alert ${id} purged from system.`,
     });
   } catch (err: any) {
     return NextResponse.json(
