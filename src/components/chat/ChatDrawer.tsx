@@ -24,6 +24,10 @@ import {
   IconSchool,
   IconCoins,
   IconCheck,
+  IconMicrophone,
+  IconMicrophoneOff,
+  IconVolume,
+  IconPlayerStop,
 } from "@tabler/icons-react";
 import { RouteCard } from "@/components/trip/RouteCard";
 import { PlannedRoute } from "@/types/api";
@@ -80,6 +84,108 @@ export function ChatDrawer({
   }, [messages, loading]);
 
   const [conversationContext, setConversationContext] = useState<any>(null);
+  const [isListening, setIsListening] = useState(false);
+  const [speakingMsgId, setSpeakingMsgId] = useState<string | null>(null);
+  const recognitionRef = useRef<any>(null);
+
+  // Initialize Speech Recognition (Chrome, Safari, Edge, Android)
+  const toggleVoiceInput = () => {
+    if (typeof window === "undefined") return;
+
+    const SpeechRecognition =
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      alert(
+        "Voice speech recognition is not supported on this browser. Please use Chrome, Edge, or Safari.",
+      );
+      return;
+    }
+
+    if (isListening && recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+      return;
+    }
+
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      // Bengali with auto English/Banglish fallback
+      recognition.lang = "bn-BD";
+
+      recognition.onstart = () => {
+        setIsListening(true);
+      };
+
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        if (transcript) {
+          setInput((prev) => (prev ? `${prev} ${transcript}` : transcript));
+        }
+      };
+
+      recognition.onerror = (event: any) => {
+        console.warn("Speech recognition notice:", event.error);
+        setIsListening(false);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current = recognition;
+      recognition.start();
+    } catch (e) {
+      console.warn("Could not start speech recognition:", e);
+      setIsListening(false);
+    }
+  };
+
+  // Speak AI message
+  const handleSpeakAiMessage = (msgId: string, text: string) => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+      return;
+    }
+
+    if (speakingMsgId === msgId) {
+      window.speechSynthesis.cancel();
+      setSpeakingMsgId(null);
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+
+    // Clean markdown symbols for natural TTS speech
+    const cleanText = text
+      .replace(/\*\*([^*]+)\*\*/g, "$1")
+      .replace(/\*([^*]+)\*/g, "$1")
+      .replace(/#+\s/g, "")
+      .replace(/`([^`]+)`/g, "$1")
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+
+    const voices = window.speechSynthesis.getVoices();
+    const preferredVoice =
+      voices.find((v) => v.lang.startsWith("bn")) ||
+      voices.find((v) => v.lang.startsWith("en-IN")) ||
+      voices.find((v) => v.lang.startsWith("en-US")) ||
+      voices[0];
+    if (preferredVoice) {
+      utterance.voice = preferredVoice;
+    }
+
+    utterance.onend = () => setSpeakingMsgId(null);
+    utterance.onerror = () => setSpeakingMsgId(null);
+
+    setSpeakingMsgId(msgId);
+    window.speechSynthesis.speak(utterance);
+  };
 
   const handleSend = async (messageText?: string) => {
     const rawText = (messageText || input).trim();
@@ -397,18 +503,39 @@ export function ChatDrawer({
                     boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
                   }}
                 >
-                  <Group gap={6} mb={4} align="center">
-                    {msg.sender === "user" ? (
-                      <IconUser size={13} />
-                    ) : (
-                      <IconSparkles size={13} />
+                  <Group justify="space-between" mb={4} align="center">
+                    <Group gap={6} align="center">
+                      {msg.sender === "user" ? (
+                        <IconUser size={13} />
+                      ) : (
+                        <IconSparkles size={13} />
+                      )}
+                      <Text size="11px" fw={700} style={{ color: "inherit" }}>
+                        {msg.sender === "user" ? "You" : "DhakaPath AI"}
+                      </Text>
+                      <Text size="10px" style={{ opacity: 0.6 }}>
+                        {msg.timestamp}
+                      </Text>
+                    </Group>
+                    {msg.sender === "assistant" && (
+                      <ActionIcon
+                        size="xs"
+                        variant="subtle"
+                        color="gray"
+                        onClick={() => handleSpeakAiMessage(msg.id, msg.text)}
+                        title={
+                          speakingMsgId === msg.id
+                            ? "Stop Audio"
+                            : "Listen to Voice Response"
+                        }
+                      >
+                        {speakingMsgId === msg.id ? (
+                          <IconPlayerStop size={12} />
+                        ) : (
+                          <IconVolume size={12} />
+                        )}
+                      </ActionIcon>
                     )}
-                    <Text size="11px" fw={700} style={{ color: "inherit" }}>
-                      {msg.sender === "user" ? "You" : "DhakaPath AI"}
-                    </Text>
-                    <Text size="10px" style={{ opacity: 0.6 }}>
-                      {msg.timestamp}
-                    </Text>
                   </Group>
 
                   {/* If user sent message, show applied constraints */}
@@ -638,15 +765,42 @@ export function ChatDrawer({
               styles={{
                 input: {
                   background: "var(--bg-card-inner)",
-                  borderColor: "var(--border-subtle)",
+                  borderColor: isListening ? "#00aa66" : "var(--border-subtle)",
                   color: "var(--text-main)",
                   borderRadius: 9999,
                   height: 44,
                   fontSize: "13px",
                   paddingLeft: 16,
+                  transition: "border-color 0.2s ease",
                 },
               }}
             />
+
+            {/* Voice Input Microphone Button */}
+            <ActionIcon
+              size="lg"
+              variant={isListening ? "filled" : "default"}
+              radius="xl"
+              onClick={toggleVoiceInput}
+              title={isListening ? "Listening... (Tap to stop)" : "Voice Search (বাংলায় বলুন)"}
+              styles={{
+                root: {
+                  background: isListening ? "#00aa66" : "var(--bg-card-inner)",
+                  borderColor: isListening ? "#00aa66" : "var(--border-subtle)",
+                  color: isListening ? "#ffffff" : "var(--text-main)",
+                  height: 44,
+                  width: 44,
+                  transition: "all 0.2s ease",
+                },
+              }}
+            >
+              {isListening ? (
+                <IconMicrophoneOff size={18} />
+              ) : (
+                <IconMicrophone size={18} />
+              )}
+            </ActionIcon>
+
             <ActionIcon
               size="lg"
               variant="filled"

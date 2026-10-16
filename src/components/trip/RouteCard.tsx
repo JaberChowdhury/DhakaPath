@@ -120,7 +120,7 @@ export function RouteCard({
 
     if (typeof window === "undefined" || !("speechSynthesis" in window)) {
       notifications.show({
-        title: "Speech Unavailable",
+        title: "Voice Unavailable",
         message: "Speech synthesis is not supported on this browser.",
         color: "yellow",
       });
@@ -133,6 +133,9 @@ export function RouteCard({
       return;
     }
 
+    // Cancel any previous pending speeches
+    window.speechSynthesis.cancel();
+
     const firstLeg = legs[0];
     const text = `DhakaPath Route Briefing. Your optimal journey takes approximately ${totalDurationMin} minutes with ${
       transfers === 0 ? "no transfers" : `${transfers} transfers`
@@ -141,17 +144,32 @@ export function RouteCard({
     }. ${warnings.length > 0 ? warnings.join(". ") : "Corridor is operating normally."} Have a safe journey.`;
 
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 1.0;
+    utterance.rate = 0.95;
+    utterance.pitch = 1.0;
+
+    // Pick best available voice (Bengali or English)
+    const voices = window.speechSynthesis.getVoices();
+    const preferredVoice =
+      voices.find((v) => v.lang.startsWith("bn")) ||
+      voices.find((v) => v.lang.startsWith("en-IN")) ||
+      voices.find((v) => v.lang.startsWith("en-US")) ||
+      voices[0];
+    if (preferredVoice) {
+      utterance.voice = preferredVoice;
+    }
+
     utterance.onend = () => setSpeaking(false);
-    utterance.onerror = () => setSpeaking(false);
+    utterance.onerror = (err) => {
+      console.warn("Speech synthesis notice:", err);
+      setSpeaking(false);
+    };
 
     setSpeaking(true);
-    window.speechSynthesis.cancel();
     window.speechSynthesis.speak(utterance);
 
     notifications.show({
-      title: "Playing Audio Briefing",
-      message: "Audio playback active. Tap the speaker again to stop.",
+      title: "Audio Briefing Active 🔊",
+      message: "Playing route voice briefing. Tap again to stop.",
       color: "teal",
     });
   };
