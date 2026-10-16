@@ -1,0 +1,222 @@
+:root,
+[data-mantine-color-scheme="light"] {
+  --bg-page: #f8fafc;
+  --bg-card: rgba(255, 255, 255, 0.95);
+  --bg-card-hover: #ffffff;
+  --bg-card-inner: #f1f5f9;
+  --border-subtle: rgba(0, 0, 0, 0.09);
+  --border-glow: rgba(45, 212, 191, 0.35);
+  --text-main: #0f172a;
+  --text-sub: #334155;
+  --text-muted: #64748b;
+  --nav-bg: rgba(255, 255, 255, 0.92);
+  --nav-border: rgba(0, 0, 0, 0.08);
+  --input-bg: #ffffff;
+  --input-border: #cbd5e1;
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.06);
+
+  --accent-cyan: #0284c7;
+  --accent-teal: #0d9488;
+  --accent-amber: #d97706;
+  --accent-rose: #e11d48;
+}
+
+[data-mantine-color-scheme="dark"] {
+  --bg-page: #0a0e17;
+  --bg-card: rgba(18, 25, 38, 0.88);
+  --bg-card-hover: rgba(26, 36, 54, 0.95);
+  --bg-card-inner: rgba(10, 15, 24, 0.6);
+  --border-subtle: rgba(255, 255, 255, 0.09);
+  --border-glow: rgba(45, 212, 191, 0.35);
+  --text-main: #f8fafc;
+  --text-sub: #cbd5e1;
+  --text-muted: #94a3b8;
+  --nav-bg: rgba(10, 15, 24, 0.85);
+  --nav-border: rgba(255, 255, 255, 0.08);
+  --input-bg: rgba(10, 15, 24, 0.65);
+  --input-border: rgba(255, 255, 255, 0.12);
+  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4);
+
+  --accent-cyan: #38bdf8;
+  --accent-teal: #2dd4bf;
+  --accent-amber: #f59e0b;
+  --accent-rose: #f43f5e;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-page);
+  color: var(--text-main);
+  font-family: 'Plus Jakarta Sans', 'Noto Sans Bengali', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Dropdown UI Bug Fixes (Select, MultiSelect, Combobox) */
+.mantine-Select-dropdown,
+.mantine-MultiSelect-dropdown,
+.mantine-Combobox-dropdown {
+  background-color: var(--bg-card) !important;
+  border: 1px solid var(--border-subtle) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25) !important;
+  z-index: 1500 !important;
+  border-radius: 8px !important;
+}
+
+.mantine-Select-option,
+.mantine-MultiSelect-option,
+.mantine-Combobox-option {
+  color: var(--text-main) !important;
+  font-family: 'Plus Jakarta Sans', 'Noto Sans Bengali', sans-serif !important;
+  font-size: 13px !important;
+  border-radius: 6px !important;
+  padding: 8px 12px !important;
+  transition: background-color 0.15s ease !important;
+}
+
+.mantine-Select-option:hover,
+.mantine-MultiSelect-option:hover,
+.mantine-Combobox-option:hover,
+.mantine-Select-option[data-hovered="true"],
+.mantine-MultiSelect-option[data-hovered="true"],
+.mantine-Combobox-option[data-hovered="true"] {
+  background-color: var(--bg-card-inner) !important;
+  color: var(--text-main) !important;
+}
+
+.mantine-Select-option[data-checked="true"],
+.mantine-MultiSelect-option[data-checked="true"],
+.mantine-Combobox-option[data-checked="true"] {
+  background-color: rgba(45, 212, 191, 0.18) !important;
+  color: #0d9488 !important;
+  font-weight: 600 !important;
+}
+
+/* Glassmorphism Surface Utility */
+.glass-panel {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  box-shadow: var(--shadow-card);
+  transition: all 0.2s ease;
+}
+
+.glass-panel:hover {
+  border-color: var(--border-glow);
+}
+
+/* Scrollbar aesthetic */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+[data-mantine-color-scheme="dark"] ::-webkit-scrollbar-track {
+  background: rgba(10, 14, 23, 0.5);
+}
+
+[data-mantine-color-scheme="light"] ::-webkit-scrollbar-track {
+  background: rgba(241, 245, 249, 0.8);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.35);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.55);
+}
+
+/* Leaflet map custom overrides for light vs dark */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  transition: background-color 0.3s ease;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+}
+
+[data-mantine-color-scheme="light"] .leaflet-container {
+  background-color: #f1f5f9 !important;
+}
+
+[data-mantine-color-scheme="light"] .leaflet-tile {
+  filter: saturate(1.05) contrast(1.02);
+}
+
+[data-mantine-color-scheme="dark"] .leaflet-container {
+  background-color: #0b111e !important;
+}
+
+[data-mantine-color-scheme="dark"] .leaflet-tile {
+  filter: brightness(0.85) invert(1) contrast(3) hue-rotate(200deg) saturate(0.35) brightness(0.7);
+}
+
+/* Live GPS Pulse Animation */
+@keyframes pulse-gps {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 14px rgba(14, 165, 233, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(14, 165, 233, 0);
+  }
+}
+
+.gps-live-beacon {
+  width: 14px;
+  height: 14px;
+  background-color: #0284c7;
+  border: 2.5px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 12px rgba(2, 132, 199, 0.8);
+  animation: pulse-gps 2s infinite;
+}
+
+/* Responsive Desktop vs Mobile layout */
+@media (max-width: 991px) {
+  .mobile-hide-list {
+    display: none !important;
+  }
+  .mobile-hide-map {
+    display: none !important;
+  }
+}
+
+@media (min-width: 992px) {
+  .desktop-sticky-map {
+    position: sticky;
+    top: 80px;
+    height: calc(100vh - 105px);
+    min-height: 580px;
+  }
+  .desktop-scroll-pane {
+    max-height: calc(100vh - 105px);
+    overflow-y: auto;
+    padding-right: 6px;
+  }
+}
+

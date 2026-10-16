@@ -1,0 +1,36 @@
+[
+  { "id": "seg_mrt_uttara_mirpur10", "from_stop_id": "stop_uttara_north_metro", "to_stop_id": "stop_mirpur_10_metro", "service_id": "srv_mrt_line_6", "mode": "metro", "baseline_duration_min": 10, "distance_meters": 7800, "is_transfer": false },
+  { "id": "seg_mrt_mirpur10_agargaon", "from_stop_id": "stop_mirpur_10_metro", "to_stop_id": "stop_agargaon_metro", "service_id": "srv_mrt_line_6", "mode": "metro", "baseline_duration_min": 7, "distance_meters": 3900, "is_transfer": false },
+  { "id": "seg_mrt_agargaon_farmgate", "from_stop_id": "stop_agargaon_metro", "to_stop_id": "stop_farmgate_metro", "service_id": "srv_mrt_line_6", "mode": "metro", "baseline_duration_min": 6, "distance_meters": 2800, "is_transfer": false },
+  { "id": "seg_mrt_farmgate_kawran", "from_stop_id": "stop_farmgate_metro", "to_stop_id": "stop_kawran_bazar_metro", "service_id": "srv_mrt_line_6", "mode": "metro", "baseline_duration_min": 3, "distance_meters": 1200, "is_transfer": false },
+  { "id": "seg_mrt_kawran_shahbagh", "from_stop_id": "stop_kawran_bazar_metro", "to_stop_id": "stop_shahbagh_metro", "service_id": "srv_mrt_line_6", "mode": "metro", "baseline_duration_min": 3, "distance_meters": 1600, "is_transfer": false },
+  { "id": "seg_mrt_shahbagh_motijheel", "from_stop_id": "stop_shahbagh_metro", "to_stop_id": "stop_motijheel_metro", "service_id": "srv_mrt_line_6", "mode": "metro", "baseline_duration_min": 6, "distance_meters": 3100, "is_transfer": false },
+
+  { "id": "seg_bus_bikolpo_mirpur_agargaon", "from_stop_id": "stop_mirpur_10_bus_south", "to_stop_id": "stop_agargaon_bus_south", "service_id": "srv_bus_bikolpo", "mode": "bus", "baseline_duration_min": 14, "distance_meters": 4100, "is_transfer": false },
+  { "id": "seg_bus_bikolpo_agargaon_farmgate", "from_stop_id": "stop_agargaon_bus_south", "to_stop_id": "stop_farmgate_bus_south", "service_id": "srv_bus_bikolpo", "mode": "bus", "baseline_duration_min": 14, "distance_meters": 3100, "is_transfer": false },
+  { "id": "seg_bus_bikolpo_farmgate_kawran", "from_stop_id": "stop_farmgate_bus_south", "to_stop_id": "stop_kawran_bazar_bus", "service_id": "srv_bus_bikolpo", "mode": "bus", "baseline_duration_min": 7, "distance_meters": 1300, "is_transfer": false },
+  { "id": "seg_bus_bikolpo_kawran_shahbagh", "from_stop_id": "stop_kawran_bazar_bus", "to_stop_id": "stop_shahbagh_bus_stop", "service_id": "srv_bus_bikolpo", "mode": "bus", "baseline_duration_min": 9, "distance_meters": 1800, "is_transfer": false },
+  { "id": "seg_bus_bikolpo_shahbagh_motijheel", "from_stop_id": "stop_shahbagh_bus_stop", "to_stop_id": "stop_motijheel_bus_shapla", "service_id": "srv_bus_bikolpo", "mode": "bus", "baseline_duration_min": 14, "distance_meters": 3300, "is_transfer": false },
+
+  { "id": "seg_bus_prochesta_airport_mohakhali", "from_stop_id": "stop_airport_railway_bus", "to_stop_id": "stop_mohakhali_bus_terminal", "service_id": "srv_bus_prochesta", "mode": "bus", "baseline_duration_min": 28, "distance_meters": 8900, "is_transfer": false },
+  { "id": "seg_bus_prochesta_mohakhali_malibagh", "from_stop_id": "stop_mohakhali_bus_terminal", "to_stop_id": "stop_malibagh_railgate_bus", "service_id": "srv_bus_prochesta", "mode": "bus", "baseline_duration_min": 22, "distance_meters": 4700, "is_transfer": false },
+  { "id": "seg_bus_prochesta_malibagh_motijheel", "from_stop_id": "stop_malibagh_railgate_bus", "to_stop_id": "stop_motijheel_bus_shapla", "service_id": "srv_bus_prochesta", "mode": "bus", "baseline_duration_min": 18, "distance_meters": 3200, "is_transfer": false },
+
+  { "id": "seg_leg_banasree_badda", "from_stop_id": "stop_banasree_block_c", "to_stop_id": "stop_badda_link_road", "service_id": "srv_leguna_banasree_gulshan", "mode": "leguna", "baseline_duration_min": 10, "distance_meters": 2200, "is_transfer": false },
+  { "id": "seg_leg_badda_gulshan1", "from_stop_id": "stop_badda_link_road", "to_stop_id": "stop_gulshan_1_leguna_stand", "service_id": "srv_leguna_banasree_gulshan", "mode": "leguna", "baseline_duration_min": 8, "distance_meters": 1400, "is_transfer": false },
+  { "id": "seg_leg_gulshan1_badda", "from_stop_id": "stop_gulshan_1_leguna_stand", "to_stop_id": "stop_badda_link_road", "service_id": "srv_leguna_banasree_gulshan", "mode": "leguna", "baseline_duration_min": 8, "distance_meters": 1400, "is_transfer": false },
+  { "id": "seg_leg_badda_banasree", "from_stop_id": "stop_badda_link_road", "to_stop_id": "stop_banasree_block_c", "service_id": "srv_leguna_banasree_gulshan", "mode": "leguna", "baseline_duration_min": 10, "distance_meters": 2200, "is_transfer": false },
+
+  { "id": "seg_walk_mirpur10_metro_to_bus", "from_stop_id": "stop_mirpur_10_metro", "to_stop_id": "stop_mirpur_10_bus_south", "service_id": null, "mode": "walk", "baseline_duration_min": 3, "distance_meters": 180, "is_transfer": true },
+  { "id": "seg_walk_farmgate_metro_to_bus", "from_stop_id": "stop_farmgate_metro", "to_stop_id": "stop_farmgate_bus_south", "service_id": null, "mode": "walk", "baseline_duration_min": 3, "distance_meters": 150, "is_transfer": true },
+  { "id": "seg_walk_farmgate_bus_to_metro", "from_stop_id": "stop_farmgate_bus_south", "to_stop_id": "stop_farmgate_metro", "service_id": null, "mode": "walk", "baseline_duration_min": 3, "distance_meters": 150, "is_transfer": true },
+  { "id": "seg_walk_kawran_metro_to_bus", "from_stop_id": "stop_kawran_bazar_metro", "to_stop_id": "stop_kawran_bazar_bus", "service_id": null, "mode": "walk", "baseline_duration_min": 2, "distance_meters": 110, "is_transfer": true },
+  { "id": "seg_walk_shahbagh_metro_to_bus", "from_stop_id": "stop_shahbagh_metro", "to_stop_id": "stop_shahbagh_bus_stop", "service_id": null, "mode": "walk", "baseline_duration_min": 2, "distance_meters": 120, "is_transfer": true },
+  { "id": "seg_walk_motijheel_metro_to_bus", "from_stop_id": "stop_motijheel_metro", "to_stop_id": "stop_motijheel_bus_shapla", "service_id": null, "mode": "walk", "baseline_duration_min": 3, "distance_meters": 170, "is_transfer": true },
+  { "id": "seg_walk_gulshan1_leguna_to_circle", "from_stop_id": "stop_gulshan_1_leguna_stand", "to_stop_id": "stop_gulshan_1_circle", "service_id": null, "mode": "walk", "baseline_duration_min": 2, "distance_meters": 120, "is_transfer": true },
+
+  { "id": "seg_rickshaw_gulshan1_mohakhali", "from_stop_id": "stop_gulshan_1_circle", "to_stop_id": "stop_mohakhali_bus_terminal", "service_id": null, "mode": "rickshaw", "baseline_duration_min": 14, "distance_meters": 1800, "is_transfer": false },
+  { "id": "seg_rickshaw_banasree_to_malibagh", "from_stop_id": "stop_banasree_block_c", "to_stop_id": "stop_malibagh_mor", "service_id": null, "mode": "rickshaw", "baseline_duration_min": 22, "distance_meters": 3100, "is_transfer": false },
+  { "id": "seg_bus_malibagh_mor_to_kawran", "from_stop_id": "stop_malibagh_mor", "to_stop_id": "stop_kawran_bazar_bus", "service_id": "srv_bus_bikolpo", "mode": "bus", "baseline_duration_min": 16, "distance_meters": 2900, "is_transfer": false },
+  { "id": "seg_bus_mohakhali_to_kawran", "from_stop_id": "stop_mohakhali_bus_terminal", "to_stop_id": "stop_kawran_bazar_bus", "service_id": "srv_bus_prochesta", "mode": "bus", "baseline_duration_min": 18, "distance_meters": 3800, "is_transfer": false }
+]

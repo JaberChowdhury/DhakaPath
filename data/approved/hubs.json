@@ -1,0 +1,128 @@
+[
+  {
+    "id": "hub_uttara_north",
+    "name_en": "Uttara North",
+    "name_bn": "উত্তরা উত্তর",
+    "aliases": ["Uttara 12", "Diabari", "Sector 12", "দিয়াবাড়ি", "উত্তরা"],
+    "center_lat": 23.8770,
+    "center_lon": 90.3700,
+    "description": "Northern terminus of MRT Line 6 at Diabari with feeder connections to Uttara residential sectors and Tongi."
+  },
+  {
+    "id": "hub_mirpur_10",
+    "name_en": "Mirpur 10",
+    "name_bn": "মিরপুর ১০",
+    "aliases": ["Mirpur 10 Golchottor", "Mirpur Roundabout", "মিরপুর গোলচত্বর", "Mirpur"],
+    "center_lat": 23.8070,
+    "center_lon": 90.3685,
+    "description": "Massive multimodal transit hub connecting MRT Line 6, dozens of city bus corridors, and eastern leguna services."
+  },
+  {
+    "id": "hub_agargaon",
+    "name_en": "Agargaon",
+    "name_bn": "আগারগাঁও",
+    "aliases": ["Passport Office", "IDB Bhaban", "Agargaon Crossing", "আগারগাও"],
+    "center_lat": 23.7785,
+    "center_lon": 90.3795,
+    "description": "Government administrative and tech retail zone; key elevated MRT Line 6 station."
+  },
+  {
+    "id": "hub_farmgate",
+    "name_en": "Farmgate",
+    "name_bn": "ফার্মগেট",
+    "aliases": ["Ananda Cinema", "Farmgate Overbridge", "Green Road", "ফার্মগেইট"],
+    "center_lat": 23.7570,
+    "center_lon": 90.3890,
+    "description": "One of Dhaka's highest-density bus interchanges with elevated MRT station concourse and high pedestrian traffic."
+  },
+  {
+    "id": "hub_kawran_bazar",
+    "name_en": "Kawran Bazar",
+    "name_bn": "কাওরান বাজার",
+    "aliases": ["Karwan Bazar", "Panthapath", "Sonargaon Mor", "কারওয়ান বাজার"],
+    "center_lat": 23.7515,
+    "center_lon": 90.3935,
+    "description": "Major commercial and media district; MRT Line 6 station and key bus trunk line."
+  },
+  {
+    "id": "hub_shahbagh",
+    "name_en": "Shahbagh",
+    "name_bn": "শাহবাগ",
+    "aliases": ["Shahbag", "BSMMU", "PG Hospital", "DU Medical", "ঢাকা বিশ্ববিদ্যালয়"],
+    "center_lat": 23.7385,
+    "center_lon": 90.3955,
+    "description": "Academic and medical center (Dhaka University, BUET, BSMMU, National Museum); high student transit volume."
+  },
+  {
+    "id": "hub_motijheel",
+    "name_en": "Motijheel",
+    "name_bn": "মতিঝিল",
+    "aliases": ["Shapla Chottor", "Dilkusha", "Bangladesh Bank", "শাপলা চত্বর"],
+    "center_lat": 23.7330,
+    "center_lon": 90.4175,
+    "description": "Historic financial and commercial headquarters of Dhaka; southern terminus of operational MRT Line 6."
+  },
+  {
+    "id": "hub_mohakhali",
+    "name_en": "Mohakhali",
+    "name_bn": "মহাখালী",
+    "aliases": ["Mohakhali Wireless", "Amtoli", "Mohakhali Bus Terminal", "আমতলী"],
+    "center_lat": 23.7778,
+    "center_lon": 90.4035,
+    "description": "Central junction connecting north Dhaka with south/east arteries; inter-district bus terminal."
+  },
+  {
+    "id": "hub_gulshan_1",
+    "name_en": "Gulshan 1",
+    "name_bn": "গুলশান ১",
+    "aliases": ["Gulshan 1 DCC", "Gulshan 1 Circle", "গুলশান"],
+    "center_lat": 23.7780,
+    "center_lon": 90.4170,
+    "description": "Commercial and retail district with heavy rickshaw and leguna links across the lake to Badda and Banasree."
+  },
+  {
+    "id": "hub_gulshan_2",
+    "name_en": "Gulshan 2",
+    "name_bn": "গুলশান ২",
+    "aliases": ["Gulshan 2 Circle", "Embassy Zone", "গুলশান ২"],
+    "center_lat": 23.7940,
+    "center_lon": 90.4140,
+    "description": "Diplomatic quarter and corporate headquarters zone; serviced by Gulshan Chaka local transit."
+  },
+  {
+    "id": "hub_badda",
+    "name_en": "Badda",
+    "name_bn": "বাড্ডা",
+    "aliases": ["Middle Badda", "Badda Link Road", "Rampura Bridge", "বাড্ডা লিংক রোড"],
+    "center_lat": 23.7800,
+    "center_lon": 90.4260,
+    "description": "Eastern artery on Pragati Sarani connecting Kuril to Rampura; feeder bottleneck."
+  },
+  {
+    "id": "hub_banasree",
+    "name_en": "Banasree",
+    "name_bn": "বনশ্রী",
+    "aliases": ["Rampura Banasree", "Block C", "Ideal School Banasree", "বনশ্রী সি ব্লক"],
+    "center_lat": 23.7650,
+    "center_lon": 90.4350,
+    "description": "High-density residential neighborhood relying heavily on legunas, rickshaws, and feeder links to Progoti Sarani."
+  },
+  {
+    "id": "hub_malibagh",
+    "name_en": "Malibagh",
+    "name_bn": "মালিবাগ",
+    "aliases": ["Malibagh Railgate", "Malibagh Mor", "Shantinagar", "মৌচাক", "Mouchak"],
+    "center_lat": 23.7470,
+    "center_lon": 90.4145,
+    "description": "Major junction linking eastern suburbs to downtown; notorious waterlogging and congestion hotspot."
+  },
+  {
+    "id": "hub_airport",
+    "name_en": "Airport",
+    "name_bn": "বিমানবন্দর",
+    "aliases": ["Airport Railway Station", "Hazrat Shahjalal Airport", "এয়ারপোর্ট"],
+    "center_lat": 23.8510,
+    "center_lon": 90.4075,
+    "description": "Northern gateway multimodal corridor linking international airport, railway station, and BRT corridor."
+  }
+]

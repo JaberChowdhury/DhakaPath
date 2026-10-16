@@ -1,0 +1,80 @@
+[
+  {
+    "id": "fare_mrt_station_matrix",
+    "mode": "metro",
+    "service_id": "srv_mrt_line_6",
+    "fare_regular": 20.00,
+    "fare_min": 20.00,
+    "fare_max": 100.00,
+    "student_eligible": false,
+    "student_discount_pct": 0.00,
+    "student_fare_floor": 20.00,
+    "source_id": "src_dmtcl_official",
+    "effective_date": "2024-01-20"
+  },
+  {
+    "id": "fare_bus_bikolpo_rules",
+    "mode": "bus",
+    "service_id": "srv_bus_bikolpo",
+    "fare_regular": 25.00,
+    "fare_min": 10.00,
+    "fare_max": 40.00,
+    "student_eligible": true,
+    "student_discount_pct": 50.00,
+    "student_fare_floor": 10.00,
+    "source_id": "src_dhaka_bus_heatmap",
+    "effective_date": "2024-01-01"
+  },
+  {
+    "id": "fare_bus_prochesta_rules",
+    "mode": "bus",
+    "service_id": "srv_bus_prochesta",
+    "fare_regular": 30.00,
+    "fare_min": 10.00,
+    "fare_max": 50.00,
+    "student_eligible": true,
+    "student_discount_pct": 50.00,
+    "student_fare_floor": 10.00,
+    "source_id": "src_dhaka_bus_heatmap",
+    "effective_date": "2024-01-01"
+  },
+  {
+    "id": "fare_leguna_banasree_gulshan",
+    "mode": "leguna",
+    "service_id": "srv_leguna_banasree_gulshan",
+    "fare_regular": 15.00,
+    "fare_min": 15.00,
+    "fare_max": 25.00,
+    "student_eligible": false,
+    "student_discount_pct": 0.00,
+    "student_fare_floor": 15.00,
+    "source_id": "src_field_leguna_survey",
+    "effective_date": "2026-03-01"
+  },
+  {
+    "id": "fare_rickshaw_feeders",
+    "mode": "rickshaw",
+    "service_id": null,
+    "fare_regular": 40.00,
+    "fare_min": 30.00,
+    "fare_max": 60.00,
+    "student_eligible": false,
+    "student_discount_pct": 0.00,
+    "student_fare_floor": 30.00,
+    "source_id": "src_field_rickshaw_rates",
+    "effective_date": "2026-03-01"
+  },
+  {
+    "id": "fare_walk_free",
+    "mode": "walk",
+    "service_id": null,
+    "fare_regular": 0.00,
+    "fare_min": 0.00,
+    "fare_max": 0.00,
+    "student_eligible": false,
+    "student_discount_pct": 0.00,
+    "student_fare_floor": 0.00,
+    "source_id": "src_field_leguna_survey",
+    "effective_date": "2026-03-01"
+  }
+]

@@ -1,0 +1,37 @@
+[
+  { "id": 1, "service_id": "srv_mrt_line_6", "direction_id": "southbound", "stop_id": "stop_uttara_north_metro", "sequence_order": 1, "time_offset_min": 0 },
+  { "id": 2, "service_id": "srv_mrt_line_6", "direction_id": "southbound", "stop_id": "stop_mirpur_10_metro", "sequence_order": 2, "time_offset_min": 10 },
+  { "id": 3, "service_id": "srv_mrt_line_6", "direction_id": "southbound", "stop_id": "stop_agargaon_metro", "sequence_order": 3, "time_offset_min": 17 },
+  { "id": 4, "service_id": "srv_mrt_line_6", "direction_id": "southbound", "stop_id": "stop_farmgate_metro", "sequence_order": 4, "time_offset_min": 23 },
+  { "id": 5, "service_id": "srv_mrt_line_6", "direction_id": "southbound", "stop_id": "stop_kawran_bazar_metro", "sequence_order": 5, "time_offset_min": 26 },
+  { "id": 6, "service_id": "srv_mrt_line_6", "direction_id": "southbound", "stop_id": "stop_shahbagh_metro", "sequence_order": 6, "time_offset_min": 29 },
+  { "id": 7, "service_id": "srv_mrt_line_6", "direction_id": "southbound", "stop_id": "stop_motijheel_metro", "sequence_order": 7, "time_offset_min": 35 },
+
+  { "id": 8, "service_id": "srv_mrt_line_6", "direction_id": "northbound", "stop_id": "stop_motijheel_metro", "sequence_order": 1, "time_offset_min": 0 },
+  { "id": 9, "service_id": "srv_mrt_line_6", "direction_id": "northbound", "stop_id": "stop_shahbagh_metro", "sequence_order": 2, "time_offset_min": 6 },
+  { "id": 10, "service_id": "srv_mrt_line_6", "direction_id": "northbound", "stop_id": "stop_kawran_bazar_metro", "sequence_order": 3, "time_offset_min": 9 },
+  { "id": 11, "service_id": "srv_mrt_line_6", "direction_id": "northbound", "stop_id": "stop_farmgate_metro", "sequence_order": 4, "time_offset_min": 12 },
+  { "id": 12, "service_id": "srv_mrt_line_6", "direction_id": "northbound", "stop_id": "stop_agargaon_metro", "sequence_order": 5, "time_offset_min": 18 },
+  { "id": 13, "service_id": "srv_mrt_line_6", "direction_id": "northbound", "stop_id": "stop_mirpur_10_metro", "sequence_order": 6, "time_offset_min": 25 },
+  { "id": 14, "service_id": "srv_mrt_line_6", "direction_id": "northbound", "stop_id": "stop_uttara_north_metro", "sequence_order": 7, "time_offset_min": 35 },
+
+  { "id": 15, "service_id": "srv_bus_bikolpo", "direction_id": "southbound", "stop_id": "stop_mirpur_10_bus_south", "sequence_order": 1, "time_offset_min": 0 },
+  { "id": 16, "service_id": "srv_bus_bikolpo", "direction_id": "southbound", "stop_id": "stop_agargaon_bus_south", "sequence_order": 2, "time_offset_min": 14 },
+  { "id": 17, "service_id": "srv_bus_bikolpo", "direction_id": "southbound", "stop_id": "stop_farmgate_bus_south", "sequence_order": 3, "time_offset_min": 28 },
+  { "id": 18, "service_id": "srv_bus_bikolpo", "direction_id": "southbound", "stop_id": "stop_kawran_bazar_bus", "sequence_order": 4, "time_offset_min": 35 },
+  { "id": 19, "service_id": "srv_bus_bikolpo", "direction_id": "southbound", "stop_id": "stop_shahbagh_bus_stop", "sequence_order": 5, "time_offset_min": 44 },
+  { "id": 20, "service_id": "srv_bus_bikolpo", "direction_id": "southbound", "stop_id": "stop_motijheel_bus_shapla", "sequence_order": 6, "time_offset_min": 58 },
+
+  { "id": 21, "service_id": "srv_bus_prochesta", "direction_id": "southbound", "stop_id": "stop_airport_railway_bus", "sequence_order": 1, "time_offset_min": 0 },
+  { "id": 22, "service_id": "srv_bus_prochesta", "direction_id": "southbound", "stop_id": "stop_mohakhali_bus_terminal", "sequence_order": 2, "time_offset_min": 28 },
+  { "id": 23, "service_id": "srv_bus_prochesta", "direction_id": "southbound", "stop_id": "stop_malibagh_railgate_bus", "sequence_order": 3, "time_offset_min": 50 },
+  { "id": 24, "service_id": "srv_bus_prochesta", "direction_id": "southbound", "stop_id": "stop_motijheel_bus_shapla", "sequence_order": 4, "time_offset_min": 68 },
+
+  { "id": 25, "service_id": "srv_leguna_banasree_gulshan", "direction_id": "westbound", "stop_id": "stop_banasree_block_c", "sequence_order": 1, "time_offset_min": 0 },
+  { "id": 26, "service_id": "srv_leguna_banasree_gulshan", "direction_id": "westbound", "stop_id": "stop_badda_link_road", "sequence_order": 2, "time_offset_min": 10 },
+  { "id": 27, "service_id": "srv_leguna_banasree_gulshan", "direction_id": "westbound", "stop_id": "stop_gulshan_1_leguna_stand", "sequence_order": 3, "time_offset_min": 18 },
+
+  { "id": 28, "service_id": "srv_leguna_banasree_gulshan", "direction_id": "eastbound", "stop_id": "stop_gulshan_1_leguna_stand", "sequence_order": 1, "time_offset_min": 0 },
+  { "id": 29, "service_id": "srv_leguna_banasree_gulshan", "direction_id": "eastbound", "stop_id": "stop_badda_link_road", "sequence_order": 2, "time_offset_min": 8 },
+  { "id": 30, "service_id": "srv_leguna_banasree_gulshan", "direction_id": "eastbound", "stop_id": "stop_banasree_block_c", "sequence_order": 3, "time_offset_min": 18 }
+]

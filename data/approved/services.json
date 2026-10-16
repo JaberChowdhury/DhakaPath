@@ -1,0 +1,42 @@
+[
+  {
+    "id": "srv_mrt_line_6",
+    "name": "MRT Line 6 (Metro Rail)",
+    "mode": "metro",
+    "route_code": "MRT-6",
+    "operator": "Dhaka Mass Transit Company Limited (DMTCL)",
+    "description": "Dhaka's premier grade-separated rapid transit corridor linking Uttara North to Motijheel via Mirpur, Farmgate, and Shahbagh.",
+    "is_active": true,
+    "verification_status": "verified"
+  },
+  {
+    "id": "srv_bus_bikolpo",
+    "name": "Bikolpo Auto Service",
+    "mode": "bus",
+    "route_code": "BIKOLPO-1",
+    "operator": "Bikolpo Paribahan Syndicate",
+    "description": "High-frequency arterial city bus operating between Mirpur 10, Agargaon, Farmgate, Shahbagh, and Motijheel. Fully accepts student concessions.",
+    "is_active": true,
+    "verification_status": "verified"
+  },
+  {
+    "id": "srv_bus_prochesta",
+    "name": "Prochesta Paribahan",
+    "mode": "bus",
+    "route_code": "PROCHESTA-2",
+    "operator": "Prochesta City Transport Ltd",
+    "description": "Major eastern-central trunk bus connecting Airport, Mohakhali, Malibagh, and Motijheel.",
+    "is_active": true,
+    "verification_status": "verified"
+  },
+  {
+    "id": "srv_leguna_banasree_gulshan",
+    "name": "Banasree-Badda-Gulshan Leguna",
+    "mode": "leguna",
+    "route_code": "LEG-BAN-GUL",
+    "operator": "Local Human Hauler Operators Union",
+    "description": "High-headway 14-seater feeder link connecting Banasree residential area with Progoti Sarani and Gulshan 1.",
+    "is_active": true,
+    "verification_status": "verified"
+  }
+]
