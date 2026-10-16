@@ -8,14 +8,15 @@ import {
   IconAlertTriangle,
   IconShieldLock,
   IconLogout,
+  IconScan,
 } from "@tabler/icons-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ThemeToggle } from "./ThemeToggle";
 
 interface NavbarProps {
-  activeTab?: "planner" | "alerts" | "network" | "admin";
-  setActiveTab?: (tab: "planner" | "alerts" | "network" | "admin") => void;
+  activeTab?: "planner" | "alerts" | "network" | "digitizer" | "admin";
+  setActiveTab?: (tab: "planner" | "alerts" | "network" | "digitizer" | "admin") => void;
   activeAlertsCount?: number;
 }
 
@@ -29,16 +30,19 @@ export function Navbar({
   const [adminUser, setAdminUser] = useState<any>(null);
 
   // Compute active tab from pathname or prop
-  let currentTab: "planner" | "alerts" | "network" | "admin" = "planner";
+  let currentTab: "planner" | "alerts" | "network" | "digitizer" | "admin" = "planner";
   if (pathname === "/transit-lines" || pathname?.startsWith("/transit")) {
     currentTab = "network";
   } else if (pathname === "/alerts" || pathname?.startsWith("/live-alerts")) {
     currentTab = "alerts";
+  } else if (pathname === "/digitizer") {
+    currentTab = "digitizer";
   } else if (pathname === "/admin") {
     currentTab = "admin";
   } else if (propActiveTab) {
     currentTab = propActiveTab;
   }
+
 
   // Check admin authentication session
   useEffect(() => {
@@ -204,11 +208,41 @@ export function Navbar({
                   },
                 }}
               >
-                Live Alerts
+                Notice Board
+              </Button>
+            </Link>
+
+            <Link href="/digitizer" style={{ textDecoration: "none" }}>
+              <Button
+                size="sm"
+                variant={currentTab === "digitizer" ? "filled" : "subtle"}
+                color="dark"
+                leftSection={<IconScan size={18} stroke={2} />}
+                onClick={() => setActiveTab?.("digitizer")}
+                radius="xl"
+                styles={{
+                  root: {
+                    fontWeight: 600,
+                    fontSize: 14,
+                    background:
+                      currentTab === "digitizer"
+                        ? "var(--text-main)"
+                        : "transparent",
+                    color:
+                      currentTab === "digitizer"
+                        ? "var(--bg-page)"
+                        : "var(--text-sub)",
+                    height: 38,
+                    padding: "0 18px",
+                  },
+                }}
+              >
+                Signboard Digitizer
               </Button>
             </Link>
           </Group>
         </Group>
+
 
         {/* Right Actions: Admin (Role Protected Only), Theme, Login/Signout */}
         <Group gap="sm" align="center">

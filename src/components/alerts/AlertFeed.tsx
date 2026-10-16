@@ -115,7 +115,7 @@ export function AlertFeed({ alerts, hubs, onRefreshAlerts }: AlertFeedProps) {
         notifications.show({
           title: "Report Submitted",
           message:
-            "Your incident was queued for moderation and community validation.",
+            "আপনার রিপোর্টটি গ্রহণ করা হয়েছে। Admin Panel থেকে ভেরিফাই ও approve করার পর এটি Public Notice Board-এ প্রকাশিত হবে।",
           color: "dark",
         });
         setReportModalOpen(false);
@@ -172,7 +172,7 @@ export function AlertFeed({ alerts, hubs, onRefreshAlerts }: AlertFeedProps) {
                   letterSpacing: "-0.02em",
                 }}
               >
-                Live Transit Alerts & Disruptions
+                Public Transit Notice Board & Live Alerts
               </Title>
               <Badge
                 variant="outline"
@@ -185,15 +185,14 @@ export function AlertFeed({ alerts, hubs, onRefreshAlerts }: AlertFeedProps) {
                   fontWeight: 600,
                 }}
               >
-                {alerts.length} ACTIVE
+                {alerts.length} VERIFIED ACTIVE
               </Badge>
             </Group>
             <Text
               size="xs"
               style={{ color: "var(--text-muted)", marginTop: 4 }}
             >
-              Real-time crowd-sourced and verified disruptions automatically
-              affecting routing algorithms.
+              শুধুমাত্র Admin দ্বারা যাচাইকৃত ও অনুমোদিত (Approved) রিপোর্টগুলোই এই পাবলিক নোটিশ বোর্ডে প্রদর্শিত হয় এবং স্বয়ংক্রিয়ভাবে ট্রানজিট রাউটিংকে প্রভাবিত করে।
             </Text>
           </Box>
 
@@ -263,6 +262,19 @@ export function AlertFeed({ alerts, hubs, onRefreshAlerts }: AlertFeedProps) {
                       }}
                     >
                       {alert.severity.toUpperCase()}
+                    </Badge>
+                    <Badge
+                      radius="sm"
+                      size="xs"
+                      variant="outline"
+                      style={{
+                        borderColor: "#00aa66",
+                        color: "#00aa66",
+                        background: "rgba(0, 170, 102, 0.08)",
+                        fontWeight: 600,
+                      }}
+                    >
+                      ✓ VERIFIED BY ADMIN
                     </Badge>
                     {alert.is_closed && (
                       <Badge
@@ -472,8 +484,7 @@ export function AlertFeed({ alerts, hubs, onRefreshAlerts }: AlertFeedProps) {
       >
         <Stack gap="sm">
           <Text size="xs" style={{ color: "var(--text-muted)" }}>
-            Help Dhaka commuters avoid gridlock. Submitted reports undergo
-            verification and directly reroute transit plans.
+            ঢাকার যাত্রীদের যানজট এড়াতে সাহায্য করুন। আপনার রিপোর্টটি সরাসরি Admin Moderation Queue-তে জমা হবে। অ্যাডমিন অনুমোদন (Approve) করলেই এটি Public Notice Board-এ প্রকাশিত হবে এবং রাউট রি-প্ল্যানিংয়ে যুক্ত হবে।
           </Text>
 
           <TextInput
