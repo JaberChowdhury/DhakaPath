@@ -444,6 +444,7 @@ export function AlertFeed({ alerts, hubs, onRefreshAlerts }: AlertFeedProps) {
         onClose={() => setReportModalOpen(false)}
         size="md"
         radius="lg"
+        centered
         title={
           <Group gap="xs">
             <Box
