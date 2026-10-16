@@ -417,6 +417,8 @@ export default function HomePage() {
             window.location.href = "/admin";
           } else if (tab === "digitizer") {
             window.location.href = "/digitizer";
+          } else if (tab === "weather") {
+            window.location.href = "/weather";
           } else {
             setActiveTab(tab);
           }

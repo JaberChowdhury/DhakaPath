@@ -916,6 +916,53 @@ async function runTestSuite() {
     );
   });
 
+  // 22. Weather Decoding & Commuter Transit Impact Matrix
+  test("Open-Meteo Weather Decoding & Commuter Transit Impact Matrix", () => {
+    const {
+      decodeWmoCode,
+      computeTransitImpact,
+      DHAKA_WEATHER_HUBS,
+    } = require("../src/lib/weather/service");
+
+    assert(
+      DHAKA_WEATHER_HUBS.length >= 10,
+      "Must have coordinates for Dhaka transit hubs",
+    );
+
+    // Clear sky
+    const clear = decodeWmoCode(0);
+    assert.strictEqual(clear.iconType, "sun");
+    assert.strictEqual(clear.label_bn, "পরিষ্কার আকাশ");
+
+    // Monsoon rain
+    const rain = decodeWmoCode(65);
+    assert.strictEqual(rain.iconType, "rain");
+    assert.strictEqual(rain.label_bn, "ভারী বর্ষণ");
+
+    // Thunderstorm
+    const storm = decodeWmoCode(95);
+    assert.strictEqual(storm.iconType, "storm");
+
+    // Normal weather transit impact
+    const normalImpact = computeTransitImpact(31, 33, 0, 0, 85);
+    assert.strictEqual(normalImpact.waterloggingRisk, "None");
+    assert.strictEqual(normalImpact.rickshawViability.status, "Optimal");
+    assert.strictEqual(normalImpact.metroViability.status, "Optimal");
+
+    // Heavy monsoon precipitation transit impact
+    const stormImpact = computeTransitImpact(27, 30, 25, 65, 160);
+    assert.strictEqual(stormImpact.waterloggingRisk, "Severe");
+    assert.strictEqual(stormImpact.rickshawViability.status, "Avoid");
+    assert(
+      stormImpact.airQualityStatus.maskRequired,
+      "AQI > 150 must require mask",
+    );
+    assert(
+      stormImpact.hotspotsAlert.some((h: string) => h.includes("মালিবাগ")),
+      "Must alert Malibagh bottleneck during severe monsoon",
+    );
+  });
+
   console.log(
     `\n================================================================`,
   );

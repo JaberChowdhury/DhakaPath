@@ -9,15 +9,17 @@ import {
   IconShieldLock,
   IconLogout,
   IconScan,
+  IconCloudRain,
 } from "@tabler/icons-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ThemeToggle } from "./ThemeToggle";
 
 interface NavbarProps {
-  activeTab?: "planner" | "alerts" | "network" | "digitizer" | "admin";
+  activeTab?:
+    "planner" | "alerts" | "network" | "digitizer" | "weather" | "admin";
   setActiveTab?: (
-    tab: "planner" | "alerts" | "network" | "digitizer" | "admin",
+    tab: "planner" | "alerts" | "network" | "digitizer" | "weather" | "admin",
   ) => void;
   activeAlertsCount?: number;
 }
@@ -32,7 +34,8 @@ export function Navbar({
   const [adminUser, setAdminUser] = useState<any>(null);
 
   // Compute active tab from pathname or prop
-  let currentTab: "planner" | "alerts" | "network" | "digitizer" | "admin" =
+  let currentTab:
+    "planner" | "alerts" | "network" | "digitizer" | "weather" | "admin" =
     "planner";
   if (pathname === "/transit-lines" || pathname?.startsWith("/transit")) {
     currentTab = "network";
@@ -40,6 +43,8 @@ export function Navbar({
     currentTab = "alerts";
   } else if (pathname === "/digitizer") {
     currentTab = "digitizer";
+  } else if (pathname === "/weather") {
+    currentTab = "weather";
   } else if (pathname === "/admin") {
     currentTab = "admin";
   } else if (propActiveTab) {
@@ -240,6 +245,35 @@ export function Navbar({
                 }}
               >
                 Signboard Digitizer
+              </Button>
+            </Link>
+
+            <Link href="/weather" style={{ textDecoration: "none" }}>
+              <Button
+                size="sm"
+                variant={currentTab === "weather" ? "filled" : "subtle"}
+                color="dark"
+                leftSection={<IconCloudRain size={18} stroke={2} />}
+                onClick={() => setActiveTab?.("weather")}
+                radius="xl"
+                styles={{
+                  root: {
+                    fontWeight: 600,
+                    fontSize: 14,
+                    background:
+                      currentTab === "weather"
+                        ? "var(--text-main)"
+                        : "transparent",
+                    color:
+                      currentTab === "weather"
+                        ? "var(--bg-page)"
+                        : "var(--text-sub)",
+                    height: 38,
+                    padding: "0 18px",
+                  },
+                }}
+              >
+                Weather
               </Button>
             </Link>
           </Group>

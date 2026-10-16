@@ -11,6 +11,66 @@
       "delay_minutes": 15,
       "is_closed": false,
       "reported_by_type": "guest",
+      "observed_at": "2026-10-16T11:22:59.305Z",
+      "expires_at": "2026-10-16T11:52:59.305Z",
+      "id": "alt_usr_1792149779305",
+      "submitted_at": "2026-10-16T11:22:59.306Z",
+      "status": "approved",
+      "lifecycle_stage": "resolved",
+      "upvotes": 0,
+      "downvotes": 0
+    },
+    {
+      "title": "Waterlogging at Kakrail",
+      "description": "Stagnant water on bus lane",
+      "severity": "medium",
+      "affected_modes": [
+        "bus"
+      ],
+      "affected_segment_ids": [],
+      "delay_minutes": 15,
+      "is_closed": false,
+      "reported_by_type": "guest",
+      "observed_at": "2026-10-16T11:21:28.834Z",
+      "expires_at": "2026-10-16T11:51:28.834Z",
+      "id": "alt_usr_1792149688835",
+      "submitted_at": "2026-10-16T11:21:28.835Z",
+      "status": "approved",
+      "lifecycle_stage": "resolved",
+      "upvotes": 0,
+      "downvotes": 0
+    },
+    {
+      "title": "Waterlogging at Kakrail",
+      "description": "Stagnant water on bus lane",
+      "severity": "medium",
+      "affected_modes": [
+        "bus"
+      ],
+      "affected_segment_ids": [],
+      "delay_minutes": 15,
+      "is_closed": false,
+      "reported_by_type": "guest",
+      "observed_at": "2026-10-16T11:19:47.781Z",
+      "expires_at": "2026-10-16T11:49:47.781Z",
+      "id": "alt_usr_1792149587781",
+      "submitted_at": "2026-10-16T11:19:47.781Z",
+      "status": "approved",
+      "lifecycle_stage": "resolved",
+      "upvotes": 0,
+      "downvotes": 0
+    },
+    {
+      "title": "Waterlogging at Kakrail",
+      "description": "Stagnant water on bus lane",
+      "severity": "medium",
+      "affected_modes": [
+        "bus"
+      ],
+      "affected_segment_ids": [],
+      "delay_minutes": 15,
+      "is_closed": false,
+      "reported_by_type": "guest",
       "observed_at": "2026-10-16T11:10:46.088Z",
       "expires_at": "2026-10-16T11:40:46.088Z",
       "id": "alt_usr_1792149046088",
@@ -67,6 +127,9 @@
   "deletedAlertIds": [
     "alt_usr_1792148832762",
     "alt_adm_1792148895938",
-    "alt_adm_1792149046142"
+    "alt_adm_1792149046142",
+    "alt_adm_1792149587828",
+    "alt_adm_1792149688894",
+    "alt_adm_1792149779364"
   ]
 }
